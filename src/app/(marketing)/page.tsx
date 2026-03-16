@@ -41,9 +41,8 @@ export default function Home() {
           <div className="flex flex-col md:flex-row justify-between gap-8 border-b border-slate-700 pb-8">
             <div className="space-y-4">
               <h3 className="font-bold text-slate-200">ABOUT</h3>
-              <p className="text-sm">현재 월 700명 신규수강중입니다.</p>
               <div className="text-sm space-y-1">
-                <p>📞 (09:00~20:00) 빠른 상담은 카톡 플러스친구 jtmath (링크)</p>
+                <p>📞 (09:00~20:00) 빠른 상담은 카톡 플러스친구 jtmath</p>
                 <p>✉️ admin@jtmath.com</p>
                 <p>📄 이용약관, 개인정보처리방침</p>
                 <p>© jtmath, 강의 예제, 영상 복제 금지</p>
@@ -57,9 +56,9 @@ export default function Home() {
           </div>
           
           <div className="pt-8 text-xs text-slate-500 space-y-1">
-            <p>상호: 제이티매쓰 | 학원등록명: 제이티매쓰원격학원 | 대표: [대표자명]</p>
-            <p>사업자등록번호: [번호 입력] | 통신판매업신고: [신고번호]</p>
-            <p>주소: [주소 입력] | 개인정보보호책임자: [책임자명]</p>
+            <p>상호: 제이티매쓰 | 학원등록명: 제이티매쓰원격학원 | 대표: 고창언</p>
+            <p>사업자등록번호: 662-91-01993 | 통신판매업신고: 제 2025-인천서구-2807 호</p>
+            <p>주소: 인천광역시 서구 보석로 32, 216동 401호 (청라동, 청라파크자이더테라스) | 개인정보보호책임자: 고창언</p>
           </div>
         </div>
       </footer>
