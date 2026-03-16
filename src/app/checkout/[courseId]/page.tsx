@@ -27,10 +27,11 @@ export default async function CheckoutPage({ params }: { params: { courseId: str
     .eq('id', params.courseId)
     .single();
 
+  let fallbackCourse: any = null;
   if (courseError || !course) {
     // 상품이 없으면 404로 보내거나 목록으로 리다이렉트
     // 테스트 환경용 가짜 데이터
-    var fallbackCourse = {
+    fallbackCourse = {
       id: params.courseId,
       title: "기하학 마스터 클래스",
       subtitle: "중등 기하 완벽 대비반",
