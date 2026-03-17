@@ -1,33 +1,27 @@
 import Link from 'next/link';
-import { Download, PlayCircle, MessageCircle, ChevronLeft } from 'lucide-react';
+import { Download, PlayCircle, MessageCircle, ChevronLeft, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
+
+const BUNNY_LIBRARY_ID = process.env.BUNNY_LIBRARY_ID || '566809';
 
 export default async function CourseViewerPage({ params, searchParams }: { params: { id: string }, searchParams: { lesson?: string } }) {
   const supabase = await createClient();
 
-  // 1. Check Auth & Enrollment
+  // 1. Check Auth
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    redirect('/login');
-  }
+  if (!user) redirect('/login');
 
   // 2. Fetch Course Details
-  const { data: course, error: courseError } = await supabase
+  const { data: course } = await supabase
     .from('courses')
     .select('*')
     .eq('id', params.id)
     .single();
 
-  if (courseError || !course) {
-    // Fallback to placeholder if DB is empty for UI testing
-    // In production, this might redirect to a 404 or dashboard
-  }
+  const courseTitle = course?.title || '대수 Δ0 실전 개념 완성';
 
-  const courseTitle = course?.title || "[공수1] 중간기말 전반전";
-  const courseProgress = "12"; // Placeholder until progress tracking is built
-
-  // 3. Fetch Lessons
+  // 3. Fetch Lessons ordered by week → lesson
   const { data: lessonsData } = await supabase
     .from('lessons')
     .select('*')
@@ -35,178 +29,185 @@ export default async function CourseViewerPage({ params, searchParams }: { param
     .order('week_number', { ascending: true })
     .order('lesson_number', { ascending: true });
 
-  // Group lessons by week
-  type LessonType = { id: string, title: string, lesson_number: number, week_number: number, bunny_video_id: string | null, pdf_level_1_url: string | null, pdf_level_2_url: string | null, description: string | null };
-  const lessons = (lessonsData || []) as LessonType[];
-  
-  const weeksMap = new Map<number, LessonType[]>();
-  lessons.forEach(lesson => {
-    if (!weeksMap.has(lesson.week_number)) {
-      weeksMap.set(lesson.week_number, []);
-    }
-    weeksMap.get(lesson.week_number)!.push(lesson);
-  });
-
-  const weeks = Array.from(weeksMap.entries()).sort((a, b) => a[0] - b[0]);
-
-  // Use selected lesson or first available
-  const currentLessonId = searchParams.lesson || (lessons.length > 0 ? lessons[0].id : null);
-  const currentLesson = lessons.find(l => l.id === currentLessonId) || {
-    title: "1주차 1차시 다항식과 나머지정리 (샘플)",
-    description: "교육청 기출 레벨 1, 2 (스킵가능)",
-    bunny_video_id: null,
-    pdf_level_1_url: "#",
-    pdf_level_2_url: "#",
+  type LessonType = {
+    id: string;
+    title: string;
+    lesson_number: number;
+    week_number: number;
+    bunny_video_id: string | null;
+    pdf_level_1_url: string | null;
+    pdf_level_2_url: string | null;
+    description: string | null;
   };
 
+  const lessons = (lessonsData || []) as LessonType[];
+
+  // Group by week
+  const weeksMap = new Map<number, LessonType[]>();
+  lessons.forEach(l => {
+    if (!weeksMap.has(l.week_number)) weeksMap.set(l.week_number, []);
+    weeksMap.get(l.week_number)!.push(l);
+  });
+  const weeks = Array.from(weeksMap.entries()).sort((a, b) => a[0] - b[0]);
+
+  const currentLessonId = searchParams.lesson || (lessons.length > 0 ? lessons[0].id : null);
+  const currentLesson = lessons.find(l => l.id === currentLessonId) || (lessons.length > 0 ? lessons[0] : null);
+
+  const totalLessons = lessons.length;
+  const completedLessons = 0; // placeholder — will add progress tracking later
+
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-8rem)]">
+    <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-5rem)]">
       
-      {/* Curriculum Sidebar */}
-      <div className="w-full lg:w-80 border border-slate-200 bg-white rounded-2xl overflow-hidden flex flex-col shrink-0 shadow-sm">
-        <div className="p-5 border-b border-slate-100 bg-slate-50">
-          <Link href="/dashboard" className="inline-flex items-center text-xs font-bold text-slate-500 hover:text-red-600 mb-3 transition-colors">
-            <ChevronLeft className="w-4 h-4 mr-1" />
-            내 강의실로 돌아가기
+      {/* ── Sidebar ── */}
+      <div className="w-full lg:w-72 xl:w-80 bg-brand-surface border border-white/[0.06] rounded-2xl overflow-hidden flex flex-col shrink-0">
+        {/* Course Header */}
+        <div className="p-5 border-b border-white/[0.06]">
+          <Link href="/dashboard" className="inline-flex items-center text-xs font-mono text-white/30 hover:text-brand-blue mb-4 transition-colors gap-1">
+            <ChevronLeft className="w-3.5 h-3.5" />
+            내 강의실
           </Link>
-          <h2 className="font-bold text-lg text-slate-900 line-clamp-2">{courseTitle}</h2>
-          <div className="mt-3 flex items-center justify-between text-xs">
-            <span className="font-semibold text-slate-500">진도율</span>
-            <span className="font-bold text-red-600">{courseProgress}%</span>
-          </div>
-          <div className="w-full bg-slate-200 rounded-full h-1.5 mt-1 overflow-hidden">
-            <div className="bg-red-600 h-1.5 rounded-full" style={{ width: `${courseProgress}%` }}></div>
+          <h2 className="font-bold text-base text-white leading-snug">{courseTitle}</h2>
+          <div className="mt-4">
+            <div className="flex justify-between text-xs font-mono mb-1.5">
+              <span className="text-white/30">진도율</span>
+              <span className="text-brand-mint">{totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0}%</span>
+            </div>
+            <div className="w-full bg-white/[0.06] rounded-full h-1">
+              <div
+                className="bg-gradient-to-r from-brand-blue to-brand-mint h-1 rounded-full transition-all"
+                style={{ width: `${totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0}%` }}
+              />
+            </div>
+            <p className="text-[10px] font-mono text-white/20 mt-1.5">{completedLessons}/{totalLessons}강 완료</p>
           </div>
         </div>
-        
-        <div className="overflow-y-auto flex-1 p-3 space-y-6">
+
+        {/* Lesson List */}
+        <div className="overflow-y-auto flex-1 p-3">
           {weeks.length > 0 ? weeks.map(([weekNum, weekLessons]) => (
-            <div key={`week-${weekNum}`}>
-              <h3 className="px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+            <div key={`week-${weekNum}`} className="mb-4">
+              <p className="px-3 py-1.5 text-[10px] font-mono font-bold text-white/25 uppercase tracking-widest">
                 {weekNum}주차
-              </h3>
-              <div className="space-y-1">
-                {weekLessons.map((lesson) => (
-                  <Link 
-                    key={lesson.id}
-                    href={`/dashboard/courses/${params.id}?lesson=${lesson.id}`}
-                    className={`w-full text-left flex items-start gap-3 px-3 py-3 text-sm font-semibold rounded-xl transition-colors ${
-                      currentLessonId === lesson.id 
-                        ? 'bg-red-50 text-red-700' 
-                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                    }`}
-                  >
-                    <PlayCircle className={`w-5 h-5 shrink-0 mt-0.5 ${currentLessonId === lesson.id ? 'text-red-600' : 'text-slate-400'}`} />
-                    <span className="leading-snug">{lesson.title}</span>
-                  </Link>
-                ))}
+              </p>
+              <div className="space-y-0.5">
+                {weekLessons.map(lesson => {
+                  const isActive = currentLessonId === lesson.id;
+                  return (
+                    <Link
+                      key={lesson.id}
+                      href={`/dashboard/courses/${params.id}?lesson=${lesson.id}`}
+                      className={`w-full text-left flex items-start gap-2.5 px-3 py-2.5 text-xs rounded-lg transition-all ${
+                        isActive
+                          ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20'
+                          : 'text-white/40 hover:bg-white/[0.04] hover:text-white/70'
+                      }`}
+                    >
+                      {isActive
+                        ? <PlayCircle className="w-4 h-4 shrink-0 mt-0.5 text-brand-blue" />
+                        : <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-white/15" />
+                      }
+                      <span className="leading-snug font-medium">{lesson.title}</span>
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           )) : (
-            // Fallback UI if database is empty
-            <div>
-              <h3 className="px-3 py-2 text-xs font-bold text-red-600 bg-red-50 rounded-lg mb-2">
-                1주차 샘플 커리큘럼
-              </h3>
-              <div className="space-y-1">
-                <button className="w-full text-left flex items-start gap-3 px-3 py-3 text-sm font-semibold bg-red-50 text-red-700 rounded-xl">
-                  <PlayCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
-                  <span className="leading-snug">1주차 1차시: 샘플 영상</span>
-                </button>
-              </div>
+            <div className="p-4 text-center">
+              <p className="text-xs text-white/30 font-mono">강의 준비 중입니다</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Main Content (Video & Materials) */}
-      <div className="flex-1 flex flex-col space-y-6 overflow-y-auto pb-20 lg:pb-0">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900 shadow-sm-text">{currentLesson.title}</h1>
-          {currentLesson.description && (
-            <p className="text-slate-500 font-medium mt-2 text-sm">{currentLesson.description}</p>
-          )}
-        </div>
+      {/* ── Main Content ── */}
+      <div className="flex-1 flex flex-col gap-6 overflow-y-auto pb-20 lg:pb-0 min-w-0">
+        
+        {/* Lesson Title */}
+        {currentLesson && (
+          <div>
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-mono text-brand-blue bg-brand-blue/10 px-2.5 py-1 rounded-md border border-brand-blue/20 mb-3">
+              <PlayCircle className="w-3 h-3" />
+              재생 중
+            </span>
+            <h1 className="text-xl md:text-2xl font-bold text-white">{currentLesson.title}</h1>
+            {currentLesson.description && (
+              <p className="text-white/40 text-sm mt-1.5">{currentLesson.description}</p>
+            )}
+          </div>
+        )}
 
-        {/* Video Player Embed (Bunny.net) */}
-        <div className="aspect-video bg-slate-900 rounded-2xl overflow-hidden relative shadow-lg ring-1 ring-slate-900/5">
-          {currentLesson.bunny_video_id ? (
-            <iframe 
-               src={`https://video.bunnycdn.com/embed/YOUR_LIBRARY_ID/${currentLesson.bunny_video_id}`}
-               className="w-full h-full border-0 absolute inset-0" 
-               allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;" 
-               allowFullScreen
-            ></iframe>
+        {/* Video Player */}
+        <div className="aspect-video bg-black rounded-2xl overflow-hidden relative ring-1 ring-white/[0.06]">
+          {currentLesson?.bunny_video_id ? (
+            <iframe
+              src={`https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${currentLesson.bunny_video_id}?autoplay=false&loop=false&muted=false&preload=true`}
+              className="w-full h-full border-0 absolute inset-0"
+              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+              allowFullScreen
+            />
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-              <PlayCircle className="w-16 h-16 mb-4 opacity-20" />
-              <p className="font-semibold text-sm">등록된 강의 영상이 없습니다.</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/20">
+              <PlayCircle className="w-14 h-14" />
+              <p className="text-sm font-mono">등록된 영상이 없습니다</p>
             </div>
           )}
         </div>
 
-        {/* Material Downloads */}
+        {/* Materials + Q&A */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm">
-            <h3 className="text-sm font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <Download className="w-4 h-4 text-red-600" />
+          {/* PDF Downloads */}
+          <div className="brand-card p-6">
+            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2">
+              <Download className="w-4 h-4 text-brand-blue" />
               강의 자료 다운로드
             </h3>
-            <div className="space-y-3">
-              <a 
-                href={currentLesson.pdf_level_1_url || "#"} 
-                className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-red-200 hover:shadow-sm transition-all group"
-              >
-                <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-500 group-hover:text-red-600 group-hover:border-red-200 transition-colors">
-                  <Download className="w-5 h-5" />
-                </div>
-                <div>
-                  <p className="font-bold text-slate-900 text-sm">{currentLesson.pdf_level_1_url ? '레벨 1 자료 다운로드' : '자료 준비 중'}</p>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">PDF 형식</p>
-                </div>
-              </a>
-              {currentLesson.pdf_level_2_url && (
-                <a 
-                  href={currentLesson.pdf_level_2_url} 
-                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-100 bg-slate-50 hover:bg-white hover:border-red-200 hover:shadow-sm transition-all group"
+            <div className="space-y-2.5">
+              {currentLesson?.pdf_level_1_url ? (
+                <a
+                  href={currentLesson.pdf_level_1_url}
+                  className="flex items-center gap-3 p-3.5 rounded-xl bg-brand-elevated border border-white/[0.04] hover:border-brand-blue/30 hover:text-brand-blue text-white/50 transition-all group text-sm font-medium"
                 >
-                  <div className="p-2.5 bg-white border border-slate-200 rounded-lg text-slate-500 group-hover:text-red-600 group-hover:border-red-200 transition-colors">
-                    <Download className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900 text-sm">레벨 2 자료 다운로드</p>
-                    <p className="text-xs text-slate-500 font-medium mt-0.5">PDF 형식</p>
-                  </div>
+                  <Download className="w-4 h-4 shrink-0" />
+                  레벨 1 자료 (PDF)
+                </a>
+              ) : (
+                <div className="flex items-center gap-3 p-3.5 rounded-xl bg-brand-elevated border border-white/[0.04] text-white/20 text-sm font-mono">
+                  자료 준비 중
+                </div>
+              )}
+              {currentLesson?.pdf_level_2_url && (
+                <a
+                  href={currentLesson.pdf_level_2_url}
+                  className="flex items-center gap-3 p-3.5 rounded-xl bg-brand-elevated border border-white/[0.04] hover:border-brand-blue/30 hover:text-brand-blue text-white/50 transition-all text-sm font-medium"
+                >
+                  <Download className="w-4 h-4 shrink-0" />
+                  레벨 2 자료 (PDF)
                 </a>
               )}
             </div>
           </div>
 
-          {/* On-page Q&A Prompt */}
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 flex flex-col justify-center gap-4 relative overflow-hidden">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-amber-100 rounded-full opacity-50 blur-2xl"></div>
-            <div className="relative z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full mb-3">
-                1:1 밀착 관리
-              </div>
-              <h4 className="font-bold text-amber-900 text-lg">모르는 문제는 캡처해서 질문하세요!</h4>
-              <p className="text-sm text-amber-700/80 mt-1 mb-5 font-medium leading-relaxed">
-                어디까지 생각했고 어느 부분에서 막혔는지 함께 보내주시면, 강사가 직접 정확한 피드백을 남겨드립니다.
-              </p>
-              <a 
-                href="https://open.kakao.com/o/YOUR_LINK_HERE" 
-                target="_blank" 
-                rel="noreferrer"
-                className="inline-flex items-center justify-center gap-2 w-full bg-[#FEE500] hover:bg-[#FDD800] text-[#371D1E] font-bold px-6 py-4 rounded-xl transition-all shadow-sm"
-              >
-                <MessageCircle className="w-5 h-5" />
-                카톡으로 질문하기
-              </a>
-            </div>
+          {/* Q&A */}
+          <div className="brand-card p-6 border-yellow-400/10 hover:border-yellow-400/20 transition-all">
+            <div className="text-[10px] font-mono text-yellow-400/60 uppercase tracking-wider mb-3">1:1 밀착 관리</div>
+            <h4 className="font-bold text-white text-base mb-1">모르는 문제는 캡처해서 질문하세요!</h4>
+            <p className="text-xs text-white/30 mb-5 leading-relaxed">
+              어디까지 생각했고, 어느 부분에서 막혔는지 함께 보내주시면 직접 피드백 드립니다.
+            </p>
+            <a
+              href="https://open.kakao.com/o/YOUR_LINK_HERE"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center justify-center gap-2 w-full bg-[#FEE500] hover:bg-[#FDD800] text-[#371D1E] font-bold px-5 py-3.5 rounded-xl transition-all text-sm"
+            >
+              <MessageCircle className="w-4 h-4" />
+              카카오로 질문하기
+            </a>
           </div>
         </div>
       </div>
-
     </div>
   );
 }
