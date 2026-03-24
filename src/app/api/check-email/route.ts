@@ -11,7 +11,11 @@ export async function GET(request: Request) {
   }
 
   const supabase = createAdminClient();
-  const { data, error } = await supabase.auth.admin.getUserByEmail(email);
+  const { data } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('assignment_email', email)
+    .maybeSingle();
 
-  return NextResponse.json({ exists: !!data?.user && !error });
+  return NextResponse.json({ exists: !!data });
 }
