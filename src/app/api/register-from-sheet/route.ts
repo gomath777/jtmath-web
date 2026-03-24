@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 // 수강 옵션 문자열 → subject slug 매핑
 function parseCourseOption(option: string): string | null {
   if (option.includes('공수1') || option.includes('공통수학1') || option.includes('공통수학 1')) return 'common-math-1';

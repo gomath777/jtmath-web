@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 // GET /api/setup-test
 // 테스트 계정을 생성하고 첫 번째 강의에 수강 권한을 부여합니다.
 // 개발/테스트 용도로만 사용하세요.

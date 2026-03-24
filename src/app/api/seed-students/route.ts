@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 const TEST_STUDENTS = [
   { name: '김민준', school: '서울고등학교', birth_date: '060315', phone_student: '010-1234-5678', phone_parent: '010-8765-4321', email: 'minjun@test.com' },
   { name: '이서연', school: '한양고등학교', birth_date: '070820', phone_student: '010-2345-6789', phone_parent: '010-9876-5432', email: 'seoyeon@test.com' },
