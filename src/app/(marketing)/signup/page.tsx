@@ -5,12 +5,15 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import MainHeader from '@/components/MainHeader';
 import { signupUser } from './actions';
+import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 
 function SignupFormContent() {
   const [useSameEmail, setUseSameEmail] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [emailValue, setEmailValue] = useState('');
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -19,12 +22,29 @@ function SignupFormContent() {
     }
   }, [searchParams]);
 
+  // 이메일 중복 확인 (입력 후 포커스 아웃 시)
+  async function handleEmailBlur() {
+    if (!emailValue || !emailValue.includes('@')) return;
+    setEmailStatus('checking');
+    try {
+      const res = await fetch(`/api/check-email?email=${encodeURIComponent(emailValue)}`);
+      const { exists } = await res.json();
+      setEmailStatus(exists ? 'taken' : 'available');
+    } catch {
+      setEmailStatus('idle');
+    }
+  }
+
   async function handleSubmit(formData: FormData) {
+    if (emailStatus === 'taken') {
+      setErrorMessage('이미 사용 중인 이메일입니다. 다른 이메일을 사용해주세요.');
+      return;
+    }
     setIsLoading(true);
     setErrorMessage('');
-    
+
     const result = await signupUser(formData);
-    
+
     if (result?.error) {
       setErrorMessage(result.error);
       setIsLoading(false);
@@ -44,7 +64,7 @@ function SignupFormContent() {
           입력하신 가입용 이메일로 인증 링크를 발송했습니다.<br/>
           링크를 클릭하시면 가입이 최종 완료됩니다.
         </p>
-        <Link 
+        <Link
           href="/login"
           className="w-full block bg-brand-blue hover:bg-blue-600 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-brand-blue/20"
         >
@@ -58,7 +78,7 @@ function SignupFormContent() {
 
   return (
     <div className="w-full max-w-xl brand-card p-8 md:p-12">
-      
+
       <div className="mb-10 text-center">
         <h1 className="text-2xl font-bold text-white">회원가입</h1>
         <p className="mt-2 text-sm text-white/40">jtmath에서 상위 1%로 도약하세요.</p>
@@ -73,14 +93,36 @@ function SignupFormContent() {
       <form action={handleSubmit} className="space-y-6">
         <div className="space-y-4 border-b border-white/[0.06] pb-8">
           <h2 className="font-bold text-white/80 text-sm tracking-wider uppercase">기본 정보</h2>
-          
+
           <div className="space-y-1">
             <label className="text-sm font-medium text-white/60">이메일 (아이디) *</label>
-            <input type="email" name="email" placeholder="name@example.com" className={inputClass} required />
+            <div className="relative">
+              <input
+                type="email"
+                name="email"
+                placeholder="name@example.com"
+                className={`${inputClass} pr-10`}
+                required
+                value={emailValue}
+                onChange={(e) => { setEmailValue(e.target.value); setEmailStatus('idle'); }}
+                onBlur={handleEmailBlur}
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {emailStatus === 'checking' && <Loader2 className="w-4 h-4 text-white/30 animate-spin" />}
+                {emailStatus === 'available' && <CheckCircle2 className="w-4 h-4 text-brand-mint" />}
+                {emailStatus === 'taken' && <XCircle className="w-4 h-4 text-brand-orange" />}
+              </div>
+            </div>
+            {emailStatus === 'available' && (
+              <p className="text-xs text-brand-mint mt-1">사용 가능한 이메일입니다.</p>
+            )}
+            {emailStatus === 'taken' && (
+              <p className="text-xs text-brand-orange mt-1">이미 사용 중인 이메일입니다.</p>
+            )}
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-white/60">비밀번호 입력 *</label>
+            <label className="text-sm font-medium text-white/60">비밀번호 입력 * (6자 이상)</label>
             <input type="password" name="password" className={inputClass} required minLength={6} />
           </div>
 
@@ -125,7 +167,7 @@ function SignupFormContent() {
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium text-white/60">과제 수신 이메일 *</label>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input 
+                <input
                   type="checkbox" name="useSameEmail"
                   className="rounded text-brand-blue focus:ring-brand-blue bg-brand-elevated border-white/10"
                   checked={useSameEmail} onChange={(e) => setUseSameEmail(e.target.checked)}
@@ -148,7 +190,7 @@ function SignupFormContent() {
           </label>
         </div>
 
-        <button type="submit" disabled={isLoading}
+        <button type="submit" disabled={isLoading || emailStatus === 'taken'}
           className="w-full bg-brand-blue hover:bg-blue-600 disabled:bg-brand-blue/50 text-white font-bold py-4 rounded-xl shadow-lg shadow-brand-blue/20 transition-all text-lg"
         >
           {isLoading ? '가입 처리 중...' : '가입완료'}

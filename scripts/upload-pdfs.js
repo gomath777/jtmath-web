@@ -41,7 +41,8 @@ if (!SUPABASE_SERVICE_KEY) {
 
 async function uploadPdf(localPath, storagePath) {
   const buffer = fs.readFileSync(localPath);
-  const url = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${storagePath}`;
+  const encodedPath = storagePath.split('/').map(encodeURIComponent).join('/');
+  const url = `${SUPABASE_URL}/storage/v1/object/${STORAGE_BUCKET}/${encodedPath}`;
 
   const res = await fetch(url, {
     method: 'POST',
@@ -53,7 +54,7 @@ async function uploadPdf(localPath, storagePath) {
     body: buffer,
   });
 
-  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${storagePath}`;
+  const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/${STORAGE_BUCKET}/${encodedPath}`;
   if (res.ok) {
     console.log(`  ✅ ${path.basename(localPath)}`);
     return publicUrl;
@@ -92,9 +93,11 @@ async function main() {
 
       for (const pdf of pdfs) {
         const localPath = path.join(deltaDir, pdf);
-        const storagePath = `${subject.name}/${delta.name}/${pdf}`;
+        // Use a UUID for the storage filename to avoid all character set issues
+        const storageFilename = require('crypto').randomUUID() + '.pdf';
+        const storagePath = `${subject.name}/${delta.name}/${storageFilename}`;
         const url = await uploadPdf(localPath, storagePath);
-        if (url) results.push({ subject: subject.name, delta: delta.name, filename: pdf, url });
+        if (url) results.push({ subject: subject.name, delta: delta.name, originalFilename: pdf, storagePath, url });
       }
     }
   }

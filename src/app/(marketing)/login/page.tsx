@@ -16,15 +16,18 @@ function LoginFormContent() {
     if (searchParams?.get('registered') === 'true') {
       setSuccessMessage('회원가입이 완료되었습니다! 가입하신 정보로 로그인해주세요.');
     }
+    if (searchParams?.get('reset') === 'true') {
+      setSuccessMessage('비밀번호가 성공적으로 변경되었습니다. 새 비밀번호로 로그인해주세요.');
+    }
   }, [searchParams]);
 
   async function handleSubmit(formData: FormData) {
     setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
-    
+
     const result = await loginUser(formData);
-    
+
     if (result?.error) {
       setErrorMessage(result.error);
       setIsLoading(false);
@@ -53,25 +56,27 @@ function LoginFormContent() {
       <form action={handleSubmit} className="space-y-5">
         <div className="space-y-1">
           <label className="text-sm font-medium text-white/60">이메일</label>
-          <input 
+          <input
             type="email"
             name="email"
             placeholder="name@example.com"
             className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all"
-            required 
+            required
           />
         </div>
 
         <div className="space-y-1">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-white/60">비밀번호</label>
-            <Link href="#" className="text-xs text-white/30 hover:text-brand-blue font-medium transition-colors">비밀번호를 잊으셨나요?</Link>
+            <Link href="/forgot-password" className="text-xs text-white/30 hover:text-brand-blue font-medium transition-colors">
+              비밀번호를 잊으셨나요?
+            </Link>
           </div>
-          <input 
+          <input
             type="password"
             name="password"
             className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all"
-            required 
+            required
           />
         </div>
 
@@ -85,8 +90,8 @@ function LoginFormContent() {
 
         <div className="pt-6 border-t border-white/[0.06] text-center space-y-4">
           <p className="text-sm text-white/30">아직 등록하지 않으셨나요?</p>
-          <Link 
-            href="/signup" 
+          <Link
+            href="/signup"
             className="block w-full bg-brand-surface hover:bg-brand-elevated text-white/80 font-bold py-4 rounded-xl border border-white/[0.08] transition-all"
           >
             시작하기 (회원가입)
@@ -101,7 +106,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex flex-col bg-brand-dark">
       <MainHeader />
-      
+
       <main className="flex-1 container mx-auto px-4 py-12 flex justify-center items-center">
         <div className="w-full max-w-md brand-card p-8 md:p-10">
           <Suspense fallback={<div className="text-center text-white/30">로딩 중...</div>}>

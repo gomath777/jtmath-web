@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BookOpen, PlayCircle, Clock, ChevronRight } from 'lucide-react';
+import PasswordChangeBanner from '@/components/PasswordChangeBanner';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -19,27 +20,73 @@ export default async function DashboardPage() {
 
   const userName = profile?.name || '학생';
 
-  const enrolledCourses = [
-    {
-      id: "1",
-      title: "Δ0 기초 빌드업",
-      subtitle: "Delta Zero",
-      progress: 45,
-      nextLesson: "3주차 2차시: 삼각형의 외심",
-      validUntil: "2025년 12월 31일"
-    },
-    {
-      id: "2",
-      title: "Δ1 핵심 실전",
-      subtitle: "Delta One",
-      progress: 0,
-      nextLesson: "1주차 1차시: 문자와 식",
-      validUntil: "2025년 10월 15일"
+  // 실제 수강 권한 조회
+  const now = new Date().toISOString();
+  const { data: enrollments } = await supabase
+    .from('enrollments')
+    .select('id, valid_until, course_id, courses(id, title)')
+    .eq('user_id', user.id)
+    .gt('valid_until', now);
+
+  // 완료한 강의 수 조회 (진도율 계산용)
+  const { data: completedProgress } = await supabase
+    .from('lesson_progress')
+    .select('lesson_id, lessons(course_id)')
+    .eq('user_id', user.id)
+    .eq('completed', true);
+
+  // 강의별 완료 수 집계
+  const completedByCourse: Record<string, number> = {};
+  (completedProgress || []).forEach((p: any) => {
+    const courseId = p.lessons?.course_id;
+    if (courseId) {
+      completedByCourse[courseId] = (completedByCourse[courseId] || 0) + 1;
     }
-  ];
+  });
+
+  // 강의별 전체 강의 수
+  const courseIds = (enrollments || []).map((e: any) => e.course_id).filter(Boolean);
+  let totalByCourse: Record<string, number> = {};
+  if (courseIds.length > 0) {
+    const { data: lessonCounts } = await supabase
+      .from('lessons')
+      .select('course_id')
+      .in('course_id', courseIds)
+      .eq('is_published', true);
+
+    (lessonCounts || []).forEach((l: any) => {
+      totalByCourse[l.course_id] = (totalByCourse[l.course_id] || 0) + 1;
+    });
+  }
+
+  type EnrolledCourse = {
+    id: string;
+    title: string;
+    progress: number;
+    validUntil: string;
+  };
+
+  const enrolledCourses: EnrolledCourse[] = (enrollments || [])
+    .filter((e: any) => e.courses)
+    .map((e: any) => {
+      const courseId = e.course_id;
+      const total = totalByCourse[courseId] || 0;
+      const done = completedByCourse[courseId] || 0;
+      const progress = total > 0 ? Math.round((done / total) * 100) : 0;
+      const validDate = new Date(e.valid_until);
+      const validUntil = `${validDate.getFullYear()}년 ${validDate.getMonth() + 1}월 ${validDate.getDate()}일`;
+      return {
+        id: courseId,
+        title: e.courses.title,
+        progress,
+        validUntil,
+      };
+    });
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
+      <PasswordChangeBanner />
+
       {/* Welcome */}
       <div className="brand-card p-8">
         <h1 className="text-2xl font-bold text-white">
@@ -63,7 +110,7 @@ export default async function DashboardPage() {
               매스플랫(MathFlat) 앱 설치부터 과제 제출 방법까지, 원활한 수강을 위해 반드시 시청해주세요.
             </p>
           </div>
-          <Link 
+          <Link
             href="/dashboard/ot"
             className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-blue/20"
           >
@@ -87,8 +134,7 @@ export default async function DashboardPage() {
                 <div className="h-1 w-full bg-gradient-to-r from-brand-blue to-brand-mint" />
                 <div className="p-6 flex flex-col flex-1">
                   <div className="mb-4">
-                    <span className="text-xs font-mono text-brand-blue/70 tracking-wide">{course.subtitle}</span>
-                    <h3 className="text-lg font-bold text-white mt-1 line-clamp-1 group-hover:text-brand-blue transition-colors">{course.title}</h3>
+                    <h3 className="text-lg font-bold text-white mt-1 line-clamp-2 group-hover:text-brand-blue transition-colors">{course.title}</h3>
                   </div>
 
                   <div className="mt-auto space-y-4">
@@ -105,9 +151,9 @@ export default async function DashboardPage() {
                     <div className="flex items-center justify-between pt-4 border-t border-white/[0.06]">
                       <div className="flex items-center gap-2 text-xs text-white/30 font-medium">
                         <Clock className="w-3.5 h-3.5" />
-                        {course.validUntil}
+                        {course.validUntil}까지
                       </div>
-                      <Link 
+                      <Link
                         href={`/dashboard/courses/${course.id}`}
                         className="text-sm font-bold text-brand-blue hover:text-blue-400 flex items-center gap-1 transition-colors"
                       >
@@ -129,7 +175,7 @@ export default async function DashboardPage() {
             <p className="text-white/40 text-sm max-w-sm mx-auto mb-6">
               아직 수강 신청한 강의가 없거나, 결제 승인 대기 중입니다.
             </p>
-            <Link 
+            <Link
               href="/courses"
               className="inline-flex font-bold justify-center items-center px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white rounded-xl transition-all shadow-lg shadow-brand-blue/20"
             >
