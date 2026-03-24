@@ -46,7 +46,7 @@ export default async function DashboardPage() {
 
   // 강의별 전체 강의 수
   const courseIds = (enrollments || []).map((e: any) => e.course_id).filter(Boolean);
-  let totalByCourse: Record<string, number> = {};
+  const totalByCourse: Record<string, number> = {};
   if (courseIds.length > 0) {
     const { data: lessonCounts } = await supabase
       .from('lessons')
