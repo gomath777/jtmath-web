@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { BookOpen, PlayCircle, Clock, ChevronRight } from 'lucide-react';
+import { BookOpen, PlayCircle, Clock, ChevronRight, BookMarked } from 'lucide-react';
+// PlayCircle은 기출 영상 섹션에서 사용
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -50,28 +51,32 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* OT Banner */}
-      <div className="brand-card p-8 relative overflow-hidden group">
-        <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-brand-orange/10 text-brand-orange text-xs font-bold rounded-md mb-1 border border-brand-orange/20 font-mono">
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-orange animate-pulse" />
-              REQUIRED
-            </div>
-            <h2 className="text-2xl font-bold text-white">Lesson 0: 수강 전 오리엔테이션</h2>
-            <p className="text-white/40 text-sm max-w-xl">
-              매스플랫(MathFlat) 앱 설치부터 과제 제출 방법까지, 원활한 수강을 위해 반드시 시청해주세요.
-            </p>
-          </div>
-          <Link 
-            href="/dashboard/ot"
-            className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-blue/20"
-          >
-            <PlayCircle className="w-5 h-5" />
-            OT 시청하기
-          </Link>
+
+      {/* 기출 영상 */}
+      <div className="space-y-4">
+        <h2 className="text-sm font-bold text-white/50 tracking-wider uppercase flex items-center gap-2 font-mono">
+          <BookMarked className="w-4 h-4 text-brand-mint" />
+          EXAM VIDEOS
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { slug: 'gs1', name: '공통수학1' },
+            { slug: 'ds2', name: '대수' },
+          ].map(subject => (
+            <Link
+              key={subject.slug}
+              href={`/dashboard/practice/${subject.slug}`}
+              className="brand-card p-4 flex flex-col gap-2 hover:border-brand-mint/30 transition-all group"
+            >
+              <span className="text-[10px] font-mono text-brand-mint/60 uppercase tracking-widest">기출 해설</span>
+              <span className="font-bold text-white text-sm group-hover:text-brand-mint transition-colors">{subject.name}</span>
+              <span className="text-xs text-white/20 flex items-center gap-1 mt-auto">
+                <PlayCircle className="w-3.5 h-3.5" />
+                영상 보기
+              </span>
+            </Link>
+          ))}
         </div>
-        <div className="absolute right-0 top-0 w-64 h-64 bg-brand-blue/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none group-hover:bg-brand-blue/10 transition-all duration-700" />
       </div>
 
       <div className="space-y-4">

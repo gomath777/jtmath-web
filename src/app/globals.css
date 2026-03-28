@@ -72,6 +72,39 @@
   }
 }
 
+/* Admin Light Mode Override */
+.admin-root,
+.admin-root * {
+  color: inherit;
+}
+.admin-root {
+  color: #0f172a; /* slate-900 */
+}
+.admin-root input,
+.admin-root select,
+.admin-root textarea {
+  color: #0f172a !important;
+}
+.admin-root input::placeholder,
+.admin-root textarea::placeholder {
+  color: #94a3b8 !important; /* slate-400 */
+}
+.admin-root option {
+  color: #0f172a;
+  background: white;
+}
+
+/* Admin header keeps white text */
+.admin-root header {
+  color: white;
+}
+.admin-root header * {
+  color: inherit;
+}
+.admin-root header a.text-slate-400 {
+  color: #94a3b8;
+}
+
 /* Brand Utility Classes */
 @layer utilities {
   .brand-glow-blue {

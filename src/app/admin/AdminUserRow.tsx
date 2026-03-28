@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { grantEnrollment } from './actions';
 
-export default function AdminUserRow({ profile, courses }: { profile: any, courses: any[] }) {
+export default function AdminUserRow({ profile, courses, userEnrollments }: { profile: any, courses: any[], userEnrollments?: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(courses[0]?.id || '');
   const [isLoading, setIsLoading] = useState(false);
