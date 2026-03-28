@@ -1,7 +1,8 @@
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Users, CreditCard, BookOpen } from 'lucide-react';
+import { Users, CreditCard, BookOpen, LayoutDashboard, Calendar } from 'lucide-react';
 import ContentLibraryClient from './ContentLibraryClient';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map((e) => e.trim());
@@ -12,7 +13,12 @@ export default async function ContentLibraryPage() {
   if (!user) redirect('/login');
   if (!ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
 
-  const { data: sets } = await supabase
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
+
+  const { data: sets } = await serviceClient
     .from('learning_sets')
     .select(`
       id, title, description, subject_slug, pdf_filename, created_at,
@@ -21,7 +27,7 @@ export default async function ContentLibraryPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FA] text-slate-900 flex flex-col">
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" className="font-extrabold text-xl tracking-tight text-white hover:text-red-400 transition-colors">
@@ -49,9 +55,17 @@ export default async function ContentLibraryPage() {
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100">
               <CreditCard className="w-5 h-5" />결제 내역
             </Link>
+            <Link href="/admin?tab=stats"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100">
+              <LayoutDashboard className="w-5 h-5" />현황 요약
+            </Link>
             <Link href="/admin/content-library"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors bg-white text-red-600 shadow-sm border border-slate-100">
-              <BookOpen className="w-5 h-5" />콘텐츠 라이브러리
+              <BookOpen className="w-5 h-5" />보충자료
+            </Link>
+            <Link href="/admin/curriculum"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100">
+              <Calendar className="w-5 h-5" />커리큘럼
             </Link>
           </nav>
         </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
+import { createClient as createServiceClient } from '@supabase/supabase-js';
 
 // GET: 콘텐츠 라이브러리 목록
 export async function GET(req: NextRequest) {
@@ -7,7 +8,12 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { data, error } = await supabase
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
+
+  const { data, error } = await serviceClient
     .from('learning_sets')
     .select(`
       id, title, description, subject_slug, pdf_url, pdf_filename, created_at,
@@ -40,27 +46,33 @@ export async function POST(req: NextRequest) {
 
   const problems = JSON.parse(problemsJson);
 
-  // PDF Supabase Storage 업로드
+  // PDF Supabase Storage 업로드 (service role로 RLS 우회)
+  const serviceClient = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!
+  );
+
   let pdfUrl: string | null = null;
   let pdfFilename: string | null = null;
   if (pdfFile) {
     pdfFilename = pdfFile.name;
     const bytes = await pdfFile.arrayBuffer();
-    const path = `learning-sets/${Date.now()}_${pdfFilename}`;
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    // 한글 파일명 → 영문 safe key 변환
+    const safeName = `learning-sets/${Date.now()}.pdf`;
+    const { data: uploadData, error: uploadError } = await serviceClient.storage
       .from('pdfs')
-      .upload(path, bytes, { contentType: 'application/pdf', upsert: false });
+      .upload(safeName, bytes, { contentType: 'application/pdf', upsert: false });
 
     if (uploadError) {
       return NextResponse.json({ error: 'PDF 업로드 실패: ' + uploadError.message }, { status: 500 });
     }
 
-    const { data: urlData } = supabase.storage.from('pdfs').getPublicUrl(uploadData.path);
+    const { data: urlData } = serviceClient.storage.from('pdfs').getPublicUrl(uploadData.path);
     pdfUrl = urlData.publicUrl;
   }
 
-  // learning_sets 생성
-  const { data: setData, error: setError } = await supabase
+  // learning_sets 생성 (service role로 RLS 우회)
+  const { data: setData, error: setError } = await serviceClient
     .from('learning_sets')
     .insert({
       title,
@@ -91,7 +103,7 @@ export async function POST(req: NextRequest) {
     }));
 
   if (videos.length > 0) {
-    const { error: vidError } = await supabase
+    const { error: vidError } = await serviceClient
       .from('learning_set_videos')
       .insert(videos);
 

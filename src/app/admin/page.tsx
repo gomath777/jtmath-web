@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Users, CreditCard, LayoutDashboard, BookOpen } from 'lucide-react';
+import { Users, CreditCard, LayoutDashboard, BookOpen, Calendar } from 'lucide-react';
 import AdminUserRow from './AdminUserRow';
 
 // 관리자 이메일 목록 (환경 변수로 관리 가능)
@@ -62,7 +62,7 @@ export default async function AdminDashboardPage({
     .reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
+    <div className="min-h-screen bg-[#F8F9FA] text-slate-900 flex flex-col">
       {/* 어드민 헤더 */}
       <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -112,7 +112,14 @@ export default async function AdminDashboardPage({
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
             >
               <BookOpen className="w-5 h-5" />
-              콘텐츠 라이브러리
+              보충자료
+            </Link>
+            <Link
+              href="/admin/curriculum"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <Calendar className="w-5 h-5" />
+              커리큘럼
             </Link>
           </nav>
         </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Home, LogOut, MessageCircle, User, Library } from 'lucide-react';
+import { LogOut, PlayCircle, Calendar, FileText } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -11,58 +11,44 @@ export default function DashboardLayout({
       {/* Sidebar Navigation */}
       <aside className="hidden w-64 border-r border-white/[0.06] bg-brand-surface flex-col md:flex">
         <div className="flex h-16 items-center px-6 border-b border-white/[0.06]">
-          <Link href="/dashboard" className="text-xl font-black tracking-tight text-white hover:opacity-80 transition-opacity">
+          <Link href="/dashboard/learning" className="text-xl font-black tracking-tight text-white hover:opacity-80 transition-opacity">
             jt<span className="brand-gradient-text">math</span><span className="text-brand-blue">.</span>
           </Link>
         </div>
-        
+
         <nav className="flex-1 space-y-1 p-4">
-          <div className="text-[10px] font-mono text-white/30 uppercase tracking-widest px-3 pb-2 pt-2">학습 공간</div>
+          {/* OT */}
           <Link
-            href="/dashboard"
-            className="flex items-center gap-3 rounded-xl bg-brand-blue/10 px-3 py-3 text-brand-blue transition-all hover:bg-brand-blue/20 font-bold"
+            href="/dashboard/ot"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-brand-orange transition-all hover:bg-brand-orange/10"
           >
-            <Home className="h-4 w-4" />
-            <span className="text-sm">대시보드 홈</span>
-          </Link>
-          <Link
-            href="/courses"
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium"
-          >
-            <BookOpen className="h-4 w-4" />
-            <span className="text-sm">모든 교육과정</span>
-          </Link>
-          <Link
-            href="/dashboard/supplements/gs1"
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium mb-4"
-          >
-            <Library className="h-4 w-4" />
-            <span className="text-sm">공수1 보충자료</span>
+            <PlayCircle className="h-4 w-4" />
+            <span className="text-sm font-medium">오리엔테이션</span>
+            <span className="ml-auto text-[10px] font-bold bg-brand-orange/20 text-brand-orange px-1.5 py-0.5 rounded">필수</span>
           </Link>
 
-          <div className="text-[10px] font-mono text-white/30 uppercase tracking-widest px-3 pb-2 pt-4">지원 및 설정</div>
-          <a
-            href="https://open.kakao.com/o/YOUR_LINK_HERE"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium"
-          >
-            <MessageCircle className="h-4 w-4" />
-            <span className="text-sm">1:1 질의응답</span>
-          </a>
+          <div className="h-px bg-white/[0.06] my-2" />
+
           <Link
-            href="/dashboard"
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium"
+            href="/dashboard/learning"
+            className="flex items-center gap-3 rounded-lg bg-brand-blue/10 px-3 py-2.5 text-brand-blue transition-all hover:bg-brand-blue/20"
           >
-            <User className="h-4 w-4" />
-            <span className="text-sm">마이페이지</span>
+            <Calendar className="h-4 w-4" />
+            <span className="text-sm font-medium">내 학습</span>
+          </Link>
+          <Link
+            href="/dashboard/supplements"
+            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-white/40 transition-all hover:bg-white/[0.04] hover:text-white/70"
+          >
+            <FileText className="h-4 w-4" />
+            <span className="text-sm font-medium">보충자료</span>
           </Link>
         </nav>
-        
+
         <div className="mt-auto border-t border-white/[0.06] p-4">
-          <button className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-white/30 transition-all hover:bg-white/[0.04] hover:text-white/60 text-left font-medium">
+          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-white/30 transition-all hover:bg-white/[0.04] hover:text-white/60 text-left">
             <LogOut className="h-4 w-4" />
-            <span className="text-sm">로그아웃</span>
+            <span className="text-sm font-medium">로그아웃</span>
           </button>
         </div>
       </aside>
@@ -71,7 +57,7 @@ export default function DashboardLayout({
       <div className="flex flex-1 flex-col">
         {/* Mobile Header */}
         <header className="flex h-16 items-center justify-between border-b border-white/[0.06] bg-brand-surface px-6 md:hidden">
-          <Link href="/dashboard" className="text-xl font-black tracking-tight text-white">
+          <Link href="/dashboard/learning" className="text-xl font-black tracking-tight text-white">
             jt<span className="brand-gradient-text">math</span><span className="text-brand-blue">.</span>
           </Link>
           <div className="ml-auto">
