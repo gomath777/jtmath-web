@@ -69,8 +69,8 @@ function onFormSubmit(e) {
     birth_date: birthDateStr.trim(),
     phone_student: String(phoneStudent).trim(),
     phone_parent: String(phoneParent).trim(),
-    course_option: courseOption.trim(),
-    naver_id: naverId.trim(),
+    course_option: String(courseOption).trim(),
+    naver_id: String(naverId).trim(),
     duration_months: 6,  // 기본 6개월. 필요시 수정
   };
 

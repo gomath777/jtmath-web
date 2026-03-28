@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Users, CreditCard, LayoutDashboard } from 'lucide-react';
+import { Users, CreditCard, LayoutDashboard, BookOpen } from 'lucide-react';
 import AdminUserRow from './AdminUserRow';
 
 // 관리자 이메일 목록 (환경 변수로 관리 가능)
@@ -106,6 +106,13 @@ export default async function AdminDashboardPage({
             >
               <LayoutDashboard className="w-5 h-5" />
               현황 요약
+            </Link>
+            <Link
+              href="/admin/content-library"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <BookOpen className="w-5 h-5" />
+              콘텐츠 라이브러리
             </Link>
           </nav>
         </div>

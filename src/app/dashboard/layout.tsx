@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { BookOpen, Home, LogOut, Compass, MessageCircle, User } from 'lucide-react';
+import { BookOpen, Home, LogOut, MessageCircle, User, Library } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -27,12 +27,19 @@ export default function DashboardLayout({
           </Link>
           <Link
             href="/courses"
-            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium mb-4"
+            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium"
           >
             <BookOpen className="h-4 w-4" />
             <span className="text-sm">모든 교육과정</span>
           </Link>
-          
+          <Link
+            href="/dashboard/supplements/gs1"
+            className="flex items-center gap-3 rounded-xl px-3 py-3 text-white/50 transition-all hover:bg-white/[0.04] hover:text-white font-medium mb-4"
+          >
+            <Library className="h-4 w-4" />
+            <span className="text-sm">공수1 보충자료</span>
+          </Link>
+
           <div className="text-[10px] font-mono text-white/30 uppercase tracking-widest px-3 pb-2 pt-4">지원 및 설정</div>
           <a
             href="https://open.kakao.com/o/YOUR_LINK_HERE"
