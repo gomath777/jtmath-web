@@ -28,6 +28,13 @@ interface SessionData {
   progress: Record<string, { watch_percent: number; completed: boolean }>;
 }
 
+const SUBJECT_LABELS: Record<string, string> = {
+  gs1: '공통수학1',
+  gs2: '공통수학2',
+  ds2: '대수',
+  ms1: '미적분1',
+};
+
 const SECTION_COLORS: Record<string, string> = {
   green: 'bg-green-600',
   blue: 'bg-brand-blue',
@@ -92,7 +99,7 @@ export default function SessionPageClient({ itemId }: { itemId: string }) {
           </span>
           {curriculum.subject_slug && (
             <span className="text-xs font-bold bg-white/10 text-white/50 px-2 py-0.5 rounded-full">
-              {curriculum.subject_slug}
+              {SUBJECT_LABELS[curriculum.subject_slug] || curriculum.subject_slug}
             </span>
           )}
         </div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { LogOut, PlayCircle, Calendar, FileText } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import SidebarNav from './SidebarNav';
 
 export default function DashboardLayout({
   children,
@@ -16,34 +17,7 @@ export default function DashboardLayout({
           </Link>
         </div>
 
-        <nav className="flex-1 space-y-1 p-4">
-          {/* OT */}
-          <Link
-            href="/dashboard/ot"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-brand-orange transition-all hover:bg-brand-orange/10"
-          >
-            <PlayCircle className="h-4 w-4" />
-            <span className="text-sm font-medium">오리엔테이션</span>
-            <span className="ml-auto text-[10px] font-bold bg-brand-orange/20 text-brand-orange px-1.5 py-0.5 rounded">필수</span>
-          </Link>
-
-          <div className="h-px bg-white/[0.06] my-2" />
-
-          <Link
-            href="/dashboard/learning"
-            className="flex items-center gap-3 rounded-lg bg-brand-blue/10 px-3 py-2.5 text-brand-blue transition-all hover:bg-brand-blue/20"
-          >
-            <Calendar className="h-4 w-4" />
-            <span className="text-sm font-medium">내 학습</span>
-          </Link>
-          <Link
-            href="/dashboard/supplements"
-            className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-white/40 transition-all hover:bg-white/[0.04] hover:text-white/70"
-          >
-            <FileText className="h-4 w-4" />
-            <span className="text-sm font-medium">보충자료</span>
-          </Link>
-        </nav>
+        <SidebarNav />
 
         <div className="mt-auto border-t border-white/[0.06] p-4">
           <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-white/30 transition-all hover:bg-white/[0.04] hover:text-white/60 text-left">
