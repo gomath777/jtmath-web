@@ -75,7 +75,11 @@ export default function LearningClient() {
     try {
       const res = await fetch('/api/student/assignments');
       const data = await res.json();
-      setAssignments(data.assignments || []);
+      // 보충자료(label에 "보충" 포함)는 보충자료 탭에서 표시 — 내 학습 달력에서 제외
+      const regular = (data.assignments || []).filter(
+        (a: Assignment) => !a.label?.includes('보충')
+      );
+      setAssignments(regular);
       setProgress(data.progress || {});
 
       // 오늘 날짜에 배정이 있으면 자동 선택

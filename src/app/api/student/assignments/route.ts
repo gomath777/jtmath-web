@@ -77,11 +77,11 @@ export async function GET(req: NextRequest) {
   });
 
   // 5. 커리큘럼 정보 보강 (차시 배정인 경우 커리큘럼 제목 + 차시 라벨 추가)
-  const curriculumIds = [...new Set(unique.filter(a => a.curriculum_id).map(a => a.curriculum_id))];
-  const curriculumItemIds = [...new Set(unique.filter(a => a.curriculum_item_id).map(a => a.curriculum_item_id))];
+  const curriculumIds = Array.from(new Set(unique.filter((a: any) => a.curriculum_id).map((a: any) => a.curriculum_id)));
+  const curriculumItemIds = Array.from(new Set(unique.filter((a: any) => a.curriculum_item_id).map((a: any) => a.curriculum_item_id)));
 
-  let curriculaMap: Record<string, { title: string; subject_slug: string }> = {};
-  let itemsMap: Record<string, { label: string; week_number: number; session_number: number }> = {};
+  const curriculaMap: Record<string, { title: string; subject_slug: string }> = {};
+  const itemsMap: Record<string, { label: string; week_number: number; session_number: number }> = {};
 
   if (curriculumIds.length > 0) {
     const { data: curricula } = await sc
