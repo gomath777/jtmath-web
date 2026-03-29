@@ -30,14 +30,8 @@ export default function Home() {
           
           <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/courses"
-              className="px-8 py-4 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all w-full sm:w-auto text-lg shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 hover:scale-[1.02]"
-            >
-              전체 코스 보기
-            </Link>
-            <Link
               href="/dashboard"
-              className="px-8 py-4 bg-brand-surface hover:bg-brand-elevated text-white/80 font-bold rounded-xl transition-all w-full sm:w-auto text-lg border border-white/[0.08] hover:border-white/[0.15]"
+              className="px-8 py-4 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all w-full sm:w-auto text-lg shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 hover:scale-[1.02]"
             >
               내 수강현황 →
             </Link>
@@ -57,34 +51,12 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-brand-dark border-t border-white/[0.06] text-white/40 py-12 px-6">
+      <footer className="bg-brand-dark border-t border-white/[0.06] text-white/40 py-8 px-6">
         <div className="container mx-auto max-w-5xl">
-          <div className="flex flex-col md:flex-row justify-between gap-8 border-b border-white/[0.06] pb-8">
-            <div className="space-y-4">
-              <h3 className="font-bold text-white/70 text-sm tracking-wider uppercase">Contact</h3>
-              <div className="text-sm space-y-2">
-                <p className="flex items-center gap-2">
-                  <span className="text-brand-blue">→</span> (09:00~20:00) 빠른 상담은 카톡 플러스친구 jtmath
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-brand-blue">→</span> admin@jtmath.com
-                </p>
-                <p className="flex items-center gap-2">
-                  <span className="text-brand-blue">→</span> 이용약관 · 개인정보처리방침
-                </p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <a href="#" className="inline-flex py-3 px-6 bg-[#FEE500] hover:bg-[#FDD800] text-[#371D1E] font-bold rounded-lg transition-colors text-sm items-center gap-2">
-                카카오톡 상담하기
-              </a>
-            </div>
-          </div>
-          
-          <div className="pt-8 text-xs text-white/25 space-y-1 font-mono">
+          <div className="text-xs text-white/25 space-y-1 font-mono">
             <p>상호: 제이티매쓰 | 학원등록명: 제이티매쓰원격학원 | 대표: 고창언</p>
             <p>사업자등록번호: 662-91-01993 | 통신판매업신고: 제 2025-인천서구-2807 호</p>
-            <p>주소: 인천광역시 서구 보석로 32, 216-401 | 개인정보보호책임자: 고창언</p>
+            <p>주소: 인천광역시 서구 보석로 32 | 개인정보보호책임자: 고창언</p>
             <p className="pt-2">© 2025 jtmath. All rights reserved.</p>
           </div>
         </div>

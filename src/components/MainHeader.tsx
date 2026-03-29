@@ -16,8 +16,6 @@ export default function MainHeader() {
           {/* Nav Links (Desktop) */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-white/50">
             <Link href="/" className="hover:text-white transition-colors duration-200">HOME</Link>
-            <Link href="/courses" className="hover:text-white transition-colors duration-200">교육과정</Link>
-            <Link href="/about" className="hover:text-white transition-colors duration-200">ABOUT</Link>
           </nav>
         </div>
 
