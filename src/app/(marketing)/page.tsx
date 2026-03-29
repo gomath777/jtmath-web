@@ -13,39 +13,40 @@ export default function Home() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_rgba(0,230,118,0.05)_0%,_transparent_50%)]" />
         
         <div className="max-w-4xl w-full py-24 text-center space-y-8 relative z-10">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-surface border border-white/[0.06] text-xs font-medium text-white/60">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-mint animate-pulse" />
-            Data-Driven Mathematics Platform
+
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-[1.15]">
+            상위권의 시간은<br />
+            <span className="brand-gradient-text">다르게 흐릅니다.</span>
+          </h1>
+          <p className="text-lg md:text-xl text-white/50 font-medium max-w-2xl mx-auto">
+            출제자가 만든 1대1 온라인 수학 내신대비
+          </p>
+
+          {/* 신뢰 지표 */}
+          <div className="flex items-center justify-center gap-8 md:gap-12 pt-2">
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">200명<span className="text-brand-mint">+</span></p>
+              <p className="text-xs text-white/30 mt-1">누적 수강생</p>
+            </div>
+            <div className="w-px h-10 bg-white/[0.08]" />
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">50회<span className="text-brand-mint">+</span></p>
+              <p className="text-xs text-white/30 mt-1">내신 출제 경험</p>
+            </div>
+            <div className="w-px h-10 bg-white/[0.08]" />
+            <div className="text-center">
+              <p className="text-2xl md:text-3xl font-black text-white">4.97<span className="text-brand-mint">점</span></p>
+              <p className="text-xs text-white/30 mt-1">네이버 스토어</p>
+            </div>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-white leading-[1.1]">
-            수학, 외우지 말고<br />
-            <span className="brand-gradient-text">알고리즘으로 풀어라.</span>
-          </h1>
-          <p className="text-lg md:text-xl text-white/50 font-medium max-w-2xl mx-auto leading-relaxed">
-            오답 데이터 기반 개인별 학습 시스템.<br />
-            상위 1% 도약을 위한 압도적 효율의 선택, <span className="text-white font-semibold">jtmath.</span>
-          </p>
-          
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
-              href="/dashboard"
+              href="/login"
               className="px-8 py-4 bg-brand-blue hover:bg-blue-600 text-white font-bold rounded-xl transition-all w-full sm:w-auto text-lg shadow-lg shadow-brand-blue/20 hover:shadow-brand-blue/40 hover:scale-[1.02]"
             >
-              내 수강현황 →
+              로그인하기 →
             </Link>
-          </div>
-
-          {/* Tech Stack Badges */}
-          <div className="pt-12 flex items-center justify-center gap-6 text-white/30 text-xs font-mono">
-            <span>Δ0 기초</span>
-            <span className="w-px h-3 bg-white/10" />
-            <span>Δ1 실전</span>
-            <span className="w-px h-3 bg-white/10" />
-            <span>Δ2 심화</span>
-            <span className="w-px h-3 bg-white/10" />
-            <span>Δ FINAL</span>
           </div>
         </div>
       </main>
