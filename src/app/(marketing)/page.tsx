@@ -1,4 +1,5 @@
 import MainHeader from '@/components/MainHeader';
+import FooterDisclosure from '@/components/FooterDisclosure';
 import Link from 'next/link';
 
 export default function Home() {
@@ -60,6 +61,7 @@ export default function Home() {
             <p>주소: 인천광역시 서구 보석로 32 | 개인정보보호책임자: 고창언</p>
             <p className="pt-2">© 2025 jtmath. All rights reserved.</p>
           </div>
+          <FooterDisclosure />
         </div>
       </footer>
     </div>
