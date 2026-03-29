@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
 import MainHeader from '@/components/MainHeader';
 import { loginUser } from './actions';
 
@@ -60,7 +61,8 @@ function LoginFormContent() {
             type="email"
             name="email"
             placeholder="name@example.com"
-            className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all"
+            disabled={isLoading}
+            className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all disabled:opacity-40"
             required
           />
         </div>
@@ -75,7 +77,8 @@ function LoginFormContent() {
           <input
             type="password"
             name="password"
-            className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all"
+            disabled={isLoading}
+            className="w-full px-4 py-3 rounded-lg border border-white/[0.08] bg-brand-elevated text-white placeholder:text-white/25 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-brand-blue transition-all disabled:opacity-40"
             required
           />
         </div>
@@ -83,9 +86,14 @@ function LoginFormContent() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-brand-blue hover:bg-blue-600 disabled:bg-brand-blue/50 text-white font-bold py-4 rounded-xl transition-all text-lg mt-4 shadow-lg shadow-brand-blue/20"
+          className="w-full bg-brand-blue hover:bg-blue-600 disabled:bg-brand-blue/70 text-white font-bold py-4 rounded-xl transition-all text-lg mt-4 shadow-lg shadow-brand-blue/20 flex items-center justify-center gap-2"
         >
-          {isLoading ? '로그인 중...' : '로그인'}
+          {isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              로그인 중...
+            </>
+          ) : '로그인'}
         </button>
 
         <div className="pt-6 border-t border-white/[0.06] text-center space-y-4">
