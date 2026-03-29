@@ -15,26 +15,29 @@ export default function OTPage() {
             <p className="text-sm font-bold text-white/60">[1단계]</p>
             <div className="space-y-2 text-sm text-white/80 leading-relaxed">
               <p>앱스토어, 구글플레이 스토어에서 <strong className="text-white">&apos;매쓰플랫&apos;</strong> 학생용 앱을 받아주세요. (핸드폰 태블릿 모두 가능)</p>
-              <p>위 [1단계] 신청서 내용으로 제가 학생등록이 완료되었다고 카톡을 보내드립니다.</p>
               <p className="text-white font-bold">
                 등록 완료 후 학생 본인 <span className="underline decoration-brand-blue">&apos;핸드폰번호&apos;만 입력</span>하면 자동 로그인 됩니다. <span className="text-brand-blue">(기본 비번 123456)</span>
               </p>
             </div>
 
             {/* 앱 이미지 */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/docs/app-mathflat-android.png"
-                alt="매쓰플랫 안드로이드 앱"
-                className="w-full rounded-lg"
-              />
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/docs/app-mathflat-ios.png"
-                alt="매쓰플랫 iOS 앱"
-                className="w-full rounded-lg"
-              />
+            <div className="flex gap-3 pt-2">
+              <div className="w-1/3 rounded-lg overflow-hidden" style={{ maxHeight: '200px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/docs/app-mathflat-android.png"
+                  alt="매쓰플랫 안드로이드 앱"
+                  className="w-full object-cover object-top"
+                />
+              </div>
+              <div className="w-1/3 rounded-lg overflow-hidden" style={{ maxHeight: '200px' }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/docs/app-mathflat-ios.png"
+                  alt="매쓰플랫 iOS 앱"
+                  className="w-full object-cover object-top"
+                />
+              </div>
             </div>
           </div>
 
@@ -46,16 +49,12 @@ export default function OTPage() {
             <p className="text-sm font-bold text-white/60">[2단계]</p>
             <p className="text-sm text-white/80">📺🎬 어플 사용법 영상을 시청해 주세요! 🎬📺</p>
 
-            {/* YouTube 임베드 */}
-            <div className="aspect-video rounded-lg overflow-hidden">
-              <iframe
-                src="https://www.youtube.com/embed/4ObLI1aK6m0?start=59"
-                title="채점 제출 오답관리 어플 사용법"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
+            {/* 로컬 영상 */}
+            <video
+              src="/docs/ot-app-vid.mp4"
+              controls
+              className="w-full rounded-lg"
+            />
 
             <div className="space-y-1 text-sm text-white/80 leading-relaxed">
               <p>PDF파일을 다운 받아 문제를 풀고, 위에서 받은 <strong className="text-white">어플에 접속하여 답을 채점</strong>해 주세요.</p>
@@ -86,7 +85,7 @@ export default function OTPage() {
         <div className="bg-brand-dark p-6 space-y-4">
           <div className="space-y-2 text-sm text-white/80 leading-relaxed">
             <p className="font-bold text-white">
-              🔴🔴 정확히 본인이 어느 과첨에서 막혔는지 파악한 다음에 질문해야합니다!
+              🔴🔴 정확히 본인이 어느 과정에서 막혔는지 파악한 다음에 질문해야합니다!
             </p>
             <p>그래야 사고 단계 빈틈을 찾을 수 있습니다.</p>
             <p className="text-brand-blue font-medium">
