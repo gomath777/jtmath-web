@@ -6,7 +6,7 @@ export default function FooterDisclosure() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-t border-white/[0.06] pt-4 mt-4">
+    <div className="mb-4">
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 text-xs text-white/30 hover:text-white/50 transition-colors"

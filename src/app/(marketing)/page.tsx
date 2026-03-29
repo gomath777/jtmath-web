@@ -55,13 +55,13 @@ export default function Home() {
       {/* Footer */}
       <footer className="bg-brand-dark border-t border-white/[0.06] text-white/40 py-8 px-6">
         <div className="container mx-auto max-w-5xl">
-          <div className="text-xs text-white/25 space-y-1 font-mono">
+          <FooterDisclosure />
+          <div className="text-xs text-white/25 space-y-1 font-mono mt-4">
             <p>상호: 제이티매쓰 | 학원등록명: 제이티매쓰원격학원 | 대표: 고창언</p>
             <p>사업자등록번호: 662-91-01993 | 통신판매업신고: 제 2025-인천서구-2807 호</p>
             <p>주소: 인천광역시 서구 보석로 32 | 개인정보보호책임자: 고창언</p>
-            <p className="pt-2">© 2025 jtmath. All rights reserved.</p>
+            <p className="pt-2">© 2024 jtmath. All rights reserved.</p>
           </div>
-          <FooterDisclosure />
         </div>
       </footer>
     </div>
