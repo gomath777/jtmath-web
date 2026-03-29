@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { LogOut } from 'lucide-react';
 import SidebarNav from './SidebarNav';
+import LogoutButton from './LogoutButton';
 
 export default function DashboardLayout({
   children,
@@ -20,10 +20,7 @@ export default function DashboardLayout({
         <SidebarNav />
 
         <div className="mt-auto border-t border-white/[0.06] p-4">
-          <button className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-white/30 transition-all hover:bg-white/[0.04] hover:text-white/60 text-left">
-            <LogOut className="h-4 w-4" />
-            <span className="text-sm font-medium">로그아웃</span>
-          </button>
+          <LogoutButton />
         </div>
       </aside>
 
