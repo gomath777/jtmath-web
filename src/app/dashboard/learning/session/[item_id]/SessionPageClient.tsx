@@ -36,7 +36,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 };
 
 const SECTION_COLORS: Record<string, string> = {
-  green: 'bg-brand-blue',
+  green: 'bg-emerald-700',
   blue: 'bg-brand-blue',
   red: 'bg-red-600',
   purple: 'bg-purple-600',
@@ -163,6 +163,13 @@ function BlockRenderer({
   }
 }
 
+function formatSectionTitle(title: string): string {
+  // "공수1 기출 다항식과 나머지정리 레벨3 해설강의" → "[공수1 기출] 다항식과 나머지정리 레벨3"
+  return title
+    .replace(/^(공수\d+ 기출) /, '[$1] ')
+    .replace(/ 해설강의$/, '');
+}
+
 function SectionHeaderBlock({ content }: { content: Record<string, unknown> }) {
   const title = (content.title as string) || '';
   const color = (content.color as string) || 'green';
@@ -170,7 +177,7 @@ function SectionHeaderBlock({ content }: { content: Record<string, unknown> }) {
 
   return (
     <div className={`${bgClass} rounded-xl px-5 py-3 mt-6 first:mt-0`}>
-      <h2 className="text-sm font-black text-white tracking-wide">{title}</h2>
+      <h2 className="text-sm font-black text-white tracking-wide">{formatSectionTitle(title)}</h2>
     </div>
   );
 }
