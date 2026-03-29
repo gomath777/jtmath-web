@@ -98,7 +98,7 @@ export default function SupplementsClient() {
                 <div className="border-t border-white/[0.06] px-5 py-3">
                   {assignment.curriculum_item_id ? (
                     <Link
-                      href={`/dashboard/learning/session/${assignment.curriculum_item_id}`}
+                      href={`/dashboard/supplements/session/${assignment.curriculum_item_id}`}
                       className="w-full text-center text-sm font-bold text-brand-mint hover:text-emerald-400 transition-colors py-1 block"
                     >
                       학습 시작하기 →

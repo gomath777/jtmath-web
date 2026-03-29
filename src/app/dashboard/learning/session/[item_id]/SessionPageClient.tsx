@@ -44,7 +44,15 @@ const SECTION_COLORS: Record<string, string> = {
   dark: 'bg-slate-700',
 };
 
-export default function SessionPageClient({ itemId }: { itemId: string }) {
+export default function SessionPageClient({
+  itemId,
+  backHref = '/dashboard/learning',
+  backLabel = '달력으로 돌아가기',
+}: {
+  itemId: string;
+  backHref?: string;
+  backLabel?: string;
+}) {
   const [data, setData] = useState<SessionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -71,8 +79,8 @@ export default function SessionPageClient({ itemId }: { itemId: string }) {
   if (error || !data) {
     return (
       <div className="max-w-3xl mx-auto">
-        <Link href="/dashboard/learning" className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-6">
-          <ChevronLeft className="w-4 h-4" /> 달력으로 돌아가기
+        <Link href={backHref} className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-6">
+          <ChevronLeft className="w-4 h-4" /> {backLabel}
         </Link>
         <div className="brand-card p-12 text-center">
           <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-brand-orange" />
@@ -87,8 +95,8 @@ export default function SessionPageClient({ itemId }: { itemId: string }) {
   return (
     <div className="max-w-3xl mx-auto">
       {/* 상단 네비 */}
-      <Link href="/dashboard/learning" className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
-        <ChevronLeft className="w-4 h-4" /> 달력으로 돌아가기
+      <Link href={backHref} className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
+        <ChevronLeft className="w-4 h-4" /> {backLabel}
       </Link>
 
       {/* 제목 영역 */}
