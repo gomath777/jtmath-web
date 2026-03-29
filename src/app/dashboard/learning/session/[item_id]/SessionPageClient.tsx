@@ -36,7 +36,7 @@ const SUBJECT_LABELS: Record<string, string> = {
 };
 
 const SECTION_COLORS: Record<string, string> = {
-  green: 'bg-green-600',
+  green: 'bg-brand-blue',
   blue: 'bg-brand-blue',
   red: 'bg-red-600',
   purple: 'bg-purple-600',
@@ -120,7 +120,7 @@ export default function SessionPageClient({ itemId }: { itemId: string }) {
           </div>
         ) : (
           blocks.map(block => (
-            <BlockRenderer key={block.id} block={block} progress={progress} />
+            <BlockRenderer key={block.id} block={block} progress={progress} subjectSlug={curriculum.subject_slug} />
           ))
         )}
       </div>
@@ -131,9 +131,11 @@ export default function SessionPageClient({ itemId }: { itemId: string }) {
 function BlockRenderer({
   block,
   progress,
+  subjectSlug,
 }: {
   block: SessionBlock;
   progress: Record<string, { watch_percent: number; completed: boolean }>;
+  subjectSlug: string;
 }) {
   const { block_type, content } = block;
 
@@ -143,9 +145,9 @@ function BlockRenderer({
     case 'pdf':
       return <PdfBlock content={content} />;
     case 'hintbook':
-      return <HintbookBlock content={content} />;
+      return null;
     case 'video_group':
-      return <VideoGroupBlock content={content} progress={progress} />;
+      return <VideoGroupBlock content={content} progress={progress} subjectSlug={subjectSlug} />;
     case 'text':
       return <TextBlock content={content} />;
     default:
@@ -219,9 +221,11 @@ function HintbookBlock({ content }: { content: Record<string, unknown> }) {
 function VideoGroupBlock({
   content,
   progress,
+  subjectSlug,
 }: {
   content: Record<string, unknown>;
   progress: Record<string, { watch_percent: number; completed: boolean }>;
+  subjectSlug: string;
 }) {
   const videos = (content.videos as Array<{
     bunny_video_id: string;
@@ -290,7 +294,9 @@ function VideoGroupBlock({
                     <Play className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-400' : 'text-white/20'}`} />
                   )}
                   <span className={`text-sm flex-1 truncate ${isDone ? 'text-white/50' : 'text-white/80'} ${isActive ? 'font-bold text-blue-400' : ''}`}>
-                    {video.title || `${video.problem_number}번 해설`}
+                    {video.title
+                      ? `${idx + 1}번 해설강의 [${video.title}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
+                      : `${idx + 1}번 해설강의`}
                   </span>
                   {p && !isDone && (
                     <span className="text-[10px] text-white/20 shrink-0">{p.watch_percent}%</span>
