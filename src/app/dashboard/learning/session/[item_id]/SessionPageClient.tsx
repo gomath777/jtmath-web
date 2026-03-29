@@ -295,7 +295,7 @@ function VideoGroupBlock({
                   )}
                   <span className={`text-sm flex-1 truncate ${isDone ? 'text-white/50' : 'text-white/80'} ${isActive ? 'font-bold text-blue-400' : ''}`}>
                     {video.title
-                      ? `${idx + 1}번 해설강의 [${video.title}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
+                      ? `${idx + 1}번 해설강의 [${video.title.replace(/\s*해설강의\([^)]*\)$/, '').trim()}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
                       : `${idx + 1}번 해설강의`}
                   </span>
                   {p && !isDone && (
