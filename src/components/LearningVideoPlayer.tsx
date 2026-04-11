@@ -10,6 +10,7 @@ interface LearningVideoPlayerProps {
   initialCompleted?: boolean;
   onComplete?: () => void;
   onProgressUpdate?: (percent: number, completed: boolean) => void;
+  progressEndpoint?: string;
 }
 
 const BUNNY_LIBRARY_ID = '622509';
@@ -22,6 +23,7 @@ export default function LearningVideoPlayer({
   initialCompleted = false,
   onComplete,
   onProgressUpdate,
+  progressEndpoint = '/api/student/watch-progress',
 }: LearningVideoPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [completed, setCompleted] = useState(initialCompleted || initialProgress >= 80);
@@ -34,7 +36,7 @@ export default function LearningVideoPlayer({
     lastSavedRef.current = percent;
 
     try {
-      const res = await fetch('/api/student/watch-progress', {
+      const res = await fetch(progressEndpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bunny_video_id: bunnyVideoId, watch_percent: percent }),
@@ -49,7 +51,7 @@ export default function LearningVideoPlayer({
     } catch {
       // 네트워크 에러 무시
     }
-  }, [bunnyVideoId, completed, onComplete, onProgressUpdate]);
+  }, [bunnyVideoId, completed, onComplete, onProgressUpdate, progressEndpoint]);
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
