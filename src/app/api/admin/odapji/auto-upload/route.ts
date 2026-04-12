@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     .replace(/\.pdf$/i, '');          // remove .pdf
 
   // Split by underscore — student name is typically the LAST Korean-only part
-  const parts = cleaned.split('_').map(s => s.trim()).filter(Boolean);
+  const parts = cleaned.split('_').map((s: string) => s.trim()).filter(Boolean);
 
   // Search from END (name is usually last or second-to-last before 문제지)
   for (let i = parts.length - 1; i >= 0; i--) {
