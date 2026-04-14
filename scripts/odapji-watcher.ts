@@ -74,13 +74,8 @@ async function processFile(filePath: string) {
     if (response.ok && result.success) {
       console.log(`   ✅ ${result.studentName} → 업로드 완료`);
 
-      const destPath = path.join(DONE_DIR, filename);
-      // Avoid overwrite by appending timestamp if file exists
-      const finalDest = fs.existsSync(destPath)
-        ? path.join(DONE_DIR, `${Date.now()}_${filename}`)
-        : destPath;
-      fs.renameSync(filePath, finalDest);
-      console.log(`   📁 → odapji-done/`);
+      fs.unlinkSync(filePath);
+      console.log(`   🗑️ 원본 삭제 완료`);
     } else {
       console.log(`   ❌ 실패: ${result.error || '알 수 없는 오류'}`);
       if (result.candidates) {

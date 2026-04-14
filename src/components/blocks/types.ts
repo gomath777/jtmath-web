@@ -1,6 +1,6 @@
 export interface SessionBlock {
   id: string;
-  block_type: 'section_header' | 'pdf' | 'video_group' | 'text' | 'hintbook';
+  block_type: 'section_header' | 'pdf' | 'video_group' | 'text' | 'hintbook' | 'content_group';
   order_index: number;
   content: Record<string, unknown>;
 }

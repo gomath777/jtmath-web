@@ -3,6 +3,7 @@
 import SectionHeaderBlock from './SectionHeaderBlock';
 import PdfBlock, { HintbookBlock } from './PdfBlock';
 import VideoGroupBlock from './VideoGroupBlock';
+import ContentGroupBlock from './ContentGroupBlock';
 import TextBlock from './TextBlock';
 import type { SessionBlock, ProgressMap } from './types';
 
@@ -31,6 +32,15 @@ export default function BlockRenderer({
     case 'video_group':
       return (
         <VideoGroupBlock
+          content={content}
+          progress={progress}
+          subjectSlug={subjectSlug}
+          progressEndpoint={progressEndpoint}
+        />
+      );
+    case 'content_group':
+      return (
+        <ContentGroupBlock
           content={content}
           progress={progress}
           subjectSlug={subjectSlug}

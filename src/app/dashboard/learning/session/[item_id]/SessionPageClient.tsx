@@ -101,7 +101,7 @@ export default function SessionPageClient({
         )}
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {blocks.length === 0 ? (
           <div className="brand-card p-12 text-center">
             <BookOpen className="w-10 h-10 mx-auto mb-3 text-white/20" />
