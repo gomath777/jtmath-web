@@ -91,3 +91,59 @@ export function generateStoragePath(
   const safeName = filename.replace(/[^\w가-힣.\-_]/g, '_');
   return `${category}/${subPath}/${Date.now()}_${safeName}`;
 }
+
+/**
+ * Check if a file exists in Bunny Storage
+ */
+export async function existsInStorage(storagePath: string): Promise<boolean> {
+  const baseUrl = getStorageBaseUrl();
+  const url = `${baseUrl}/${storagePath}`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'HEAD',
+      headers: { AccessKey: STORAGE_API_KEY },
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Upload a PDF from local file path (Node.js only)
+ * Skips upload if file already exists at storagePath (unless force=true)
+ *
+ * @returns { cdnUrl, skipped } — skipped=true means file already existed
+ */
+export async function uploadPdfFromPath(
+  localPath: string,
+  storagePath: string,
+  options: { force?: boolean } = {},
+): Promise<{ cdnUrl: string; storagePath: string; skipped: boolean }> {
+  // Dynamic import to avoid bundling fs in client code
+  const fs = await import('fs');
+
+  if (!fs.existsSync(localPath)) {
+    throw new Error(`Local file not found: ${localPath}`);
+  }
+
+  // Check if already uploaded (skip unless force)
+  if (!options.force && await existsInStorage(storagePath)) {
+    return {
+      cdnUrl: getPublicUrl(storagePath),
+      storagePath,
+      skipped: true,
+    };
+  }
+
+  const buffer = fs.readFileSync(localPath);
+  // Convert to ArrayBuffer for uploadPdf compatibility
+  const arrayBuffer = buffer.buffer.slice(
+    buffer.byteOffset,
+    buffer.byteOffset + buffer.byteLength,
+  ) as ArrayBuffer;
+
+  const { cdnUrl } = await uploadPdf(arrayBuffer, storagePath);
+  return { cdnUrl, storagePath, skipped: false };
+}

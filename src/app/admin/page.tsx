@@ -121,6 +121,13 @@ export default async function AdminDashboardPage({
               <Calendar className="w-5 h-5" />
               커리큘럼
             </Link>
+            <Link
+              href="/admin/portal"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <Users className="w-5 h-5" />
+              학생 포탈
+            </Link>
           </nav>
         </div>
 
