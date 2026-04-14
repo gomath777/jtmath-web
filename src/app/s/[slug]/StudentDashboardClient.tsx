@@ -262,43 +262,59 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
               <p className="text-white/40 text-sm">오답지가 없습니다</p>
             </div>
           ) : (
-            odapjiFiles.map(file => (
-              <a
-                key={file.id}
-                href={file.cdn_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="brand-card p-4 flex items-center gap-3 hover:bg-white/[0.06] transition-colors block"
-                onClick={() => {
-                  if (!file.is_read) {
-                    fetch('/api/public/student/odapji', {
-                      method: 'PATCH',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ id: file.id }),
-                    });
-                  }
-                }}
-              >
-                <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center shrink-0">
-                  <FileText className="w-5 h-5 text-red-400" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-bold text-white truncate">{file.original_filename}</p>
-                    {!file.is_read && (
-                      <span className="text-[10px] font-bold bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">
-                        NEW
-                      </span>
-                    )}
+            (() => {
+              // Group by date
+              const groups: Record<string, typeof odapjiFiles> = {};
+              odapjiFiles.forEach(file => {
+                const dateKey = new Date(file.uploaded_at).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+                if (!groups[dateKey]) groups[dateKey] = [];
+                groups[dateKey].push(file);
+              });
+
+              return Object.entries(groups).map(([date, files]) => (
+                <div key={date}>
+                  <p className="text-[11px] font-bold text-white/25 px-1 pt-3 pb-2">{date}</p>
+                  <div className="space-y-2">
+                    {files.map(file => (
+                      <a
+                        key={file.id}
+                        href={file.cdn_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="brand-card p-4 flex items-center gap-3 hover:bg-white/[0.06] transition-colors block"
+                        onClick={() => {
+                          if (!file.is_read) {
+                            fetch('/api/public/student/odapji', {
+                              method: 'PATCH',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ id: file.id }),
+                            });
+                          }
+                        }}
+                      >
+                        <div className="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center shrink-0">
+                          <FileText className="w-5 h-5 text-red-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-bold text-white truncate">{file.original_filename}</p>
+                            {!file.is_read && (
+                              <span className="text-[10px] font-bold bg-red-500/20 text-red-400 px-1.5 py-0.5 rounded-full shrink-0">
+                                NEW
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-xs text-white/30">
+                            {file.file_size_bytes && `${(file.file_size_bytes / 1024 / 1024).toFixed(1)}MB`}
+                          </p>
+                        </div>
+                        <Download className="w-4 h-4 text-white/30 shrink-0" />
+                      </a>
+                    ))}
                   </div>
-                  <p className="text-xs text-white/30">
-                    {new Date(file.uploaded_at).toLocaleDateString('ko-KR')}
-                    {file.file_size_bytes && ` · ${(file.file_size_bytes / 1024 / 1024).toFixed(1)}MB`}
-                  </p>
                 </div>
-                <Download className="w-4 h-4 text-white/30 shrink-0" />
-              </a>
-            ))
+              ));
+            })()
           )}
         </div>
       )}
