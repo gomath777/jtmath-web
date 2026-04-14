@@ -54,7 +54,7 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch('/api/public/student/dashboard');
+      const res = await fetch(`/api/public/student/dashboard?slug=${slug}`);
       if (res.status === 401) {
         setNeedsVerify(true);
         setLoading(false);

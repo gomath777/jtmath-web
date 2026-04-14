@@ -8,6 +8,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Verify slug matches the URL (prevent cross-student cookie leakage)
+  const urlSlug = req.nextUrl.searchParams.get('slug');
+  if (urlSlug && urlSlug !== student.slug) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
