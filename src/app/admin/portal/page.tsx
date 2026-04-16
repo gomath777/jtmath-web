@@ -17,10 +17,10 @@ export default async function AdminPortalPage() {
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // Students with tokens
+  // Students with tokens (+ exam dates for the Exam Dates section)
   const { data: tokens } = await sc
     .from('student_tokens')
-    .select('slug, is_active, last_accessed_at, profile_id, profiles!inner(id, name, school, phone_student)')
+    .select('slug, is_active, last_accessed_at, profile_id, profiles!inner(id, name, school, phone_student, exam_date_midterm, exam_date_final)')
     .order('created_at', { ascending: false });
 
   // Get all curriculum links
@@ -42,9 +42,22 @@ export default async function AdminPortalPage() {
     .gte('publish_date', sevenDaysAgo.toISOString().split('T')[0])
     .order('publish_date', { ascending: false });
 
+  // Active curricula list (for materials audience dropdown)
+  const { data: activeCurricula } = await sc
+    .from('curricula')
+    .select('id, title, subject_slug')
+    .order('start_date', { ascending: false });
+
   // Transform data for client
   const students = (tokens || []).map(t => {
-    const profile = t.profiles as unknown as { id: string; name: string; school: string; phone_student: string };
+    const profile = t.profiles as unknown as {
+      id: string;
+      name: string;
+      school: string;
+      phone_student: string;
+      exam_date_midterm: string | null;
+      exam_date_final: string | null;
+    };
     const studentLinks = (links || []).filter(l => l.profile_id === t.profile_id);
     const odapji = (odapjiCounts || []).filter(o => o.profile_id === t.profile_id);
     const unread = odapji.filter(o => !o.is_read).length;
@@ -63,6 +76,8 @@ export default async function AdminPortalPage() {
       }).filter(Boolean),
       odapjiTotal: odapji.length,
       odapjiUnread: unread,
+      examDateMidterm: profile?.exam_date_midterm || null,
+      examDateFinal: profile?.exam_date_final || null,
     };
   });
 
@@ -78,5 +93,17 @@ export default async function AdminPortalPage() {
     };
   });
 
-  return <PortalClient students={students} releases={releases} />;
+  const curriculaList = (activeCurricula || []).map(c => ({
+    id: c.id,
+    title: c.title,
+    subject_slug: c.subject_slug,
+  }));
+
+  return (
+    <PortalClient
+      students={students}
+      releases={releases}
+      curricula={curriculaList}
+    />
+  );
 }

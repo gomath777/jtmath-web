@@ -2,49 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-/* jtmath Brand Design System - Dark Mode Base */
+/* Pretendard — modern Korean sans, served via CDN */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css');
+
+/* --------------------------------------------------------
+   고T수학 Design System — inspired by Claude (Anthropic)
+   Warm parchment canvas · Terracotta brand · Editorial serif
+   -------------------------------------------------------- */
+
 @layer base {
   :root {
-    /* Dark mode as default (brand identity) */
-    --background: 0 0% 7.1%;          /* #121212 Deep Charcoal */
-    --foreground: 0 0% 93%;           /* #EDEDED Light text */
+    /* ── Surfaces ───────────────────────────── */
+    --parchment: #f5f4ed;
+    --ivory: #faf9f5;
+    --sand: #e8e6dc;
 
-    --card: 0 0% 10%;                 /* #1A1A1A Card surfaces */
-    --card-foreground: 0 0% 93%;
+    /* ── Inks & Text ────────────────────────── */
+    --ink: #141413;          /* primary text, warm near-black */
+    --ink-soft: #30302e;     /* dark surface */
+    --charcoal: #4d4c48;     /* dark-on-light body text */
+    --olive: #5e5d59;        /* secondary body */
+    --stone: #87867f;        /* tertiary metadata */
+    --silver: #b0aea5;       /* text-on-dark */
 
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 93%;
+    /* ── Brand ──────────────────────────────── */
+    --terracotta: #c96442;
+    --coral: #d97757;
+    --crimson: #b53333;
+    --focus-blue: #3898ec;
 
-    --primary: 216 100% 58%;          /* #2979FF Electric Blue */
-    --primary-foreground: 0 0% 100%;
+    /* ── Borders & Rings ────────────────────── */
+    --border-cream: #f0eee6;
+    --border-warm: #e8e6dc;
+    --ring-warm: #d1cfc5;
+    --ring-deep: #c2c0b6;
 
-    --secondary: 0 0% 14%;            /* #242424 Elevated surface */
-    --secondary-foreground: 0 0% 80%;
-
-    --muted: 0 0% 16%;                /* #282828 */
-    --muted-foreground: 0 0% 55%;     /* #8C8C8C Subtle text */
-
-    --accent: 145 100% 45%;           /* #00E676 Neon Mint */
-    --accent-foreground: 0 0% 7%;
-
-    --destructive: 14 100% 50%;       /* #FF3D00 Alert Orange */
-    --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 18%;               /* #2E2E2E */
-    --input: 0 0% 18%;
-    --ring: 216 100% 58%;              /* #2979FF */
-
+    /* ── shadcn-compatible variables mapped to Claude palette ── */
+    --background: 48 27% 95%;         /* Parchment  */
+    --foreground: 60 4% 8%;           /* Ink        */
+    --card: 45 27% 97%;               /* Ivory      */
+    --card-foreground: 60 4% 8%;
+    --popover: 45 27% 97%;
+    --popover-foreground: 60 4% 8%;
+    --primary: 16 56% 53%;            /* Terracotta */
+    --primary-foreground: 45 27% 97%;
+    --secondary: 48 20% 89%;          /* Sand       */
+    --secondary-foreground: 60 4% 27%;
+    --muted: 48 20% 89%;
+    --muted-foreground: 60 3% 37%;    /* Olive      */
+    --accent: 19 61% 59%;             /* Coral      */
+    --accent-foreground: 45 27% 97%;
+    --destructive: 0 55% 46%;         /* Crimson    */
+    --destructive-foreground: 45 27% 97%;
+    --border: 48 28% 92%;             /* Border Cream */
+    --input: 48 28% 92%;
+    --ring: 16 56% 53%;
     --radius: 0.75rem;
-
-    /* Brand-specific tokens */
-    --brand-blue: #2979FF;
-    --brand-mint: #00E676;
-    --brand-orange: #FF3D00;
-    --brand-surface: #1A1A1A;
-    --brand-elevated: #242424;
-    --brand-dark: #121212;
-    --brand-glow-blue: 0 0 20px rgba(41, 121, 255, 0.3);
-    --brand-glow-mint: 0 0 20px rgba(0, 230, 118, 0.3);
   }
 }
 
@@ -52,84 +65,164 @@
   * {
     @apply border-border;
   }
-  body {
-    @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+
+  html {
+    font-feature-settings: 'ss01', 'tnum';
   }
-  /* Custom scrollbar for dark mode */
+
+  body {
+    @apply bg-parchment text-ink antialiased;
+    font-family:
+      'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, 'Segoe UI', Roboto, sans-serif;
+    letter-spacing: -0.005em;
+    line-height: 1.6;
+  }
+
+  /* Serif headlines — Gowun Batang at weight 400 for Korean readability.
+     Claude spec caps at 500 for Latin; Korean serifs appear visually bolder
+     at same weight, so 400 is the base with optional 700 for emphasis. */
+  h1, h2, h3, h4, h5, h6,
+  .font-serif {
+    font-family: var(--font-serif), 'Gowun Batang', 'Noto Serif KR', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+
+  /* Strong serif for hero display */
+  .display-strong {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* Italic tagline — editorial signature moment */
+  .tagline-italic {
+    font-family: var(--font-serif), 'Gowun Batang', Georgia, serif;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: 0.005em;
+  }
+
+  /* Warm-tone scrollbar */
   ::-webkit-scrollbar {
-    width: 6px;
+    width: 8px;
+    height: 8px;
   }
   ::-webkit-scrollbar-track {
-    background: var(--brand-dark);
+    background: var(--parchment);
   }
   ::-webkit-scrollbar-thumb {
-    background: #333;
-    border-radius: 3px;
+    background: var(--ring-warm);
+    border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
+    background: var(--ring-deep);
+  }
+
+  /* Native form focus ring — only cool color in the system */
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid var(--focus-blue);
+    outline-offset: 1px;
   }
 }
 
-/* Admin Light Mode Override */
-.admin-root,
-.admin-root * {
-  color: inherit;
-}
+/* --------------------------------------------------------
+   Admin override — admin surfaces stay light but inherit ink
+   -------------------------------------------------------- */
 .admin-root {
-  color: #0f172a; /* slate-900 */
+  color: var(--ink);
 }
 .admin-root input,
 .admin-root select,
 .admin-root textarea {
-  color: #0f172a !important;
+  color: var(--ink) !important;
 }
 .admin-root input::placeholder,
 .admin-root textarea::placeholder {
-  color: #94a3b8 !important; /* slate-400 */
-}
-.admin-root option {
-  color: #0f172a;
-  background: white;
+  color: var(--stone) !important;
 }
 
-/* Admin header keeps white text */
+/* Admin header keeps contrast */
 .admin-root header {
-  color: white;
+  color: var(--ivory);
 }
 .admin-root header * {
   color: inherit;
 }
-.admin-root header a.text-slate-400 {
-  color: #94a3b8;
-}
 
-/* Brand Utility Classes */
+/* --------------------------------------------------------
+   Utility classes — Claude-inspired components
+   -------------------------------------------------------- */
 @layer utilities {
-  .brand-glow-blue {
-    box-shadow: var(--brand-glow-blue);
-  }
-  .brand-glow-mint {
-    box-shadow: var(--brand-glow-mint);
-  }
-  .brand-gradient-text {
-    background: linear-gradient(135deg, var(--brand-blue), var(--brand-mint));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  .brand-gradient-bg {
-    background: linear-gradient(135deg, var(--brand-blue), var(--brand-mint));
-  }
+  /* Standard card: Ivory surface with whisper-thin warm border */
   .brand-card {
-    background: var(--brand-surface);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--ivory);
+    border: 1px solid var(--border-cream);
     border-radius: var(--radius);
   }
+
+  /* Elevated card: pure white + warm drop shadow */
   .brand-card-elevated {
-    background: var(--brand-elevated);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius);
+    background: #ffffff;
+    border: 1px solid var(--border-cream);
+    border-radius: 1rem;
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
+  }
+
+  /* Ring shadows — Claude signature (border-like halo) */
+  .ring-claude {
+    box-shadow: 0 0 0 1px var(--ring-warm);
+  }
+  .ring-claude-deep {
+    box-shadow: 0 0 0 1px var(--ring-deep);
+  }
+  .whisper-shadow {
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 4px 24px;
+  }
+
+  /* CTA button — the only chromatic color */
+  .btn-terracotta {
+    background: var(--terracotta);
+    color: var(--ivory);
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 1px var(--terracotta);
+    transition: background-color 150ms ease;
+  }
+  .btn-terracotta:hover {
+    background: var(--coral);
+  }
+
+  /* Secondary button on light surfaces */
+  .btn-sand {
+    background: var(--sand);
+    color: var(--charcoal);
+    border-radius: 0.5rem;
+    box-shadow: 0 0 0 1px var(--ring-warm);
+    transition: box-shadow 150ms ease;
+  }
+  .btn-sand:hover {
+    box-shadow: 0 0 0 1px var(--ring-deep);
+  }
+
+  /* Editorial-weight serif display helpers */
+  .display-serif {
+    font-family: var(--font-serif), 'Gowun Batang', Georgia, serif;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  /* Dark section — alternating chapter ambient */
+  .dark-section {
+    background: var(--ink);
+    color: var(--silver);
+  }
+  .dark-section h1,
+  .dark-section h2,
+  .dark-section h3 {
+    color: var(--ivory);
   }
 }

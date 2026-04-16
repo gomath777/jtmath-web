@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, FileText, ChevronDown, CheckCircle, Play, Film } from 'lucide-react';
+import { Download, FileText, ChevronDown, CheckCircle2, Play, Film, Lightbulb } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
 import { SUBJECT_LABELS } from './types';
 import type { ProgressMap } from './types';
@@ -54,7 +54,6 @@ export default function ContentGroupBlock({
 }) {
   const data = content as unknown as ContentGroupContent;
   const label = data.label || '';
-  const icon = data.icon || '📃';
   const description = data.description;
   const pdf = data.pdf;
   const pdfs = data.pdfs || (pdf ? [pdf] : []);
@@ -69,28 +68,32 @@ export default function ContentGroupBlock({
   const subLabel = getSubLabel(label);
 
   return (
-    <div className="rounded-2xl overflow-hidden bg-white/[0.04]">
-      {/* Header */}
-      <div className="px-5 pt-5 pb-3">
-        <div className="flex items-center gap-2.5">
-          {data.step && (
-            <span className="w-7 h-7 rounded-full bg-white/[0.08] flex items-center justify-center text-xs font-black text-white/50 shrink-0">
-              {data.step}
+    <div className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
+      {/* ─── Header ─── */}
+      <div className="px-6 pt-6 pb-4">
+        <div className="flex items-baseline gap-3">
+          {data.step != null && (
+            <span className="font-serif font-medium text-terracotta text-[26px] leading-none tracking-tight shrink-0">
+              {typeof data.step === 'number' ? String(data.step).padStart(2, '0') : data.step}
             </span>
           )}
-          <div>
-            <h3 className="text-base font-black text-white">{label}</h3>
-            {!description && (
-              <p className="text-[11px] text-white/30 mt-0.5">{subLabel}</p>
-            )}
+          <div className="min-w-0">
+            <h3 className="font-serif font-medium text-[19px] text-ink tracking-tight leading-tight">
+              {label}
+            </h3>
+            <p className="text-[11px] tracking-[0.1em] uppercase text-stone mt-1.5">
+              {subLabel}
+            </p>
           </div>
         </div>
         {description && (
-          <p className="text-xs text-white/40 mt-2 leading-relaxed whitespace-pre-line">{description}</p>
+          <p className="text-[13px] text-olive mt-3 leading-relaxed whitespace-pre-line">
+            {description}
+          </p>
         )}
       </div>
 
-      {/* PDF Downloads */}
+      {/* ─── PDF Downloads ─── */}
       <div className="px-4 pb-3 space-y-2">
         {pdfs.map((p, idx) => {
           const url = p.url || p.cdn_url || '';
@@ -101,15 +104,19 @@ export default function ContentGroupBlock({
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.10] transition-all group"
+              className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all"
             >
-              <FileText className="w-5 h-5 text-white/40 shrink-0" />
+              <FileText className="w-5 h-5 text-charcoal shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate">{name}</p>
-                {p.file_size && <p className="text-[11px] text-white/30 mt-0.5">{p.file_size}</p>}
+                <p className="text-[14px] font-medium text-ink truncate tracking-tight">
+                  {name}
+                </p>
+                {p.file_size && (
+                  <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>
+                )}
               </div>
-              <div className="shrink-0 flex items-center gap-1.5 text-xs font-bold text-white/40 bg-white/[0.08] px-3 py-2 rounded-lg group-hover:bg-brand-blue/20 group-hover:text-brand-blue transition-all">
-                <Download className="w-3.5 h-3.5" />
+              <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
+                <Download className="w-3 h-3" />
                 PDF
               </div>
             </a>
@@ -117,47 +124,53 @@ export default function ContentGroupBlock({
         })}
       </div>
 
-      {/* Hintbook */}
+      {/* ─── Hintbook ─── */}
       {hintbook && (
         <div className="px-4 pb-3">
           <a
             href={hintbook.url || hintbook.cdn_url || ''}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] transition-all"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
           >
-            <span className="text-base leading-none">🧠</span>
+            <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-amber-400">힌트북</p>
-              <p className="text-[11px] text-white/30">각 문항 힌트만 보고 재도전</p>
+              <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">
+                힌트북
+              </p>
+              <p className="text-[12px] text-olive">
+                각 문항 힌트만 보고 재도전
+              </p>
             </div>
-            <Download className="w-3.5 h-3.5 text-white/20 shrink-0" />
+            <Download className="w-3.5 h-3.5 text-terracotta/60 shrink-0" />
           </a>
         </div>
       )}
 
-      {/* Videos */}
+      {/* ─── Videos ─── */}
       {videos.length > 0 && (
-        <div className="mx-4 mb-4 rounded-xl bg-white/[0.03] overflow-hidden">
+        <div className="mx-4 mb-5 rounded-xl bg-parchment overflow-hidden border border-border-cream">
           <button
             onClick={() => { setVideosOpen(!videosOpen); if (videosOpen) setActiveVideo(null); }}
-            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/[0.04] transition-colors"
+            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-sand/60 transition-colors"
           >
-            <Film className={`w-4 h-4 shrink-0 ${allDone ? 'text-green-400' : 'text-white/30'}`} />
-            <p className="text-xs text-white/40 flex-1 text-left">
-              <span className="font-bold">해설강의</span>{' '}
-              <span className="text-white/25">{videos.length}개</span>
+            <Film className={`w-4 h-4 shrink-0 ${allDone ? 'text-terracotta' : 'text-stone'}`} />
+            <p className="text-[13px] text-olive flex-1 text-left">
+              <span className="font-medium text-charcoal">해설강의</span>{' '}
+              <span className="text-stone">{videos.length}개</span>
               {completedCount > 0 && (
-                <span className={`ml-2 ${allDone ? 'text-green-400' : 'text-brand-blue'}`}>
-                  {completedCount}/{videos.length}
+                <span className={`ml-2 ${allDone ? 'text-terracotta' : 'text-charcoal'}`}>
+                  · {completedCount}/{videos.length}
                 </span>
               )}
             </p>
-            <ChevronDown className={`w-3.5 h-3.5 text-white/20 shrink-0 transition-transform duration-200 ${videosOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown
+              className={`w-3.5 h-3.5 text-stone shrink-0 transition-transform duration-200 ${videosOpen ? 'rotate-180' : ''}`}
+            />
           </button>
 
           {videosOpen && (
-            <div className="border-t border-white/[0.06]">
+            <div className="border-t border-border-cream">
               {videos.map((video, idx) => {
                 const p = progress[video.bunny_video_id];
                 const isActive = activeVideo === idx;
@@ -168,15 +181,19 @@ export default function ContentGroupBlock({
                     <button
                       onClick={() => setActiveVideo(isActive ? null : idx)}
                       className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                        isActive ? 'bg-brand-blue/10' : 'hover:bg-white/[0.04]'
-                      } ${idx > 0 ? 'border-t border-white/[0.04]' : ''}`}
+                        isActive ? 'bg-sand' : 'hover:bg-sand/60'
+                      } ${idx > 0 ? 'border-t border-border-cream' : ''}`}
                     >
                       {isDone ? (
-                        <CheckCircle className="w-3.5 h-3.5 text-green-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-terracotta shrink-0" />
                       ) : (
-                        <Play className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-brand-blue' : 'text-white/20'}`} />
+                        <Play className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-terracotta' : 'text-stone'}`} />
                       )}
-                      <span className={`text-xs flex-1 truncate ${isDone ? 'text-white/35' : 'text-white/55'} ${isActive ? 'font-bold text-brand-blue' : ''}`}>
+                      <span
+                        className={`text-[13px] flex-1 truncate ${
+                          isDone ? 'text-stone' : 'text-charcoal'
+                        } ${isActive ? 'font-medium text-ink' : ''}`}
+                      >
                         {video.raw_text
                           ? `${idx + 1}번 ${video.raw_text}`
                           : video.title
@@ -184,12 +201,12 @@ export default function ContentGroupBlock({
                             : `${idx + 1}번 해설강의`}
                       </span>
                       {p && !isDone && (
-                        <span className="text-[10px] text-white/20 shrink-0">{p.watch_percent}%</span>
+                        <span className="text-[11px] text-stone shrink-0">{p.watch_percent}%</span>
                       )}
                     </button>
 
                     {isActive && (
-                      <div className="px-4 pb-3">
+                      <div className="px-4 pb-3 pt-1 bg-sand">
                         <LearningVideoPlayer
                           bunnyVideoId={video.bunny_video_id}
                           initialProgress={p?.watch_percent || 0}

@@ -24,9 +24,13 @@ export default async function StudentPortalPage({
   if (!token) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="brand-card p-12 text-center max-w-sm">
-          <p className="text-white/60 text-sm">유효하지 않은 학습 페이지입니다</p>
-          <p className="text-white/30 text-xs mt-2">링크를 다시 확인해주세요</p>
+        <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-12 text-center max-w-sm">
+          <p className="font-serif text-[18px] text-ink tracking-tight">
+            유효하지 않은 학습 페이지입니다
+          </p>
+          <p className="text-[13px] text-olive mt-2">
+            링크를 다시 확인해주세요
+          </p>
         </div>
       </div>
     );

@@ -22,13 +22,20 @@ export async function GET(req: NextRequest) {
   // Get student profile
   const { data: profile } = await sc
     .from('profiles')
-    .select('id, name, school')
+    .select('id, name, school, exam_date_midterm, exam_date_final')
     .eq('id', student.profileId)
     .single();
 
   if (!profile) {
     return NextResponse.json({ error: '프로필을 찾을 수 없습니다' }, { status: 404 });
   }
+
+  const profilePayload = {
+    name: profile.name,
+    school: profile.school,
+    exam_date_midterm: profile.exam_date_midterm as string | null,
+    exam_date_final: profile.exam_date_final as string | null,
+  };
 
   // Get assigned curricula
   const { data: links } = await sc
@@ -41,7 +48,7 @@ export async function GET(req: NextRequest) {
   if (curriculumIds.length === 0) {
     const newToken = await renewToken(student);
     const res = NextResponse.json({
-      profile: { name: profile.name, school: profile.school },
+      profile: profilePayload,
       curricula: [],
       odapjiCount: 0,
     });
@@ -128,7 +135,7 @@ export async function GET(req: NextRequest) {
   // Renew cookie
   const newToken = await renewToken(student);
   const res = NextResponse.json({
-    profile: { name: profile.name, school: profile.school },
+    profile: profilePayload,
     curricula: curriculaWithSessions,
     odapjiCount: odapjiCount || 0,
   });

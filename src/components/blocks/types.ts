@@ -22,11 +22,13 @@ export const SUBJECT_LABELS: Record<string, string> = {
   gi: '기하',
 };
 
+// Section header colors — remapped to warm palette tones.
+// All alternatives collapse to ink-soft + terracotta accents for consistency.
 export const SECTION_COLORS: Record<string, string> = {
-  green: 'bg-emerald-700',
-  blue: 'bg-brand-blue',
-  red: 'bg-red-600',
-  purple: 'bg-purple-600',
-  orange: 'bg-brand-orange',
-  dark: 'bg-slate-700',
+  green: 'bg-ink',
+  blue: 'bg-ink',
+  red: 'bg-crimson',
+  purple: 'bg-ink-soft',
+  orange: 'bg-terracotta',
+  dark: 'bg-ink-soft',
 };

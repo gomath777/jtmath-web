@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Copy, ExternalLink, Check, CheckCircle, Clock, Users, Calendar } from 'lucide-react';
+import MaterialsSection from './MaterialsSection';
+import ExamDatesSection from './ExamDatesSection';
 
 interface Student {
   profileId: string;
@@ -15,6 +17,8 @@ interface Student {
   curricula: string[];
   odapjiTotal: number;
   odapjiUnread: number;
+  examDateMidterm: string | null;
+  examDateFinal: string | null;
 }
 
 interface Release {
@@ -26,9 +30,23 @@ interface Release {
   isReleased: boolean;
 }
 
+interface Curriculum {
+  id: string;
+  title: string;
+  subject_slug: string;
+}
+
 const SITE_URL = 'https://jtmath.kr';
 
-export default function PortalClient({ students, releases }: { students: Student[]; releases: Release[] }) {
+export default function PortalClient({
+  students,
+  releases,
+  curricula,
+}: {
+  students: Student[];
+  releases: Release[];
+  curricula: Curriculum[];
+}) {
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [search, setSearch] = useState('');
 
@@ -194,6 +212,23 @@ export default function PortalClient({ students, releases }: { students: Student
             )}
           </div>
         </div>
+
+        {/* Exam dates */}
+        <ExamDatesSection
+          students={students.map(s => ({
+            profileId: s.profileId,
+            name: s.name,
+            school: s.school,
+            examDateMidterm: s.examDateMidterm,
+            examDateFinal: s.examDateFinal,
+          }))}
+        />
+
+        {/* Shared materials */}
+        <MaterialsSection
+          students={students.map(s => ({ profileId: s.profileId, name: s.name }))}
+          curricula={curricula}
+        />
 
         {/* Recent releases */}
         <div className="bg-white rounded-xl border border-slate-200">

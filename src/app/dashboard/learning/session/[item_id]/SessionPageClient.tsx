@@ -55,7 +55,7 @@ export default function SessionPageClient({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-white/30" />
+        <Loader2 className="w-6 h-6 animate-spin text-stone" />
       </div>
     );
   }
@@ -63,12 +63,17 @@ export default function SessionPageClient({
   if (error || !data) {
     return (
       <div className="max-w-3xl mx-auto">
-        <Link href={backHref} className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-6">
+        <Link
+          href={backHref}
+          className="flex items-center gap-2 text-olive hover:text-ink text-[13px] mb-6 transition-colors"
+        >
           <ChevronLeft className="w-4 h-4" /> {backLabel}
         </Link>
-        <div className="brand-card p-12 text-center">
-          <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-brand-orange" />
-          <p className="text-white/60">{error || '페이지를 불러올 수 없습니다'}</p>
+        <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
+          <AlertTriangle className="w-10 h-10 mx-auto mb-3 text-crimson" />
+          <p className="font-serif text-[17px] text-ink tracking-tight">
+            {error || '페이지를 불러올 수 없습니다'}
+          </p>
         </div>
       </div>
     );
@@ -78,34 +83,41 @@ export default function SessionPageClient({
 
   return (
     <div className="max-w-3xl mx-auto">
-      <Link href={backHref} className="flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
+      <Link
+        href={backHref}
+        className="inline-flex items-center gap-1.5 text-[13px] text-olive hover:text-ink mb-6 transition-colors"
+      >
         <ChevronLeft className="w-4 h-4" /> {backLabel}
       </Link>
 
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="text-xs font-bold bg-brand-blue/20 text-brand-blue px-2 py-0.5 rounded-full">
-            {item.week_number}주차 {item.session_number}차시
+      {/* ─── Editorial header ─── */}
+      <header className="mb-10 pb-8 border-b border-border-warm">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-[10px] tracking-[0.12em] uppercase font-medium text-terracotta bg-terracotta/10 px-2 py-1 rounded-full">
+            {item.week_number}주차 · {item.session_number}차시
           </span>
           {curriculum.subject_slug && (
-            <span className="text-xs font-bold bg-white/10 text-white/50 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] tracking-[0.12em] uppercase font-medium text-olive bg-sand px-2 py-1 rounded-full">
               {SUBJECT_LABELS[curriculum.subject_slug] || curriculum.subject_slug}
             </span>
           )}
         </div>
-        <h1 className="text-2xl font-black text-white">
-          {item.label || `${curriculum.title}`}
+        <h1 className="font-serif font-medium text-[38px] text-ink tracking-tightest leading-[1.08]">
+          {item.label || curriculum.title}
         </h1>
         {item.label && (
-          <p className="text-sm text-white/40 mt-1">{curriculum.title}</p>
+          <p className="text-[14px] text-olive mt-2">{curriculum.title}</p>
         )}
-      </div>
+      </header>
 
+      {/* ─── Blocks ─── */}
       <div className="space-y-5">
         {blocks.length === 0 ? (
-          <div className="brand-card p-12 text-center">
-            <BookOpen className="w-10 h-10 mx-auto mb-3 text-white/20" />
-            <p className="text-white/40">아직 학습 콘텐츠가 준비되지 않았습니다</p>
+          <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
+            <BookOpen className="w-10 h-10 mx-auto mb-3 text-stone" />
+            <p className="text-[14px] text-olive">
+              아직 학습 콘텐츠가 준비되지 않았습니다
+            </p>
           </div>
         ) : (
           blocks.map(block => (

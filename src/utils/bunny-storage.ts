@@ -84,7 +84,7 @@ export function getPublicUrl(storagePath: string): string {
  * e.g., "sessions/gs1/2026-w1s1/레벨1.pdf" or "odapji/홍민서/2026-05-06_대수.pdf"
  */
 export function generateStoragePath(
-  category: 'sessions' | 'odapji',
+  category: 'sessions' | 'odapji' | 'shared',
   subPath: string,
   filename: string,
 ): string {
