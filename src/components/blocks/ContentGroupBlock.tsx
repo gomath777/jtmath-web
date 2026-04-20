@@ -195,10 +195,10 @@ export default function ContentGroupBlock({
                         } ${isActive ? 'font-medium text-ink' : ''}`}
                       >
                         {video.raw_text
-                          ? `${idx + 1}번 ${video.raw_text}`
+                          ? `${video.problem_number}번 ${video.raw_text}`
                           : video.title
-                            ? `${idx + 1}번 [${video.title}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
-                            : `${idx + 1}번 해설강의`}
+                            ? `${video.problem_number}번 [${video.title}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
+                            : `${video.problem_number}번 해설강의`}
                       </span>
                       {p && !isDone && (
                         <span className="text-[11px] text-stone shrink-0">{p.watch_percent}%</span>
