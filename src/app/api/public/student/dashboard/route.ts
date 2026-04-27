@@ -78,30 +78,24 @@ export async function GET(req: NextRequest) {
 
   const curriculumIds = (links || []).map(l => l.curriculum_id);
 
-  if (curriculumIds.length === 0) {
-    const newToken = await renewToken(student);
-    const res = NextResponse.json({
-      profile: profilePayload,
-      curricula: [],
-      odapjiCount: 0,
-      todayTasks: [],
-      nextReleaseAt: computeNextReleaseAt(),
-    });
-    return setStudentCookie(res, newToken);
-  }
+  // curriculum 미연결 학생도 개념강의(assignments) 노출되도록 early return 제거.
+  // curriculumIds가 비어있으면 curricula/items 쿼리는 빈 배열 반환 → 자연스럽게 sessionTasks=[]가 됨.
+  const { data: curricula } = curriculumIds.length > 0
+    ? await sc
+        .from('curricula')
+        .select('id, title, subject_slug, start_date')
+        .in('id', curriculumIds)
+    : { data: [] as Array<{ id: string; title: string; subject_slug: string; start_date: string | null }> };
 
-  const { data: curricula } = await sc
-    .from('curricula')
-    .select('id, title, subject_slug, start_date')
-    .in('id', curriculumIds);
-
-  const { data: items } = await sc
-    .from('curriculum_items')
-    .select('id, curriculum_id, week_number, session_number, label, publish_date, is_released')
-    .in('curriculum_id', curriculumIds)
-    .eq('is_released', true)
-    .order('week_number', { ascending: true })
-    .order('session_number', { ascending: true });
+  const { data: items } = curriculumIds.length > 0
+    ? await sc
+        .from('curriculum_items')
+        .select('id, curriculum_id, week_number, session_number, label, publish_date, is_released')
+        .in('curriculum_id', curriculumIds)
+        .eq('is_released', true)
+        .order('week_number', { ascending: true })
+        .order('session_number', { ascending: true })
+    : { data: [] as Array<{ id: string; curriculum_id: string; week_number: number; session_number: number; label: string | null; publish_date: string | null; is_released: boolean }> };
 
   // ─── 세션 구성 ─────────────────────────────────────
   // 학습 완료(status) / 영상 시청률(videoProgress) 추적은 대시보드에서 제거.

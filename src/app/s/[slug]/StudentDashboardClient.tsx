@@ -285,7 +285,7 @@ export default function StudentDashboardClient({
         <h1 className="font-serif font-medium text-[36px] text-ink tracking-tightest leading-[1.05]">
           {data.profile.name}
           <span className="text-olive font-normal text-[22px] ml-1.5">
-            님
+            학생
           </span>
         </h1>
         {data.profile.school && (
