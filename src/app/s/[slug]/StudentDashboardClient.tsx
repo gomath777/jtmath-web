@@ -5,6 +5,7 @@ import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download, Chevro
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ConceptLecturesSection from './ConceptLecturesSection';
+import SeasonPlan from './SeasonPlan';
 import type { TodayTask } from './variants/types';
 import VariantB from './variants/VariantB';
 import { getVariantForSlug } from '@/lib/dashboardVariants';
@@ -541,6 +542,9 @@ export default function StudentDashboardClient({
       )}
       </>
       )}
+
+      {/* ─── 시즌 학습 일정 (토글 무관 항상 표시) ─── */}
+      <SeasonPlan slug={slug} basePath={basePath} />
     </div>
   );
 }
