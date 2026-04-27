@@ -75,13 +75,19 @@ export async function GET(req: NextRequest) {
     progressMap[p.bunny_video_id] = { watch_percent: p.watch_percent ?? 0, completed: !!p.completed };
   }
 
-  // 5) set별 영상 합치고 반환
+  // 5) set별 영상 합치고 반환 (assignment의 published_at도 같이 — 시즌 캘린더용)
+  const publishedAtBySet = new Map<string, string | null>();
+  for (const a of assigns || []) {
+    if (a.set_id) publishedAtBySet.set(a.set_id, a.published_at as string | null);
+  }
+
   const result = (sets || []).map(s => ({
     id: s.id,
     title: s.title,
     description: s.description,
     subject_slug: s.subject_slug,
     chapter_order: s.chapter_order,
+    published_at: publishedAtBySet.get(s.id) || null,
     pdfs: s.pdfs || (s.pdf_url ? [{ url: s.pdf_url, original_name: s.pdf_filename }] : []),
     videos: (videos || [])
       .filter(v => v.set_id === s.id)

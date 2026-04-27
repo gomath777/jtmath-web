@@ -22,7 +22,7 @@ function defaultWindow(): WindowKey {
  * task의 publishDate가 어느 윈도우에 속하는지 판정.
  * - 일·월·화 → mon-tue (1차시)
  * - 수·목·금 → thu-fri (2차시)
- * - concept 같이 publishDate 없는 task는 기본 mon-tue.
+ * - publishDate 없는 task는 기본 mon-tue.
  */
 function taskWindow(t: TodayTask): WindowKey {
   if (!t.publishDate) return 'mon-tue';
@@ -41,11 +41,10 @@ function taskWindow(t: TodayTask): WindowKey {
 export default function VariantB(props: VariantProps) {
   const [selectedWindow, setSelectedWindow] = useState<WindowKey>(() => defaultWindow());
 
-  // 선택된 윈도우에 해당하는 task 필터링 (session 한정, concept은 그대로 뒤따름)
-  const sessionTasks = props.tasks.filter(t => t.kind === 'session');
-  const conceptTasks = props.tasks.filter(t => t.kind === 'concept');
-  const windowSessionTasks = sessionTasks.filter(t => taskWindow(t) === selectedWindow);
-  const filteredTasks = [...windowSessionTasks, ...conceptTasks];
+  // 선택된 윈도우에 해당하는 task 필터링.
+  // session/concept 모두 publishDate 기반 윈도우 분류 (concept는 dashboard route에서
+  // 같은 주 내 chapter_order 순으로 월요일/목요일 분배됨).
+  const filteredTasks = props.tasks.filter(t => taskWindow(t) === selectedWindow);
 
   return (
     <>

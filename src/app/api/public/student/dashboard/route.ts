@@ -170,6 +170,8 @@ export async function GET(req: NextRequest) {
   }
 
   // 2) 개념강의 후보 (완료 스킵 없음)
+  // 같은 주(같은 published_at)에 여러 차시 배정 시 → chapter_order 오름차순으로
+  // 첫 번째는 월요일, 두 번째 이후는 목요일에 분배 (월·화 vs 목·금 윈도우 자동 분류).
   const conceptTasks: TodayTask[] = [];
   const { data: conceptAssigns } = await sc
     .from('assignments')
@@ -186,26 +188,45 @@ export async function GET(req: NextRequest) {
     const { data: conceptSets } = await sc
       .from('learning_sets')
       .select('id, title, subject_slug, chapter_order')
-      .in('id', conceptSetIds)
-      .eq('kind', 'concept')
-      .order('chapter_order', { ascending: true });
+      .in('id', conceptSetIds);
 
-    const publishOrder = new Map(
-      (conceptAssigns || []).map((a, idx) => [a.set_id, idx]),
-    );
-    const sortedSets = (conceptSets || []).slice().sort(
-      (a, b) => (publishOrder.get(a.id) ?? 999) - (publishOrder.get(b.id) ?? 999),
-    );
+    const setMap = new Map((conceptSets || []).map(s => [s.id, s]));
 
-    for (const set of sortedSets) {
-      conceptTasks.push({
-        kind: 'concept',
-        id: set.id,
-        title: set.title,
-        subject_slug: set.subject_slug || '',
-        subject_label: SUBJECT_LABEL[set.subject_slug || ''] || set.subject_slug || '',
-        meta: '개념강의',
-        concept_set_id: set.id,
+    // published_at별로 set_id 그룹핑 (chapter_order 오름차순)
+    const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+    const ymdKst = (iso: string) => new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
+    const addDaysKst = (iso: string, days: number) => {
+      const d = new Date(new Date(iso).getTime() + days * 24 * 60 * 60 * 1000 + KST_OFFSET_MS);
+      return d.toISOString().slice(0, 10);
+    };
+
+    const byWeek = new Map<string, Array<{ setId: string; chapter_order: number | null }>>();
+    for (const a of conceptAssigns || []) {
+      const set = setMap.get(a.set_id);
+      if (!set || set.id == null) continue;
+      const key = a.published_at as string;
+      if (!byWeek.has(key)) byWeek.set(key, []);
+      byWeek.get(key)!.push({ setId: a.set_id, chapter_order: set.chapter_order });
+    }
+
+    // 그룹 내 chapter_order 오름차순으로 정렬 후 publishDate 분배
+    for (const [publishedAt, items] of Array.from(byWeek.entries())) {
+      items.sort((a, b) => (a.chapter_order ?? 999) - (b.chapter_order ?? 999));
+      items.forEach((item, idx) => {
+        const set = setMap.get(item.setId);
+        if (!set) return;
+        // 첫 번째 → 그 주 월(=publishedAt 그대로), 나머지 → 그 주 목(+3일)
+        const publishDate = idx === 0 ? ymdKst(publishedAt) : addDaysKst(publishedAt, 3);
+        conceptTasks.push({
+          kind: 'concept',
+          id: set.id,
+          title: set.title,
+          subject_slug: set.subject_slug || '',
+          subject_label: SUBJECT_LABEL[set.subject_slug || ''] || set.subject_slug || '',
+          meta: '개념강의',
+          concept_set_id: set.id,
+          publishDate,
+        });
       });
     }
   }
