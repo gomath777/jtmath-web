@@ -14,6 +14,9 @@ export default async function StudentPortalPage({
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
+  // 온라인 페이지는 student_type 검증 없이 그대로 통과 — 기존 운영 영향 0.
+  // 오프라인 학생은 별도 slug + /c/<slug> 페이지로만 접근하도록 운영하면 충돌 없음.
+  // (SQL 마이그레이션은 /c 페이지 작동에만 필요. /s 는 항상 그대로 작동.)
   const { data: token } = await sc
     .from('student_tokens')
     .select('id, slug, is_active')
@@ -36,5 +39,5 @@ export default async function StudentPortalPage({
     );
   }
 
-  return <StudentDashboardClient slug={slug} />;
+  return <StudentDashboardClient slug={slug} basePath="/s" />;
 }

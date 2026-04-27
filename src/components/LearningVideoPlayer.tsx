@@ -5,6 +5,7 @@ import { CheckCircle } from 'lucide-react';
 
 interface LearningVideoPlayerProps {
   bunnyVideoId: string;
+  libraryId?: string;       // 기본값: 622509 (기출해설). 개념강의는 566809
   title?: string;
   initialProgress?: number;
   initialCompleted?: boolean;
@@ -18,6 +19,7 @@ const SAVE_INTERVAL = 10000; // 10초마다 저장
 
 export default function LearningVideoPlayer({
   bunnyVideoId,
+  libraryId,
   title,
   initialProgress = 0,
   initialCompleted = false,
@@ -25,6 +27,7 @@ export default function LearningVideoPlayer({
   onProgressUpdate,
   progressEndpoint = '/api/student/watch-progress',
 }: LearningVideoPlayerProps) {
+  const lib = libraryId || BUNNY_LIBRARY_ID;
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [completed, setCompleted] = useState(initialCompleted || initialProgress >= 80);
   const [currentPercent, setCurrentPercent] = useState(initialProgress);
@@ -93,7 +96,7 @@ export default function LearningVideoPlayer({
     };
   }, [saveProgress]);
 
-  const embedUrl = `https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${bunnyVideoId}?autoplay=false&preload=true&responsive=true`;
+  const embedUrl = `https://iframe.mediadelivery.net/embed/${lib}/${bunnyVideoId}?autoplay=false&preload=true&responsive=true`;
 
   return (
     <div className="w-full">

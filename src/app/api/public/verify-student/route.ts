@@ -29,16 +29,34 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '비활성화된 계정입니다' }, { status: 403 });
   }
 
-  // Verify birth pin
-  if (tokenRow.birth_pin !== birth_pin) {
+  // Verify birth pin — 학생 본인 PIN 또는 관리자 마스터 PIN
+  // 마스터 PIN(ADMIN_MASTER_PIN)은 학원장이 모든 학생 계정을 impersonate 하기 위한 백도어.
+  // .env.local 에만 보관하고 학생/외부엔 절대 공유 금지.
+  const masterPin = process.env.ADMIN_MASTER_PIN;
+  const isMasterAccess = !!masterPin && birth_pin === masterPin;
+  const isOwnerAccess = tokenRow.birth_pin === birth_pin;
+  if (!isOwnerAccess && !isMasterAccess) {
     return NextResponse.json({ error: '생년월일이 일치하지 않습니다' }, { status: 401 });
   }
 
-  // Update last accessed
+  // Update last accessed (마스터 접근 시에도 접근 기록 남김 — 실 학생 활동과 구분되게 별도 audit 남길지는 후순위)
   await sc
     .from('student_tokens')
     .update({ last_accessed_at: new Date().toISOString() })
     .eq('id', tokenRow.id);
+
+  // 마스터 접근 감사 로그 (실 학생 로그와 분리되게 별도 이벤트). 실패해도 로그인은 허용.
+  if (isMasterAccess && !isOwnerAccess) {
+    try {
+      await sc.from('student_events').insert({
+        profile_id: tokenRow.profile_id,
+        event_type: 'admin_master_access',
+        metadata: { slug: tokenRow.slug },
+      });
+    } catch {
+      /* silent */
+    }
+  }
 
   // Get student name
   const { data: profile } = await sc

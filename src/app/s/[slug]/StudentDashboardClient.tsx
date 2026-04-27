@@ -1,16 +1,31 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download } from 'lucide-react';
+import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import ConceptLecturesSection from './ConceptLecturesSection';
+import type { TodayTask } from './variants/types';
+import VariantB from './variants/VariantB';
+import { getVariantForSlug } from '@/lib/dashboardVariants';
+
+/** 이벤트 트래킹 — fire-and-forget. 실패해도 UX 방해 X. */
+function trackEvent(event_type: string, metadata?: Record<string, unknown>) {
+  fetch('/api/public/student/track', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ event_type, metadata }),
+  }).catch(() => {
+    /* silent */
+  });
+}
 
 interface SessionItem {
   id: string;
   week_number: number;
   session_number: number;
   label: string;
-  status: 'new' | 'in_progress' | 'completed';
-  videoProgress: string | null;
+  publishDate?: string | null;
 }
 
 interface CurriculumData {
@@ -29,6 +44,8 @@ interface DashboardData {
   };
   curricula: CurriculumData[];
   odapjiCount: number;
+  todayTasks: TodayTask[];
+  nextReleaseAt?: string;
 }
 
 interface ExamCountdown {
@@ -85,22 +102,7 @@ interface SharedMaterial {
   uploaded_at: string;
 }
 
-type TabKey = 'learning' | 'materials';
-
-const STATUS_BADGE: Record<string, { label: string; className: string }> = {
-  new: {
-    label: 'NEW',
-    className: 'bg-terracotta text-ivory',
-  },
-  in_progress: {
-    label: '진행중',
-    className: 'bg-sand text-charcoal',
-  },
-  completed: {
-    label: '완료',
-    className: 'bg-transparent text-stone border border-border-warm',
-  },
-};
+type TabKey = 'learning' | 'concept' | 'materials';
 
 const AUDIENCE_LABEL: Record<string, string> = {
   all: '전체 공개',
@@ -108,7 +110,14 @@ const AUDIENCE_LABEL: Record<string, string> = {
   curriculum: '수강 자료',
 };
 
-export default function StudentDashboardClient({ slug }: { slug: string }) {
+export default function StudentDashboardClient({
+  slug,
+  basePath = '/s',
+}: {
+  slug: string;
+  /** URL prefix: '/s' (online portal) or '/c' (offline classroom). 세션 링크 조립에 사용. */
+  basePath?: string;
+}) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [needsVerify, setNeedsVerify] = useState(false);
@@ -116,10 +125,15 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
   const [verifyError, setVerifyError] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('learning');
+  const [showAll, setShowAll] = useState(false);
+  const [conceptInitialSubject, setConceptInitialSubject] = useState<string | null>(null);
+  const router = useRouter();
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState<string | null>(null);
 
   const [materials, setMaterials] = useState<SharedMaterial[]>([]);
   const [materialsLoaded, setMaterialsLoaded] = useState(false);
   const [materialsLoading, setMaterialsLoading] = useState(false);
+  const [pageViewTracked, setPageViewTracked] = useState(false);
 
   const fetchDashboard = async () => {
     try {
@@ -167,6 +181,16 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
     if (activeTab === 'materials') fetchMaterials();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  // 최초 로드 시 page_view 1회 트래킹 (variant 비교 지표)
+  useEffect(() => {
+    if (!data || pageViewTracked) return;
+    trackEvent('page_view', {
+      variant: getVariantForSlug(slug),
+      tasks_count: data.todayTasks?.length ?? 0,
+    });
+    setPageViewTracked(true);
+  }, [data, pageViewTracked, slug]);
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -298,10 +322,43 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
         )}
       </div>
 
+      {/* ─── 오늘 할 일 (Variant B: 주간 타임라인 + Hero + Mini) ─── */}
+      <VariantB
+        tasks={data.todayTasks || []}
+        nextReleaseAt={data.nextReleaseAt}
+        curricula={data.curricula}
+        slug={slug}
+        basePath={basePath}
+        onOpenConcept={(setId, subjectSlug) => {
+          trackEvent('task_click', { kind: 'concept', id: setId });
+          setConceptInitialSubject(subjectSlug);
+          router.push(`${basePath}/${slug}/concept/${setId}`);
+        }}
+      />
+      <div id="all-content-anchor" />
+
+      {/* ─── 전체 콘텐츠 보기 양방향 토글 ─── */}
+      <button
+        onClick={() => {
+          trackEvent('show_all_toggle', { to: showAll ? 'off' : 'on' });
+          setShowAll(!showAll);
+        }}
+        className="w-full flex items-center justify-center gap-2 py-4 text-[13px] tracking-[0.08em] uppercase text-stone hover:text-terracotta transition-colors"
+        aria-expanded={showAll}
+      >
+        {showAll ? '전체 콘텐츠 접기' : '전체 콘텐츠 보기'}
+        <ChevronDown className={`w-4 h-4 transition-transform ${showAll ? 'rotate-180' : ''}`} />
+      </button>
+
+      {showAll && (
+      <>
       {/* ─── Tabs ─── */}
       <div className="flex gap-0.5 mb-6 bg-sand rounded-xl p-1">
         <button
-          onClick={() => setActiveTab('learning')}
+          onClick={() => {
+            trackEvent('tab_change', { tab: 'learning' });
+            setActiveTab('learning');
+          }}
           className={`flex-1 py-2.5 text-[13px] font-medium rounded-lg transition-all ${
             activeTab === 'learning'
               ? 'bg-ivory text-ink shadow-ring-warm'
@@ -311,7 +368,23 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
           학습 페이지
         </button>
         <button
-          onClick={() => setActiveTab('materials')}
+          onClick={() => {
+            trackEvent('tab_change', { tab: 'concept' });
+            setActiveTab('concept');
+          }}
+          className={`flex-1 py-2.5 text-[13px] font-medium rounded-lg transition-all ${
+            activeTab === 'concept'
+              ? 'bg-ivory text-ink shadow-ring-warm'
+              : 'text-olive hover:text-charcoal'
+          }`}
+        >
+          개념강의
+        </button>
+        <button
+          onClick={() => {
+            trackEvent('tab_change', { tab: 'materials' });
+            setActiveTab('materials');
+          }}
           className={`flex-1 py-2.5 text-[13px] font-medium rounded-lg transition-all ${
             activeTab === 'materials'
               ? 'bg-ivory text-ink shadow-ring-warm'
@@ -323,75 +396,90 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
       </div>
 
       {/* ─── Learning Tab ─── */}
-      {activeTab === 'learning' && (
-        <div className="space-y-8">
-          {data.curricula.length === 0 ? (
+      {activeTab === 'learning' && (() => {
+        if (data.curricula.length === 0) {
+          return (
             <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
               <BookOpen className="w-10 h-10 mx-auto mb-3 text-stone" />
               <p className="text-[14px] text-olive">
                 아직 배정된 학습이 없습니다
               </p>
             </div>
-          ) : (
-            data.curricula.map(curriculum => (
-              <section key={curriculum.id}>
-                <div className="flex items-baseline gap-3 mb-5 pb-3 border-b border-border-warm">
-                  <span className="w-1.5 h-1.5 rounded-full bg-terracotta shrink-0 translate-y-[-4px]" />
-                  <h2 className="font-serif font-medium text-[22px] text-ink tracking-tight">
-                    {curriculum.title}
-                  </h2>
-                  <span className="text-[11px] tracking-[0.1em] uppercase text-stone ml-auto">
-                    세션 {curriculum.sessions.length}
-                  </span>
-                </div>
+          );
+        }
+        const activeCurriculum =
+          data.curricula.find(c => c.id === selectedCurriculumId) ||
+          data.curricula[0];
+        const showCurriculumTabs = data.curricula.length > 1;
+        return (
+          <div className="space-y-5">
+            {/* 커리큘럼 서브탭 */}
+            {showCurriculumTabs && (
+              <div className="flex gap-2 flex-wrap">
+                {data.curricula.map(c => {
+                  const isActive = c.id === activeCurriculum.id;
+                  return (
+                    <button
+                      key={c.id}
+                      onClick={() => setSelectedCurriculumId(c.id)}
+                      className={`px-4 py-2 rounded-xl text-[13px] font-medium transition-all ${
+                        isActive
+                          ? 'bg-terracotta text-ivory shadow-ring-terracotta'
+                          : 'bg-ivory text-charcoal border border-border-warm hover:bg-sand'
+                      }`}
+                    >
+                      {c.title}
+                      <span className={`ml-1.5 text-[11px] ${isActive ? 'opacity-75' : 'text-stone'}`}>
+                        {c.sessions.length}개
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
 
-                <div className="space-y-2.5">
-                  {curriculum.sessions.length === 0 ? (
-                    <div className="bg-ivory border border-border-cream rounded-xl px-6 py-8 text-center">
-                      <p className="text-[13px] text-stone">
-                        아직 공개된 차시가 없습니다
+            {/* 선택된 커리큘럼의 세션 리스트 */}
+            <div className="space-y-2.5">
+              {activeCurriculum.sessions.length === 0 ? (
+                <div className="bg-ivory border border-border-cream rounded-xl px-6 py-8 text-center">
+                  <p className="text-[13px] text-stone">
+                    아직 공개된 차시가 없습니다
+                  </p>
+                </div>
+              ) : (
+                activeCurriculum.sessions.map(session => (
+                  <Link
+                    key={session.id}
+                    href={`${basePath}/${slug}/session/${session.id}`}
+                    className="group bg-ivory border border-border-cream rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-white hover:shadow-ring-warm transition-all"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] tracking-[0.08em] uppercase text-stone font-medium">
+                          {session.week_number}주차 · {session.session_number}차시
+                        </span>
+                      </div>
+                      <p className="font-serif font-medium text-[17px] text-ink truncate tracking-tight">
+                        {session.label ||
+                          `${session.week_number}주차 ${session.session_number}차시`}
                       </p>
                     </div>
-                  ) : (
-                    curriculum.sessions.map(session => {
-                      const badge = STATUS_BADGE[session.status];
-                      return (
-                        <Link
-                          key={session.id}
-                          href={`/s/${slug}/session/${session.id}`}
-                          className="group bg-ivory border border-border-cream rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-white hover:shadow-ring-warm transition-all"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-[11px] tracking-[0.08em] uppercase text-stone font-medium">
-                                {session.week_number}주차 · {session.session_number}차시
-                              </span>
-                              <span
-                                className={`text-[10px] tracking-wider uppercase font-medium px-1.5 py-0.5 rounded-full ${badge.className}`}
-                              >
-                                {badge.label}
-                              </span>
-                            </div>
-                            <p className="font-serif font-medium text-[17px] text-ink truncate tracking-tight">
-                              {session.label ||
-                                `${session.week_number}주차 ${session.session_number}차시`}
-                            </p>
-                          </div>
-                          {session.videoProgress && (
-                            <span className="text-[11px] text-stone shrink-0">
-                              {session.videoProgress}
-                            </span>
-                          )}
-                          <ChevronRight className="w-4 h-4 text-stone group-hover:text-terracotta shrink-0 transition-colors" />
-                        </Link>
-                      );
-                    })
-                  )}
-                </div>
-              </section>
-            ))
-          )}
-        </div>
+                    <ChevronRight className="w-4 h-4 text-stone group-hover:text-terracotta shrink-0 transition-colors" />
+                  </Link>
+                ))
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ─── Concept Tab ─── */}
+      {activeTab === 'concept' && (
+        <ConceptLecturesSection
+          slug={slug}
+          basePath={basePath}
+          initialSubjectSlug={conceptInitialSubject}
+        />
       )}
 
       {/* ─── Materials Tab ─── */}
@@ -450,6 +538,8 @@ export default function StudentDashboardClient({ slug }: { slug: string }) {
             </div>
           )}
         </div>
+      )}
+      </>
       )}
     </div>
   );

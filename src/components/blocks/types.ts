@@ -15,8 +15,11 @@ export type ProgressMap = Record<string, VideoProgress>;
 export const SUBJECT_LABELS: Record<string, string> = {
   gs1: '공통수학1',
   gs2: '공통수학2',
+  ds: '대수',
   ds2: '대수',
-  ms1: '미적분1',
+  mj1: '미적분1',
+  ms1: '미적분1',     // legacy alias
+  mj2: '미적분2',
   s2: '수학2',
   ht: '확률과통계',
   gi: '기하',
