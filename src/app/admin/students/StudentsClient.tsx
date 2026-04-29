@@ -4,11 +4,21 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Copy, ExternalLink, Check, Users, GraduationCap, Activity } from 'lucide-react';
 
-interface LatestRelease {
-  curriculumTitle: string;
-  label: string;
+interface SessionRef {
   weekSession: string;
-  publishDate: string;
+  label: string;
+  publishDate: string | null;
+}
+
+interface CurriculumProgress {
+  id: string;
+  title: string;
+  subject: string;
+  startDate: string | null;
+  total: number;
+  released: number;
+  nextItem: SessionRef | null;
+  latestReleased: SessionRef | null;
 }
 
 interface Student {
@@ -21,8 +31,7 @@ interface Student {
   studentType: string;
   active: boolean;
   lastAccessedAt: string | null;
-  curricula: string[];
-  latestRelease: LatestRelease | null;
+  curriculaProgress: CurriculumProgress[];
 }
 
 const SITE_URL = 'https://jtmath.kr';
@@ -63,7 +72,7 @@ export default function StudentsClient({ students }: { students: Student[] }) {
   };
 
   const copyKakao = (s: Student) => {
-    const curriculum = s.curricula[0] || '';
+    const curriculum = s.curriculaProgress[0]?.title || '';
     const template = [
       `[고T수학] ${s.name}님`,
       '',
@@ -199,8 +208,7 @@ export default function StudentsClient({ students }: { students: Student[] }) {
                   <th className="text-left px-4 py-2 font-semibold">학교</th>
                   <th className="text-left px-4 py-2 font-semibold">대시보드</th>
                   <th className="text-left px-4 py-2 font-semibold">최근접속</th>
-                  <th className="text-left px-4 py-2 font-semibold">배정 커리큘럼</th>
-                  <th className="text-left px-4 py-2 font-semibold">마지막 받은 세션</th>
+                  <th className="text-left px-4 py-2 font-semibold">커리큘럼 / 진도</th>
                   <th className="text-left px-4 py-2 font-semibold">상태</th>
                   <th className="text-right px-4 py-2 font-semibold">복사</th>
                 </tr>
@@ -233,30 +241,48 @@ export default function StudentsClient({ students }: { students: Student[] }) {
                     <td className="px-4 py-3 text-slate-500 text-xs">
                       {formatRelativeKo(s.lastAccessedAt)}
                     </td>
-                    <td className="px-4 py-3">
-                      {s.curricula.length === 0 ? (
+                    <td className="px-4 py-3 align-top">
+                      {s.curriculaProgress.length === 0 ? (
                         <span className="text-slate-300 text-xs">-</span>
                       ) : (
-                        <div className="flex flex-wrap gap-1 max-w-xs">
-                          {s.curricula.map((c, i) => (
-                            <span key={i} className="text-xs bg-slate-100 text-slate-700 px-2 py-0.5 rounded-full">
-                              {c}
-                            </span>
-                          ))}
+                        <div className="space-y-2 max-w-md">
+                          {s.curriculaProgress.map(c => {
+                            const isComplete = c.total > 0 && c.released === c.total;
+                            const isPending = c.released === 0;
+                            return (
+                              <div key={c.id} className="text-xs leading-snug">
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded font-semibold">
+                                    {c.title}
+                                  </span>
+                                  {c.total > 0 && (
+                                    <span className={`font-mono font-bold ${
+                                      isComplete ? 'text-green-700'
+                                        : isPending ? 'text-slate-400'
+                                          : 'text-blue-700'
+                                    }`}>
+                                      {c.released}/{c.total}차시
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-0.5 ml-0.5">
+                                  {c.total === 0 ? (
+                                    <span className="text-slate-400">세션 미등록</span>
+                                  ) : isComplete ? (
+                                    <span className="text-green-700 font-semibold">완료</span>
+                                  ) : c.nextItem ? (
+                                    <span className="text-slate-500">
+                                      <span className="text-slate-400">{isPending ? '시작' : '다음'}:</span>{' '}
+                                      {c.nextItem.publishDate || c.startDate || '미정'}{' '}
+                                      <span className="font-mono text-slate-400">{c.nextItem.weekSession}</span>{' '}
+                                      {c.nextItem.label}
+                                    </span>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-xs">
-                      {s.latestRelease ? (
-                        <div>
-                          <div className="font-semibold text-slate-900">
-                            <span className="text-slate-400 font-mono mr-1">{s.latestRelease.weekSession}</span>
-                            {s.latestRelease.label}
-                          </div>
-                          <div className="text-slate-400">{s.latestRelease.publishDate}</div>
-                        </div>
-                      ) : (
-                        <span className="text-slate-300">-</span>
                       )}
                     </td>
                     <td className="px-4 py-3">
