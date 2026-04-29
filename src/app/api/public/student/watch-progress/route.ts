@@ -8,6 +8,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // 마스터 PIN 접근은 학생 시청 진도로 기록하지 않음.
+  if (student.isMaster) {
+    return NextResponse.json({ ok: true, skipped: 'master' });
+  }
+
   const { bunny_video_id, watch_percent } = await req.json();
 
   if (!bunny_video_id || watch_percent === undefined) {

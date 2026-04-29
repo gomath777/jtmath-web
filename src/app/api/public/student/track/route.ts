@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   }
 
+  // 마스터 PIN 접근(학원장 본인)은 학생 이벤트로 기록하지 않음.
+  if (student.isMaster) {
+    return NextResponse.json({ ok: true, skipped: 'master' });
+  }
+
   let body: { event_type?: string; metadata?: Record<string, unknown> } = {};
   try {
     body = await req.json();

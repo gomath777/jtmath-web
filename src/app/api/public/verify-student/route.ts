@@ -39,11 +39,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: '생년월일이 일치하지 않습니다' }, { status: 401 });
   }
 
-  // Update last accessed (마스터 접근 시에도 접근 기록 남김 — 실 학생 활동과 구분되게 별도 audit 남길지는 후순위)
-  await sc
-    .from('student_tokens')
-    .update({ last_accessed_at: new Date().toISOString() })
-    .eq('id', tokenRow.id);
+  // 마스터 PIN 접근은 학생 본인 활동이 아니므로 last_accessed_at 업데이트하지 않음.
+  // 별도 audit 은 아래 student_events 로 남김.
+  if (!isMasterAccess) {
+    await sc
+      .from('student_tokens')
+      .update({ last_accessed_at: new Date().toISOString() })
+      .eq('id', tokenRow.id);
+  }
 
   // 마스터 접근 감사 로그 (실 학생 로그와 분리되게 별도 이벤트). 실패해도 로그인은 허용.
   if (isMasterAccess && !isOwnerAccess) {
@@ -65,8 +68,8 @@ export async function POST(req: NextRequest) {
     .eq('id', tokenRow.profile_id)
     .single();
 
-  // Sign token and set cookie
-  const token = await signToken(tokenRow.profile_id, tokenRow.slug);
+  // Sign token and set cookie (master access는 isMaster claim 으로 표시 → 이후 라우트에서 활동 추적 제외)
+  const token = await signToken(tokenRow.profile_id, tokenRow.slug, isMasterAccess && !isOwnerAccess);
   const res = NextResponse.json({
     success: true,
     name: profile?.name || '',

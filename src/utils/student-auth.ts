@@ -14,6 +14,7 @@ interface TokenPayload {
   profileId: string;
   slug: string;
   exp: number; // Unix timestamp
+  isMaster?: boolean; // true when authenticated via ADMIN_MASTER_PIN — exclude from activity tracking
 }
 
 // --- Crypto helpers (Edge Runtime compatible, zero dependencies) ---
@@ -50,11 +51,12 @@ function base64UrlDecode(str: string): ArrayBuffer {
 
 // --- Token creation & verification ---
 
-export async function signToken(profileId: string, slug: string): Promise<string> {
+export async function signToken(profileId: string, slug: string, isMaster?: boolean): Promise<string> {
   const payload: TokenPayload = {
     profileId,
     slug,
     exp: Math.floor(Date.now() / 1000) + EXPIRY_DAYS * 86400,
+    ...(isMaster ? { isMaster: true } : {}),
   };
 
   const encoder = new TextEncoder();
@@ -129,7 +131,7 @@ export async function getStudentFromRequest(req: NextRequest): Promise<TokenPayl
  * Returns a new token with refreshed expiry.
  */
 export async function renewToken(payload: TokenPayload): Promise<string> {
-  return signToken(payload.profileId, payload.slug);
+  return signToken(payload.profileId, payload.slug, payload.isMaster);
 }
 
 /**
