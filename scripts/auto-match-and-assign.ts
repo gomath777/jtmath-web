@@ -9,13 +9,12 @@
  */
 
 import { createClient } from '@supabase/supabase-js';
-import Anthropic from '@anthropic-ai/sdk';
 import * as fs from 'fs';
+import { parsePdfWithClaude as parsePdfViaCli, type ParsedProblem as CliParsedProblem } from '../src/lib/parse-pdf';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_KEY!;
 const sc = createClient(SUPABASE_URL, SUPABASE_KEY);
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const DRIVE_BASE = '/Users/cego/Library/CloudStorage/GoogleDrive-gochangeon@gmail.com/My Drive/0lecture_vid/gs1';
 
@@ -76,50 +75,18 @@ interface ParsedProblem {
   raw_text: string;
 }
 
+// Claude CLI 서브프로세스 사용 — Anthropic API 키 크레딧 안 씀.
+// (이전엔 anthropic.messages.create 직접 호출이라 PDF당 크레딧 소모됨)
 async function parsePdfWithClaude(pdfPath: string): Promise<ParsedProblem[]> {
   const fileBuffer = fs.readFileSync(pdfPath);
-  const base64 = fileBuffer.toString('base64');
-
-  console.log(`    Claude API 호출 중... (${Math.round(fileBuffer.length / 1024)}KB)`);
-
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    messages: [{
-      role: 'user',
-      content: [
-        {
-          type: 'document',
-          source: { type: 'base64', media_type: 'application/pdf', data: base64 },
-        },
-        {
-          type: 'text',
-          text: `이 PDF의 각 문제 상단에 "[YYYY년 MM월 고N NN번/XX점]" 형식의 출처 정보가 있습니다.
-문제 번호(01, 02, 03...)와 각 문제의 출처 정보를 정확하게 읽어서 JSON 배열로만 응답해주세요.
-
-주의사항:
-- 월(month)을 정확히 읽으세요: 3월=3, 4월=4, 6월=6, 9월=9, 10월=10, 11월=11
-- 번호(problem)를 정확히 읽으세요: 숫자를 절대 혼동하지 마세요
-- raw_text에는 대괄호 안의 원문을 그대로 복사하세요
-
-응답 형식 (JSON 배열만):
-[{"problem_number": 1, "year": 2025, "month": 9, "grade": 1, "problem": 15, "raw_text": "[2025년 9월 고1 15번/4점]"}]
-
-출처를 찾을 수 없는 문제는 year, month, grade, problem을 null로 설정.`,
-        },
-      ],
-    }],
-  });
-
-  const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
-  const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-
-  if (!jsonMatch) {
-    console.log('    ⚠️ JSON 파싱 실패');
+  console.log(`    Claude CLI 호출 중... (${Math.round(fileBuffer.length / 1024)}KB)`);
+  try {
+    const parsed = await parsePdfViaCli(fileBuffer);
+    return parsed as CliParsedProblem[] as ParsedProblem[];
+  } catch (err) {
+    console.log(`    ⚠️ 파싱 실패: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
-
-  return JSON.parse(jsonMatch[0]);
 }
 
 async function matchVideos(problems: ParsedProblem[]): Promise<{

@@ -175,18 +175,16 @@ export default function SessionBlockEditor({
     });
   };
 
-  // PDF 업로드 (블록 위치 유지)
-  const handlePdfUpload = async (file: File, blockId: string, blockType: 'pdf' | 'hintbook', autoMatch: boolean) => {
+  // PDF 업로드 (블록 위치 유지). 자동매칭은 비용 문제로 제거 — CLI(npm run admin:session)에서 처리.
+  const handlePdfUpload = async (file: File, blockId: string, blockType: 'pdf' | 'hintbook') => {
     setUploadingBlockId(blockId);
     try {
       const formData = new FormData();
       formData.append('pdf', file);
       formData.append('curriculum_item_id', item.id);
       formData.append('block_type', blockType);
-      formData.append('auto_match', autoMatch ? 'true' : 'false');
       // 기존 블록에 업로드: 그 블록 ID를 전달해서 같은 위치에 업데이트
       formData.append('block_id', blockId);
-      if (item.subjectSlug) formData.append('subject_slug', item.subjectSlug);
 
       const res = await fetch('/api/admin/session-blocks/upload-pdf', {
         method: 'POST',
@@ -276,7 +274,7 @@ export default function SessionBlockEditor({
             onDelete={() => deleteBlock(block.id)}
             onMoveUp={() => moveBlock(block.id, 'up')}
             onMoveDown={() => moveBlock(block.id, 'down')}
-            onPdfUpload={(file, autoMatch) => handlePdfUpload(file, block.id, block.block_type as 'pdf' | 'hintbook', autoMatch)}
+            onPdfUpload={(file) => handlePdfUpload(file, block.id, block.block_type as 'pdf' | 'hintbook')}
           />
         ))}
       </div>
@@ -330,11 +328,10 @@ function BlockEditor({
   onDelete: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
-  onPdfUpload: (file: File, autoMatch: boolean) => void;
+  onPdfUpload: (file: File) => void;
 }) {
   const blockInfo = BLOCK_TYPES.find(bt => bt.type === block.block_type);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [autoMatch, setAutoMatch] = useState(true);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden group">
@@ -414,7 +411,7 @@ function BlockEditor({
                   className="hidden"
                   onChange={e => {
                     const file = e.target.files?.[0];
-                    if (file) onPdfUpload(file, autoMatch);
+                    if (file) onPdfUpload(file);
                   }}
                 />
                 {uploading ? (
@@ -431,17 +428,6 @@ function BlockEditor({
                       <Upload className="w-4 h-4" />
                       <span className="text-sm font-bold">PDF 파일 업로드</span>
                     </button>
-                    {block.block_type === 'pdf' && (
-                      <label className="flex items-center gap-2 mt-2 text-xs text-slate-500 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={autoMatch}
-                          onChange={e => setAutoMatch(e.target.checked)}
-                          className="rounded border-slate-300"
-                        />
-                        해설영상 자동매칭 (Claude AI)
-                      </label>
-                    )}
                   </div>
                 )}
               </div>
@@ -453,7 +439,7 @@ function BlockEditor({
               className="hidden"
               onChange={e => {
                 const file = e.target.files?.[0];
-                if (file) onPdfUpload(file, autoMatch);
+                if (file) onPdfUpload(file);
               }}
             />
           </div>
