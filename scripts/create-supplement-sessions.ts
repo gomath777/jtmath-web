@@ -8,14 +8,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { createClient } from '@supabase/supabase-js';
-import Anthropic from '@anthropic-ai/sdk';
+import { parsePdfWithClaude, type ParsedProblem } from '../src/lib/parse-pdf';
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
-const ANTHROPIC_KEY = process.env.ANTHROPIC_API_KEY!;
 
 const sc = createClient(SUPABASE_URL, SERVICE_KEY);
-const ai = new Anthropic({ apiKey: ANTHROPIC_KEY });
 
 const STUDENT_ID = '58a6f48a-3efd-480f-afce-839c6751f7b9';
 const SUBJECT_SLUG = 'gs1';
@@ -43,65 +41,41 @@ const SESSIONS = [
   }
 ];
 
-// PDF에서 문제 메타데이터 추출
-async function parsePdf(filePath: string): Promise<Array<{ number: number; text: string }>> {
+// PDF에서 문제 메타데이터 추출 (claude CLI 서브프로세스 사용 — Anthropic API 키 크레딧 안 씀)
+async function parsePdf(filePath: string): Promise<ParsedProblem[]> {
   const pdfBuffer = fs.readFileSync(filePath);
-  const base64 = pdfBuffer.toString('base64');
-
-  const msg = await ai.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2000,
-    messages: [{
-      role: 'user',
-      content: [
-        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
-        { type: 'text', text: `이 PDF에서 수능/학력평가 기출 문제 출처 정보를 추출하세요.
-각 문제 번호와 출처 텍스트를 찾으세요. 출처 형식: [YYYY년 MM월 고N NN번/XX점] 또는 [YYYY년 N월 고N NN번]
-JSON 배열로만 답하세요: [{"number": 1, "text": "[2025년 9월 고1 15번/4점]"}, ...]` }
-      ]
-    }]
-  });
-
   try {
-    const raw = (msg.content[0] as any).text;
-    const match = raw.match(/\[[\s\S]*\]/);
-    if (!match) return [];
-    return JSON.parse(match[0]);
-  } catch {
+    return await parsePdfWithClaude(pdfBuffer);
+  } catch (err) {
+    console.log(`    ⚠️ 파싱 실패: ${err instanceof Error ? err.message : String(err)}`);
     return [];
   }
 }
 
-// 문제 텍스트로 exam_videos 매칭
-async function matchVideos(problems: Array<{ number: number; text: string }>) {
+// 구조화된 메타로 exam_videos 매칭
+async function matchVideos(problems: ParsedProblem[]) {
   const matched: Array<{ problem_number: number; bunny_video_id: string; title: string; raw_text: string }> = [];
 
   for (const p of problems) {
-    const t = p.text;
-    const yearM = t.match(/(\d{4})년/);
-    const monthM = t.match(/(\d{1,2})월/);
-    const gradeM = t.match(/고(\d)/);
-    const problemM = t.match(/\s(\d{1,2})번/);
-
-    if (!yearM || !monthM || !gradeM || !problemM) continue;
+    if (p.year == null || p.month == null || p.grade == null || p.problem == null) continue;
 
     const { data } = await sc
       .from('exam_videos')
       .select('id, bunny_video_id, title')
       .eq('subject_slug', SUBJECT_SLUG)
-      .eq('year', parseInt(yearM[1]))
-      .eq('month', parseInt(monthM[1]))
-      .eq('grade', parseInt(gradeM[1]))
-      .eq('problem', problemM[1])
+      .eq('year', p.year)
+      .eq('month', p.month)
+      .eq('grade', p.grade)
+      .eq('problem', p.problem)
       .eq('is_published', true)
       .limit(1);
 
     if (data && data.length > 0) {
       matched.push({
-        problem_number: p.number,
+        problem_number: p.problem_number,
         bunny_video_id: data[0].bunny_video_id,
         title: data[0].title,
-        raw_text: t,
+        raw_text: p.raw_text,
       });
     }
   }
