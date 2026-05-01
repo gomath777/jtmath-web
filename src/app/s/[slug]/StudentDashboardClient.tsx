@@ -48,6 +48,14 @@ interface MasterSessionEntry {
   is_released: boolean;
 }
 
+interface MasterConceptItem {
+  id: string;
+  title: string;
+  subject_slug: string;
+  subject_label: string;
+  publishDate: string | null;
+}
+
 interface DashboardData {
   profile: {
     name: string;
@@ -61,6 +69,7 @@ interface DashboardData {
   nextReleaseAt?: string;
   isMaster?: boolean;
   masterSessions?: MasterSessionEntry[];
+  masterConceptItems?: MasterConceptItem[];
 }
 
 interface ExamCountdown {
@@ -144,6 +153,7 @@ export default function StudentDashboardClient({
   const [conceptInitialSubject, setConceptInitialSubject] = useState<string | null>(null);
   const router = useRouter();
   const [selectedCurriculumId, setSelectedCurriculumId] = useState<string | null>(null);
+  const [masterViewMode, setMasterViewMode] = useState<'calendar' | 'student'>('calendar');
 
   const [materials, setMaterials] = useState<SharedMaterial[]>([]);
   const [materialsLoaded, setMaterialsLoaded] = useState(false);
@@ -291,22 +301,64 @@ export default function StudentDashboardClient({
 
   if (!data) return null;
 
-  // ─── 마스터 모드: 4주 캘린더 뷰 ─────────────────────────────────────────
-  if (data.isMaster) {
+  const isMaster = data.isMaster ?? false;
+  const countdowns = buildCountdowns(data.profile);
+
+  // ─── 관리자 배지 + 뷰 토글 ───────────────────────────────────────────────
+  const masterBanner = isMaster ? (
+    <div className="mb-5 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+      <span className="text-[13px]">🔧</span>
+      <span className="text-[13px] text-amber-800 flex-1">
+        관리자 미리보기 —{' '}
+        <strong>{data.profile.name}</strong>
+        {data.profile.school && (
+          <span className="opacity-70"> ({data.profile.school})</span>
+        )}
+      </span>
+      <div className="flex bg-amber-100 rounded-lg p-0.5 gap-0.5">
+        <button
+          onClick={() => setMasterViewMode('calendar')}
+          className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+            masterViewMode === 'calendar'
+              ? 'bg-amber-700 text-white shadow-sm'
+              : 'text-amber-700 hover:bg-amber-200'
+          }`}
+        >
+          관리자 달력
+        </button>
+        <button
+          onClick={() => setMasterViewMode('student')}
+          className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all ${
+            masterViewMode === 'student'
+              ? 'bg-amber-700 text-white shadow-sm'
+              : 'text-amber-700 hover:bg-amber-200'
+          }`}
+        >
+          학생 뷰
+        </button>
+      </div>
+    </div>
+  ) : null;
+
+  // ─── 마스터 달력 뷰 ──────────────────────────────────────────────────────
+  if (isMaster && masterViewMode === 'calendar') {
     return (
-      <MasterCalendarView
-        profile={data.profile}
-        masterSessions={data.masterSessions || []}
-        slug={slug}
-        basePath={basePath}
-      />
+      <div>
+        {masterBanner}
+        <MasterCalendarView
+          masterSessions={data.masterSessions || []}
+          masterConceptItems={data.masterConceptItems}
+          slug={slug}
+          basePath={basePath}
+        />
+      </div>
     );
   }
 
-  const countdowns = buildCountdowns(data.profile);
-
   return (
     <div>
+      {masterBanner}
+
       {/* ─── Welcome hero ─── */}
       <div className="mb-10">
         <h1 className="font-serif font-medium text-[36px] text-ink tracking-tightest leading-[1.05]">

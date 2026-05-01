@@ -282,6 +282,15 @@ export async function GET(req: NextRequest) {
     nextReleaseAt: computeNextReleaseAt(),
     isMaster: student.isMaster ?? false,
     ...(masterSessions !== undefined ? { masterSessions } : {}),
+    ...(student.isMaster ? {
+      masterConceptItems: conceptTasks.map(t => ({
+        id: t.id,
+        title: t.title,
+        subject_slug: t.subject_slug,
+        subject_label: t.subject_label,
+        publishDate: t.publishDate ?? null,
+      })),
+    } : {}),
   });
   return setStudentCookie(res, newToken);
 }

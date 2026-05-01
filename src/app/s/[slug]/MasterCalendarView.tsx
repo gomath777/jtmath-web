@@ -13,9 +13,17 @@ interface MasterSessionEntry {
   is_released: boolean;
 }
 
+interface MasterConceptItem {
+  id: string;
+  title: string;
+  subject_slug: string;
+  subject_label: string;
+  publishDate: string | null;
+}
+
 interface MasterCalendarViewProps {
-  profile: { name: string; school: string };
   masterSessions: MasterSessionEntry[];
+  masterConceptItems?: MasterConceptItem[];
   slug: string;
   basePath?: string;
 }
@@ -33,25 +41,25 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
   s2:  { bg: 'bg-orange-50', text: 'text-orange-700' },
 };
 
-function getKstDateRange(): { weeks: Date[][] } {
+// 일월화수목금토 (Sun-first)
+const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
+function getKstWeeks(): Date[][] {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-  const nowKst = new Date(Date.now() + KST_OFFSET_MS);
-  const dayOfWeek = nowKst.getUTCDay(); // 0=Sun ... 6=Sat
-  // Days since Monday (Sun → 6 days since previous Monday)
-  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  // Monday of last week
-  const lastMondayMs = Date.now() + KST_OFFSET_MS - (daysSinceMonday + 7) * 86400000;
+  const nowMs = Date.now() + KST_OFFSET_MS;
+  const dayOfWeek = new Date(nowMs).getUTCDay(); // 0=Sun...6=Sat
+  // Start from Sunday of last week
+  const lastSundayMs = nowMs - (dayOfWeek + 7) * 86400000;
 
   const weeks: Date[][] = [];
   for (let w = 0; w < 4; w++) {
     const week: Date[] = [];
     for (let d = 0; d < 7; d++) {
-      const ms = lastMondayMs + (w * 7 + d) * 86400000;
-      week.push(new Date(ms));
+      week.push(new Date(lastSundayMs + (w * 7 + d) * 86400000));
     }
     weeks.push(week);
   }
-  return { weeks };
+  return weeks;
 }
 
 function toYmd(d: Date): string {
@@ -62,60 +70,59 @@ function todayKstYmd(): string {
   return new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
-const DOW_LABELS = ['월', '화', '수', '목', '금', '토', '일'];
-
 export default function MasterCalendarView({
-  profile,
   masterSessions,
+  masterConceptItems = [],
   slug,
   basePath = '/s',
 }: MasterCalendarViewProps) {
-  const { weeks } = getKstDateRange();
+  const weeks = getKstWeeks();
   const todayYmd = todayKstYmd();
 
-  // Index sessions by publishDate
-  const byDate = new Map<string, MasterSessionEntry[]>();
+  const sessionsByDate = new Map<string, MasterSessionEntry[]>();
   for (const s of masterSessions) {
     if (!s.publishDate) continue;
     const ymd = s.publishDate.slice(0, 10);
-    if (!byDate.has(ymd)) byDate.set(ymd, []);
-    byDate.get(ymd)!.push(s);
+    if (!sessionsByDate.has(ymd)) sessionsByDate.set(ymd, []);
+    sessionsByDate.get(ymd)!.push(s);
+  }
+
+  const conceptsByDate = new Map<string, MasterConceptItem[]>();
+  for (const c of masterConceptItems) {
+    if (!c.publishDate) continue;
+    const ymd = c.publishDate.slice(0, 10);
+    if (!conceptsByDate.has(ymd)) conceptsByDate.set(ymd, []);
+    conceptsByDate.get(ymd)!.push(c);
   }
 
   return (
     <div>
-      {/* 관리자 배지 */}
-      <div className="mb-6 flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 text-[13px] text-amber-800">
-        <span>🔧</span>
-        <span>
-          관리자 미리보기 —{' '}
-          <strong>{profile.name}</strong>
-          {profile.school && <span className="opacity-70"> ({profile.school})</span>}
-        </span>
-      </div>
-
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {DOW_LABELS.map(label => (
+        {DOW_LABELS.map((label, i) => (
           <div
             key={label}
-            className="text-center text-[11px] font-medium text-stone tracking-wide py-1"
+            className={`text-center text-[11px] font-medium tracking-wide py-1 ${
+              i === 0 ? 'text-rose-400' : i === 6 ? 'text-blue-400' : 'text-stone'
+            }`}
           >
             {label}
           </div>
         ))}
       </div>
 
-      {/* 4주 캘린더 */}
+      {/* 4주 그리드 */}
       <div className="space-y-1">
         {weeks.map((week, wi) => (
           <div key={wi} className="grid grid-cols-7 gap-1">
             {week.map((day, di) => {
               const ymd = toYmd(day);
               const isToday = ymd === todayYmd;
-              const sessions = byDate.get(ymd) || [];
+              const sessions = sessionsByDate.get(ymd) || [];
+              const concepts = conceptsByDate.get(ymd) || [];
               const dayNum = day.getUTCDate();
-              const isWeekend = di >= 5; // 토(5), 일(6)
+              const isSun = di === 0;
+              const isSat = di === 6;
 
               return (
                 <div
@@ -123,25 +130,24 @@ export default function MasterCalendarView({
                   className={`min-h-[80px] rounded-xl border p-1.5 ${
                     isToday
                       ? 'border-terracotta/50 bg-terracotta/5'
-                      : isWeekend
+                      : isSun || isSat
                       ? 'border-border-cream bg-sand/30'
                       : 'border-border-cream bg-ivory'
                   }`}
                 >
-                  {/* 날짜 */}
                   <div className={`text-[11px] font-medium mb-1 ${
-                    isToday ? 'text-terracotta' : isWeekend ? 'text-stone' : 'text-charcoal'
+                    isToday ? 'text-terracotta' : isSun ? 'text-rose-400' : isSat ? 'text-blue-400' : 'text-charcoal'
                   }`}>
                     {dayNum}
-                    {day.getUTCDate() === 1 && (
-                      <span className="ml-0.5 text-stone font-normal">
+                    {dayNum === 1 && (
+                      <span className="ml-0.5 text-stone font-normal text-[10px]">
                         {day.getUTCMonth() + 1}월
                       </span>
                     )}
                   </div>
 
-                  {/* 세션 카드들 */}
                   <div className="space-y-0.5">
+                    {/* 학습 세션 */}
                     {sessions.map(s => {
                       const color = SUBJECT_COLOR[s.subject_slug] || { bg: 'bg-sand', text: 'text-charcoal' };
                       return (
@@ -151,24 +157,29 @@ export default function MasterCalendarView({
                           className={`block rounded-lg px-1.5 py-1 text-[10px] leading-tight ${color.bg} ${color.text} hover:opacity-80 transition-opacity`}
                         >
                           <div className="flex items-center gap-0.5 mb-0.5">
-                            <span className={`text-[9px] ${s.is_released ? 'opacity-60' : 'opacity-90'}`}>
-                              {s.is_released ? '✅' : '🔒'}
-                            </span>
-                            <span className="font-medium truncate">
-                              {s.subject_label}
-                            </span>
+                            <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
+                            <span className="font-medium truncate">{s.subject_label}</span>
                           </div>
-                          <div className="font-mono text-[9px] opacity-60">
-                            W{s.week_number}-S{s.session_number}
-                          </div>
-                          {s.label && (
-                            <div className="truncate opacity-80 mt-0.5">
-                              {s.label}
-                            </div>
-                          )}
+                          <div className="font-mono text-[9px] opacity-60">W{s.week_number}-S{s.session_number}</div>
+                          {s.label && <div className="truncate opacity-80 mt-0.5">{s.label}</div>}
                         </Link>
                       );
                     })}
+
+                    {/* 개념강의 */}
+                    {concepts.map(c => (
+                      <Link
+                        key={c.id}
+                        href={`${basePath}/${slug}/concept/${c.id}`}
+                        className="block rounded-lg px-1.5 py-1 text-[10px] leading-tight bg-green-50 text-green-700 hover:opacity-80 transition-opacity"
+                      >
+                        <div className="flex items-center gap-0.5 mb-0.5">
+                          <span className="text-[9px]">📚</span>
+                          <span className="font-medium truncate">{c.subject_label || '개념강의'}</span>
+                        </div>
+                        <div className="truncate opacity-80">{c.title}</div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
               );
@@ -177,13 +188,11 @@ export default function MasterCalendarView({
         ))}
       </div>
 
-      {/* 범례 */}
-      <div className="mt-4 flex items-center gap-4 text-[11px] text-stone">
+      <div className="mt-3 flex items-center gap-3 text-[11px] text-stone">
         <span>✅ 릴리즈됨</span>
         <span>🔒 미릴리즈</span>
-        <span className="ml-auto text-[10px] opacity-60">
-          지난주 ~ 다음 2주
-        </span>
+        <span>📚 개념강의</span>
+        <span className="ml-auto text-[10px] opacity-60">지난주 ~ 다음 2주</span>
       </div>
     </div>
   );
