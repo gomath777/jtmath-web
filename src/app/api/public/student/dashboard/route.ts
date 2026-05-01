@@ -246,6 +246,9 @@ export async function GET(req: NextRequest) {
   const todaySessionTasks = sessionTasks.filter(t => t.isToday);
   const otherSessionTasks = sessionTasks.filter(t => !t.isOverdue && !t.isToday);
 
+  // 오늘 할 일에는 publishDate가 오늘 이전인 개념강의만 포함 (마스터는 미래 배정도 fetch하므로 여기서 필터)
+  const dueConcepts = conceptTasks.filter(t => !t.publishDate || t.publishDate <= todayKst);
+
   const prioritized: TodayTask[] = [];
   const pushed = new Set<string>();
   const markPush = (t: TodayTask) => {
@@ -260,12 +263,12 @@ export async function GET(req: NextRequest) {
     if (prioritized.length >= 3) break;
     markPush(t);
   }
-  if (conceptTasks[0] && prioritized.length < 3) markPush(conceptTasks[0]);
+  if (dueConcepts[0] && prioritized.length < 3) markPush(dueConcepts[0]);
   for (const t of otherSessionTasks) {
     if (prioritized.length >= 3) break;
     markPush(t);
   }
-  for (const t of conceptTasks.slice(1)) {
+  for (const t of dueConcepts.slice(1)) {
     if (prioritized.length >= 3) break;
     markPush(t);
   }
