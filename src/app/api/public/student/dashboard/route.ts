@@ -180,14 +180,18 @@ export async function GET(req: NextRequest) {
 
   // 개념강의 (assignments 기반, 기존 그대로)
   const conceptTasks: TodayTask[] = [];
-  const { data: conceptAssigns } = await sc
+  const conceptAssignsBase = sc
     .from('assignments')
     .select('set_id, published_at')
     .eq('user_id', student.profileId)
     .not('set_id', 'is', null)
     .not('published_at', 'is', null)
-    .lte('published_at', new Date().toISOString())
     .order('published_at', { ascending: false });
+  // 비마스터: 현재 시각 이전 배정만 (학생에게 공개된 것만)
+  // 마스터: 미래 배정 포함 전체 조회
+  const { data: conceptAssigns } = student.isMaster
+    ? await conceptAssignsBase
+    : await conceptAssignsBase.lte('published_at', new Date().toISOString());
 
   const conceptSetIds = (conceptAssigns || []).map(a => a.set_id).filter(Boolean);
 
