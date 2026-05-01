@@ -22,7 +22,8 @@ export async function GET(req: NextRequest) {
       id, title, description, subject_slug, schedule_pattern, start_date, created_at,
       curriculum_items (
         id, set_id, week_number, session_number, label, publish_date, order_index,
-        learning_sets ( id, title, pdf_filename )
+        learning_sets ( id, title, pdf_filename ),
+        session_blocks ( id, block_type, order_index, content )
       )
     `)
     .order('created_at', { ascending: false });

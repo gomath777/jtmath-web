@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { getStudentFromRequest, renewToken, setStudentCookie } from '@/utils/student-auth';
 
+const SUBJECT_LABEL: Record<string, string> = {
+  gs1: '공통수학1', gs2: '공통수학2',
+  ds: '대수', ds2: '대수',
+  mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
+  ht: '확률과통계', gi: '기하', s2: '수학2',
+};
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ item_id: string }> }) {
   const student = await getStudentFromRequest(req);
   if (!student) {
@@ -15,50 +22,38 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // 1. Get curriculum item
-  const { data: item, error: itemError } = await sc
-    .from('curriculum_items')
-    .select('id, curriculum_id, week_number, session_number, label, publish_date, is_released')
+  // 1. student_session 조회 (lecture JOIN)
+  const { data: ss, error: ssError } = await sc
+    .from('student_sessions')
+    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures!inner(id, title, subject_slug)')
     .eq('id', item_id)
     .single();
 
-  if (itemError || !item) {
+  if (ssError || !ss) {
     return NextResponse.json({ error: '차시를 찾을 수 없습니다' }, { status: 404 });
   }
 
-  // 2. Check student has access via student_curriculum_links
-  const { data: link } = await sc
-    .from('student_curriculum_links')
-    .select('id')
-    .eq('profile_id', student.profileId)
-    .eq('curriculum_id', item.curriculum_id)
-    .single();
-
-  if (!link) {
+  // 2. 권한 확인
+  if (ss.profile_id !== student.profileId) {
     return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
   }
 
-  // 3. Check released
-  if (!item.is_released) {
+  // 3. 공개 여부 (마스터는 미릴리즈 세션도 접근 가능)
+  if (!ss.is_released && !student.isMaster) {
     return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
   }
 
-  // 4. 학생에게 배정된 variant 조회 (없으면 default)
-  const { data: variantRow } = await sc
-    .from('student_session_variants')
-    .select('variant')
-    .eq('profile_id', student.profileId)
-    .eq('curriculum_item_id', item_id)
-    .maybeSingle();
-  const requestedVariant = variantRow?.variant ?? 'default';
+  // 4. variant는 student_sessions에서 직접 사용
+  const requestedVariant = ss.variant;
+  const lecture = ss.lecture as unknown as { id: string; title: string; subject_slug: string };
 
-  // 5. 블록 조회 — 요청 variant 우선, 없으면 default fallback
+  // 5. session_blocks 조회 — lecture_id + variant (fallback → default)
   let blocks: unknown[] = [];
   if (requestedVariant !== 'default') {
     const { data: variantBlocks } = await sc
       .from('session_blocks')
       .select('*')
-      .eq('curriculum_item_id', item_id)
+      .eq('lecture_id', lecture.id)
       .eq('variant', requestedVariant)
       .order('order_index', { ascending: true });
     if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
@@ -67,13 +62,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     const { data: defaultBlocks } = await sc
       .from('session_blocks')
       .select('*')
-      .eq('curriculum_item_id', item_id)
+      .eq('lecture_id', lecture.id)
       .eq('variant', 'default')
       .order('order_index', { ascending: true });
     blocks = defaultBlocks || [];
   }
 
-  // 5. Get video watch progress
+  // 6. 영상 시청 진도
   const { data: progress } = await sc
     .from('video_watch_progress')
     .select('bunny_video_id, watch_percent, completed')
@@ -84,14 +79,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     progressMap[p.bunny_video_id] = { watch_percent: p.watch_percent, completed: p.completed };
   });
 
-  // 6. Get curriculum info
-  const { data: curriculum } = await sc
-    .from('curricula')
-    .select('title, subject_slug')
-    .eq('id', item.curriculum_id)
-    .single();
-
-  // Update last_accessed_at on token (마스터 PIN 접근은 학원장 본인이므로 학생 활동에서 제외)
   if (!student.isMaster) {
     await sc
       .from('student_tokens')
@@ -99,11 +86,20 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
       .eq('slug', student.slug);
   }
 
-  // Renew cookie
   const newToken = await renewToken(student);
   const res = NextResponse.json({
-    item,
-    curriculum,
+    item: {
+      id: ss.id,
+      week_number: ss.week_number,
+      session_number: ss.session_number,
+      label: ss.label ?? lecture.title,
+      publish_date: ss.publish_date,
+      is_released: ss.is_released,
+    },
+    curriculum: {
+      title: SUBJECT_LABEL[ss.subject_slug] || ss.subject_slug,
+      subject_slug: ss.subject_slug,
+    },
     blocks,
     progress: progressMap,
   });

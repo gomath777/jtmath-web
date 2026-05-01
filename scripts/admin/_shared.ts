@@ -10,10 +10,12 @@ import * as path from 'path';
 import { config } from 'dotenv';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Load .env.local from project root
+// Load .env.local from project root.
+// `override: true` — 쉘에 이미 있는 빈 env 변수(예: `ANTHROPIC_API_KEY=""`)가
+// dotenv의 기본 no-override 정책에 막혀 무시되는 버그 방지. 스크립트는 .env.local을 진실의 원천으로.
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-config({ path: path.resolve(__dirname, '../../.env.local') });
+config({ path: path.resolve(__dirname, '../../.env.local'), override: true });
 
 // --- CLI argument parsing ---
 

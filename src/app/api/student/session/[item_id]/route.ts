@@ -68,15 +68,37 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
   }
 
-  // 4. 블록 조회
-  const { data: blocks, error: blocksError } = await sc
-    .from('session_blocks')
-    .select('*')
+  // 4. 학생에게 배정된 variant 조회 (없으면 default)
+  const { data: variantRow } = await sc
+    .from('student_session_variants')
+    .select('variant')
+    .eq('profile_id', user.id)
     .eq('curriculum_item_id', item_id)
-    .order('order_index', { ascending: true });
+    .maybeSingle();
+  const requestedVariant = variantRow?.variant ?? 'default';
 
-  if (blocksError) {
-    return NextResponse.json({ error: blocksError.message }, { status: 500 });
+  // 4.1 블록 조회 — 요청 variant 우선, 없으면 default fallback
+  let blocks: unknown[] = [];
+  if (requestedVariant !== 'default') {
+    const { data: variantBlocks } = await sc
+      .from('session_blocks')
+      .select('*')
+      .eq('curriculum_item_id', item_id)
+      .eq('variant', requestedVariant)
+      .order('order_index', { ascending: true });
+    if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
+  }
+  if (blocks.length === 0) {
+    const { data: defaultBlocks, error: blocksError } = await sc
+      .from('session_blocks')
+      .select('*')
+      .eq('curriculum_item_id', item_id)
+      .eq('variant', 'default')
+      .order('order_index', { ascending: true });
+    if (blocksError) {
+      return NextResponse.json({ error: blocksError.message }, { status: 500 });
+    }
+    blocks = defaultBlocks || [];
   }
 
   // 5. 영상 시청 진행률
@@ -100,7 +122,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
   return NextResponse.json({
     item,
     curriculum,
-    blocks: blocks || [],
+    blocks,
     progress: progressMap,
   });
 }

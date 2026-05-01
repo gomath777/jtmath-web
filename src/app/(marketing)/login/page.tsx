@@ -22,11 +22,13 @@ function LoginFormContent() {
     }
   }, [searchParams]);
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setIsLoading(true);
     setErrorMessage('');
     setSuccessMessage('');
 
+    const formData = new FormData(e.currentTarget);
     const result = await loginUser(formData);
 
     if (result?.error) {
@@ -54,7 +56,7 @@ function LoginFormContent() {
         </div>
       )}
 
-      <form action={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="space-y-1">
           <label className="text-sm font-medium text-white/60">이메일</label>
           <input

@@ -2,17 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { getStudentFromRequest, renewToken, setStudentCookie } from '@/utils/student-auth';
 
-/**
- * KST(UTC+9) 기준 오늘 날짜 'YYYY-MM-DD' 문자열.
- */
 function getTodayKstYmd(): string {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
   return new Date(Date.now() + KST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
-/**
- * 다음 정규 배포 시각(일·수요일 21:00 KST)의 ISO 문자열.
- */
 function computeNextReleaseAt(): string {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
   const nowMs = Date.now();
@@ -26,8 +20,7 @@ function computeNextReleaseAt(): string {
     const y = kstDate.getUTCFullYear();
     const m = kstDate.getUTCMonth();
     const dm = kstDate.getUTCDate();
-    // KST 21:00 == UTC 12:00
-    const releaseMs = Date.UTC(y, m, dm, 12, 0, 0);
+    const releaseMs = Date.UTC(y, m, dm, 12, 0, 0); // KST 21:00 = UTC 12:00
 
     if (releaseMs > nowMs) {
       return new Date(releaseMs).toISOString();
@@ -35,6 +28,13 @@ function computeNextReleaseAt(): string {
   }
   return '';
 }
+
+const SUBJECT_LABEL: Record<string, string> = {
+  gs1: '공통수학1', gs2: '공통수학2',
+  ds: '대수', ds2: '대수',
+  mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
+  ht: '확률과통계', gi: '기하', s2: '수학2',
+};
 
 export async function GET(req: NextRequest) {
   const student = await getStudentFromRequest(req);
@@ -52,7 +52,6 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // Get student profile
   const { data: profile } = await sc
     .from('profiles')
     .select('id, name, school, exam_date_midterm, exam_date_final')
@@ -63,76 +62,87 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: '프로필을 찾을 수 없습니다' }, { status: 404 });
   }
 
-  const profilePayload = {
-    name: profile.name,
-    school: profile.school,
-    exam_date_midterm: profile.exam_date_midterm as string | null,
-    exam_date_final: profile.exam_date_final as string | null,
-  };
+  // ─── 새 모델: student_sessions → lectures ───────────────────────────────
+  const sessionQuery = sc
+    .from('student_sessions')
+    .select('id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures(title)')
+    .eq('profile_id', student.profileId)
+    .order('subject_slug', { ascending: true })
+    .order('week_number', { ascending: true })
+    .order('session_number', { ascending: true });
 
-  // Get assigned curricula
-  const { data: links } = await sc
-    .from('student_curriculum_links')
-    .select('curriculum_id')
-    .eq('profile_id', student.profileId);
+  // 비마스터: 릴리즈된 세션만
+  const { data: studentSessions } = student.isMaster
+    ? await sessionQuery
+    : await sessionQuery.eq('is_released', true);
 
-  const curriculumIds = (links || []).map(l => l.curriculum_id);
+  // subject_slug별로 그룹핑 → 기존 curricula 구조와 호환 (released 세션만)
+  const subjectGroups = new Map<string, {
+    id: string;
+    title: string;
+    subject_slug: string;
+    sessions: Array<{ id: string; week_number: number; session_number: number; label: string | null; publishDate: string | null }>;
+  }>();
 
-  // curriculum 미연결 학생도 개념강의(assignments) 노출되도록 early return 제거.
-  // curriculumIds가 비어있으면 curricula/items 쿼리는 빈 배열 반환 → 자연스럽게 sessionTasks=[]가 됨.
-  const { data: curricula } = curriculumIds.length > 0
-    ? await sc
-        .from('curricula')
-        .select('id, title, subject_slug, start_date')
-        .in('id', curriculumIds)
-    : { data: [] as Array<{ id: string; title: string; subject_slug: string; start_date: string | null }> };
+  for (const s of studentSessions || []) {
+    if (!s.is_released) continue; // curricula 그룹에는 released만
+    const subj = s.subject_slug;
+    if (!subjectGroups.has(subj)) {
+      subjectGroups.set(subj, {
+        id: subj,
+        title: SUBJECT_LABEL[subj] || subj,
+        subject_slug: subj,
+        sessions: [],
+      });
+    }
+    const lecture = s.lecture as unknown as { title: string } | null;
+    subjectGroups.get(subj)!.sessions.push({
+      id: s.id,
+      week_number: s.week_number,
+      session_number: s.session_number,
+      label: s.label ?? lecture?.title ?? null,
+      publishDate: s.publish_date as string | null,
+    });
+  }
 
-  const { data: items } = curriculumIds.length > 0
-    ? await sc
-        .from('curriculum_items')
-        .select('id, curriculum_id, week_number, session_number, label, publish_date, is_released')
-        .in('curriculum_id', curriculumIds)
-        .eq('is_released', true)
-        .order('week_number', { ascending: true })
-        .order('session_number', { ascending: true })
-    : { data: [] as Array<{ id: string; curriculum_id: string; week_number: number; session_number: number; label: string | null; publish_date: string | null; is_released: boolean }> };
+  const curriculaWithSessions = Array.from(subjectGroups.values());
 
-  // ─── 세션 구성 ─────────────────────────────────────
-  // 학습 완료(status) / 영상 시청률(videoProgress) 추적은 대시보드에서 제거.
-  // 이유: 영상 시청 ≠ 학습 완료 (학생은 모르는 문제만 해설강의 시청).
-  // 학습 완료 추적은 운영자가 매쓰플랫 앱에서 개별 관리.
-  // 향후 개념강의(여름방학) 도입 시 재평가.
-  const curriculaWithSessions = (curricula || []).map(c => {
-    const sessionItems = (items || []).filter(i => i.curriculum_id === c.id);
-    return {
-      ...c,
-      sessions: sessionItems.map(item => ({
-        id: item.id,
-        week_number: item.week_number,
-        session_number: item.session_number,
-        label: item.label,
-        publishDate: (item.publish_date as string | null) ?? null,
-      })),
-    };
-  });
+  // ─── 마스터 전용: 4주 캘린더용 flat 세션 목록 ────────────────────────────
+  interface MasterSessionEntry {
+    id: string;
+    subject_slug: string;
+    subject_label: string;
+    week_number: number;
+    session_number: number;
+    label: string | null;
+    publishDate: string | null;
+    is_released: boolean;
+  }
+  let masterSessions: MasterSessionEntry[] | undefined;
+  if (student.isMaster) {
+    masterSessions = (studentSessions || []).map(s => {
+      const lecture = s.lecture as unknown as { title: string } | null;
+      return {
+        id: s.id,
+        subject_slug: s.subject_slug,
+        subject_label: SUBJECT_LABEL[s.subject_slug] || s.subject_slug,
+        week_number: s.week_number,
+        session_number: s.session_number,
+        label: s.label ?? lecture?.title ?? null,
+        publishDate: s.publish_date as string | null,
+        is_released: s.is_released,
+      };
+    });
+  }
 
-  // Count unread odapji
+  // ─── 오답지 카운트 ────────────────────────────────────────────────────────
   const { count: odapjiCount } = await sc
     .from('odapji_files')
     .select('id', { count: 'exact', head: true })
     .eq('profile_id', student.profileId)
     .eq('is_read', false);
 
-  // ─── "오늘 할 일" 계산 ─────────────────────────────────────
-  // 단순화: is_released=true 세션 전부를 후보로.
-  // 우선순위: 밀린(지난 주) 학습페이지 → 오늘 학습페이지 → 개념강의 → 나머지
-  const SUBJECT_LABEL: Record<string, string> = {
-    gs1: '공통수학1', gs2: '공통수학2',
-    ds: '대수', ds2: '대수',
-    mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
-    ht: '확률과통계', gi: '기하', s2: '수학2',
-  };
-
+  // ─── 오늘 할 일 계산 ─────────────────────────────────────────────────────
   interface TodayTask {
     kind: 'session' | 'concept';
     id: string;
@@ -145,7 +155,6 @@ export async function GET(req: NextRequest) {
     isToday?: boolean;
     publishDate?: string | null;
   }
-  // 세션 URL은 basePath를 모르는 API가 아닌 클라이언트가 조립: `${basePath}/${slug}/session/${id}`
 
   const todayKst = getTodayKstYmd();
 
@@ -160,7 +169,7 @@ export async function GET(req: NextRequest) {
         id: s.id,
         title: s.label || `${s.week_number}주차 ${s.session_number}차시`,
         subject_slug: c.subject_slug,
-        subject_label: SUBJECT_LABEL[c.subject_slug] || c.subject_slug,
+        subject_label: c.title,
         meta: `${c.title} · ${s.week_number}주차 ${s.session_number}차시`,
         isOverdue,
         isToday,
@@ -169,9 +178,7 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // 2) 개념강의 후보 (완료 스킵 없음)
-  // 같은 주(같은 published_at)에 여러 차시 배정 시 → chapter_order 오름차순으로
-  // 첫 번째는 월요일, 두 번째 이후는 목요일에 분배 (월·화 vs 목·금 윈도우 자동 분류).
+  // 개념강의 (assignments 기반, 기존 그대로)
   const conceptTasks: TodayTask[] = [];
   const { data: conceptAssigns } = await sc
     .from('assignments')
@@ -192,7 +199,6 @@ export async function GET(req: NextRequest) {
 
     const setMap = new Map((conceptSets || []).map(s => [s.id, s]));
 
-    // published_at별로 set_id 그룹핑 (chapter_order 오름차순)
     const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
     const ymdKst = (iso: string) => new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
     const addDaysKst = (iso: string, days: number) => {
@@ -209,13 +215,11 @@ export async function GET(req: NextRequest) {
       byWeek.get(key)!.push({ setId: a.set_id, chapter_order: set.chapter_order });
     }
 
-    // 그룹 내 chapter_order 오름차순으로 정렬 후 publishDate 분배
     for (const [publishedAt, items] of Array.from(byWeek.entries())) {
       items.sort((a, b) => (a.chapter_order ?? 999) - (b.chapter_order ?? 999));
       items.forEach((item, idx) => {
         const set = setMap.get(item.setId);
         if (!set) return;
-        // 첫 번째 → 그 주 월(=publishedAt 그대로), 나머지 → 그 주 목(+3일)
         const publishDate = idx === 0 ? ymdKst(publishedAt) : addDaysKst(publishedAt, 3);
         conceptTasks.push({
           kind: 'concept',
@@ -266,11 +270,18 @@ export async function GET(req: NextRequest) {
 
   const newToken = await renewToken(student);
   const res = NextResponse.json({
-    profile: profilePayload,
+    profile: {
+      name: profile.name,
+      school: profile.school,
+      exam_date_midterm: profile.exam_date_midterm as string | null,
+      exam_date_final: profile.exam_date_final as string | null,
+    },
     curricula: curriculaWithSessions,
     odapjiCount: odapjiCount || 0,
     todayTasks,
     nextReleaseAt: computeNextReleaseAt(),
+    isMaster: student.isMaster ?? false,
+    ...(masterSessions !== undefined ? { masterSessions } : {}),
   });
   return setStudentCookie(res, newToken);
 }

@@ -1,10 +1,17 @@
 #!/usr/bin/env npx ts-node
 /**
- * 세션 릴리즈 + 학생별 카톡 메시지 자동 생성
+ * 학생별 세션 릴리즈 + 카톡 메시지 생성
  *
- * 사용법:
- *   npx ts-node scripts/admin/release-session.ts --curriculum <id> --week 1 --session 1
- *   npx ts-node scripts/admin/release-session.ts --curriculum <id> --up-to-session 2  # 1,2차시 전부
+ * 대상 지정 방법 (택 1):
+ *   --subject ds2 --week 1 --session 1           전 과목·주차·차시 조건에 맞는 학생 전부
+ *   --student 김지후 --subject ds2 --week 1 --session 1  특정 학생 1명
+ *   --until 2026-05-04                           publish_date <= 날짜인 미릴리즈 세션 전부
+ *
+ * 예시:
+ *   npm run admin:release -- --subject ds2 --week 1 --session 1 --dry-run
+ *   npm run admin:release -- --subject ds2 --week 1 --session 1 --copy
+ *   npm run admin:release -- --student 김지후 --subject ds2 --week 1 --session 1
+ *   npm run admin:release -- --until 2026-05-04
  */
 
 import * as fs from 'fs';
@@ -12,10 +19,17 @@ import * as path from 'path';
 import { execSync } from 'child_process';
 import {
   parseArgs, getServiceClient, log, error, success, info, warn,
-  dryRunBanner, required, printHelp,
+  dryRunBanner, printHelp,
 } from './_shared';
 
 const SITE_URL = 'https://jtmath.kr';
+
+const SUBJECT_LABEL: Record<string, string> = {
+  gs1: '공통수학1', gs2: '공통수학2',
+  ds: '대수', ds2: '대수',
+  mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
+  ht: '확률과통계', gi: '기하', s2: '수학2',
+};
 
 async function main() {
   const args = parseArgs();
@@ -23,137 +37,164 @@ async function main() {
   if (args.flags.has('help')) {
     printHelp(
       'release-session',
-      'release-session.ts --curriculum <id> --week N --session N [--dry-run] [--copy]',
+      'release-session.ts --subject <slug> --week N --session N [--student 이름] [--dry-run] [--copy]',
       [
-        'release-session.ts --curriculum abc123 --week 1 --session 1',
-        'release-session.ts --curriculum abc123 --week 1 --session 1 --copy  # 첫 학생 메시지 클립보드 복사',
-        'release-session.ts --curriculum abc123 --up-to-session 2  # 1차시와 2차시 모두',
+        'release-session.ts --subject ds2 --week 1 --session 1',
+        'release-session.ts --subject gs1 --week 1 --session 1 --copy',
+        'release-session.ts --student 김지후 --subject ds2 --week 1 --session 1',
+        'release-session.ts --until 2026-05-04',
       ],
     );
     process.exit(0);
   }
 
-  const curriculumId = required(args, 'curriculum');
-  const week = args.options.week ? parseInt(args.options.week) : undefined;
-  const session = args.options.session ? parseInt(args.options.session) : undefined;
-  const upToSession = args.options['up-to-session'] ? parseInt(args.options['up-to-session']) : undefined;
   const isDryRun = args.flags.has('dry-run');
   const shouldCopy = args.flags.has('copy');
+  const studentName = args.options.student;
+  const subjectSlug = args.options.subject;
+  const week = args.options.week ? parseInt(args.options.week) : undefined;
+  const session = args.options.session ? parseInt(args.options.session) : undefined;
+  const untilDate = args.options.until;
 
-  if (!session && !upToSession) {
-    error('--session 또는 --up-to-session 중 하나 필요');
+  if (!subjectSlug && !untilDate) {
+    error('--subject 또는 --until 중 하나 필요');
   }
 
   dryRunBanner(isDryRun);
 
   const sc = getServiceClient();
 
-  // Find items to release
+  // ─── 릴리즈 대상 student_sessions 조회 ───────────────────────────────────
   let query = sc
-    .from('curriculum_items')
-    .select('id, week_number, session_number, label')
-    .eq('curriculum_id', curriculumId);
+    .from('student_sessions')
+    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, lecture:lectures(title)')
+    .eq('is_released', false);
 
+  if (subjectSlug) query = query.eq('subject_slug', subjectSlug);
   if (week !== undefined) query = query.eq('week_number', week);
   if (session !== undefined) query = query.eq('session_number', session);
-  if (upToSession !== undefined) query = query.lte('session_number', upToSession);
+  if (untilDate) query = query.lte('publish_date', untilDate);
 
-  const { data: items, error: itemsErr } = await query.order('week_number').order('session_number');
-  if (itemsErr) error(`세션 조회 실패: ${itemsErr.message}`);
-  if (!items || items.length === 0) error('조건에 맞는 세션이 없습니다');
+  // 특정 학생만
+  if (studentName) {
+    const { data: profile } = await sc
+      .from('profiles')
+      .select('id, name')
+      .ilike('name', studentName)
+      .single();
+    if (!profile) error(`학생을 찾을 수 없습니다: ${studentName}`);
+    query = query.eq('profile_id', profile!.id);
+  }
 
-  // Fetch curriculum info
-  const { data: curriculum } = await sc
-    .from('curricula')
-    .select('title, subject_slug')
-    .eq('id', curriculumId)
-    .single();
+  const { data: sessions, error: sessErr } = await query
+    .order('subject_slug')
+    .order('week_number')
+    .order('session_number');
 
-  if (!curriculum) error('커리큘럼을 찾을 수 없습니다');
+  if (sessErr) error(`세션 조회 실패: ${sessErr.message}`);
+  if (!sessions || sessions.length === 0) error('조건에 맞는 세션이 없습니다 (이미 릴리즈됐거나 존재하지 않음)');
 
-  info(`커리큘럼: ${curriculum.title}`);
-  info(`릴리즈할 세션: ${items.length}개`);
-  items.forEach(i => console.log(`   - ${i.week_number}주차 ${i.session_number}차시: ${i.label || '(라벨 없음)'}`));
+  // 학생 이름 조회
+  const profileIds = [...new Set(sessions!.map(s => s.profile_id))];
+  const { data: profiles } = await sc
+    .from('profiles')
+    .select('id, name')
+    .in('id', profileIds);
+  const profileById = new Map((profiles || []).map(p => [p.id, p.name]));
+
+  // 학생 토큰(슬러그) 조회
+  const { data: tokens } = await sc
+    .from('student_tokens')
+    .select('profile_id, slug')
+    .in('profile_id', profileIds)
+    .eq('is_active', true);
+  const slugByProfile = new Map((tokens || []).map(t => [t.profile_id, t.slug]));
+
+  // 목록 출력
+  info(`릴리즈 대상: ${sessions!.length}개 student_sessions`);
+  sessions!.forEach(s => {
+    const name = profileById.get(s.profile_id) || '?';
+    const lecture = s.lecture as unknown as { title: string } | null;
+    const label = s.label ?? lecture?.title ?? '(제목 없음)';
+    const subjLabel = SUBJECT_LABEL[s.subject_slug] || s.subject_slug;
+    console.log(`   - ${name} [${subjLabel}] W${s.week_number}-S${s.session_number}: ${label} (${s.publish_date})`);
+  });
   console.log('');
 
   if (!isDryRun) {
+    const ids = sessions!.map(s => s.id);
     const { error: updErr } = await sc
-      .from('curriculum_items')
+      .from('student_sessions')
       .update({ is_released: true })
-      .in('id', items.map(i => i.id));
+      .in('id', ids);
     if (updErr) error(`릴리즈 업데이트 실패: ${updErr.message}`);
-    success(`${items.length}개 세션 릴리즈 완료`);
+    success(`${ids.length}개 세션 릴리즈 완료`);
   }
 
-  // Find assigned students
-  const { data: links } = await sc
-    .from('student_curriculum_links')
-    .select('profile_id')
-    .eq('curriculum_id', curriculumId);
-
-  const profileIds = (links || []).map(l => l.profile_id);
-  if (profileIds.length === 0) {
-    warn('배정된 학생이 없습니다 — 카톡 메시지 생략');
-    return;
+  // ─── 카톡 메시지 생성 ─────────────────────────────────────────────────────
+  // 학생별로 이번에 릴리즈된 세션들을 묶어서 1통 메시지
+  const byStudent = new Map<string, typeof sessions[number][]>();
+  for (const s of sessions!) {
+    if (!byStudent.has(s.profile_id)) byStudent.set(s.profile_id, []);
+    byStudent.get(s.profile_id)!.push(s);
   }
 
-  // Get student tokens and names
-  const { data: tokens } = await sc
-    .from('student_tokens')
-    .select('profile_id, slug, profiles!inner(name)')
-    .in('profile_id', profileIds)
-    .eq('is_active', true);
-
-  if (!tokens || tokens.length === 0) {
-    warn('활성화된 토큰이 없습니다');
-    return;
-  }
-
-  // Generate messages
-  console.log('');
-  log('💬', '카톡 메시지 생성...');
-  console.log('');
-
-  const sessionSummary = items.map(i => `${i.week_number}주차 ${i.session_number}차시`).join(', ');
-  const firstLabel = items[0].label || sessionSummary;
-
+  log('💬', '카톡 메시지 생성...\n');
   const messages: Array<{ name: string; slug: string; message: string }> = [];
-  for (const token of tokens) {
-    const profile = token.profiles as unknown as { name: string };
-    const name = profile?.name || '(이름없음)';
+
+  for (const [profileId, studentSessions] of byStudent) {
+    const name = profileById.get(profileId) || '?';
+    const slug = slugByProfile.get(profileId);
+    if (!slug) {
+      warn(`${name}: 활성 토큰 없음 — 메시지 생략`);
+      continue;
+    }
+
+    // 과목별 그룹 (같은 과목끼리 묶어서 표시)
+    const bySubject = new Map<string, string[]>();
+    for (const s of studentSessions) {
+      const subjLabel = SUBJECT_LABEL[s.subject_slug] || s.subject_slug;
+      if (!bySubject.has(subjLabel)) bySubject.set(subjLabel, []);
+      const lecture = s.lecture as unknown as { title: string } | null;
+      const label = s.label ?? lecture?.title ?? `${s.week_number}주차 ${s.session_number}차시`;
+      bySubject.get(subjLabel)!.push(`${s.week_number}주차 ${s.session_number}차시 - ${label}`);
+    }
+
+    const sessionLines: string[] = [];
+    for (const [subj, lines] of bySubject) {
+      sessionLines.push(`[${subj}]`);
+      lines.forEach(l => sessionLines.push(`• ${l}`));
+    }
 
     const message = [
-      `[고T수학] ${curriculum.title} ${sessionSummary}`,
+      `[고T수학] 학습 업데이트`,
       '',
-      `${firstLabel} 학습이 올라왔습니다!`,
+      ...sessionLines,
       '',
-      `학습 페이지: ${SITE_URL}/s/${token.slug}`,
+      `학습 페이지: ${SITE_URL}/s/${slug}`,
       '',
       '문제 풀고 매쓰플랫에서 답안 제출 후 카톡 주세요~',
     ].join('\n');
 
-    messages.push({ name, slug: token.slug, message });
+    messages.push({ name, slug, message });
   }
 
-  // Print all messages
   messages.forEach(m => {
-    console.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
+    console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     console.log(`📨 ${m.name} (${m.slug})`);
     console.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
     console.log(m.message);
+    console.log('');
   });
-  console.log('');
 
-  // Save to file
   const dateStr = new Date().toISOString().split('T')[0];
-  const outPath = path.join(process.env.HOME || '', 'Desktop', `카톡메시지_${dateStr}.txt`);
+  const outPath = path.join(process.env.HOME || '', 'Downloads', `카톡메시지_${dateStr}.txt`);
   const fileContent = messages.map(m =>
     `===== ${m.name} (${m.slug}) =====\n${m.message}\n\n`,
   ).join('');
   fs.writeFileSync(outPath, fileContent);
   success(`전체 메시지 저장: ${outPath}`);
 
-  // Copy first message if requested
   if (shouldCopy && messages.length > 0) {
     try {
       execSync('pbcopy', { input: messages[0].message });
@@ -163,8 +204,7 @@ async function main() {
     }
   }
 
-  console.log('');
-  info(`총 ${messages.length}명의 학생에게 보낼 메시지 생성됨`);
+  info(`총 ${messages.length}명의 메시지 생성됨`);
 }
 
 main().catch(err => {

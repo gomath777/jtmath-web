@@ -1,11 +1,14 @@
 /**
- * PDF 문제 메타데이터 추출 (Claude API)
+ * PDF 문제 메타데이터 추출
  *
  * API 라우트와 CLI 스크립트 모두에서 재사용.
  * 독립 함수라 SUPABASE_SERVICE_KEY가 필요없음 (매칭은 별도 함수).
+ *
+ * claude CLI 서브프로세스를 사용해 현재 세션 토큰으로 호출.
+ * (ANTHROPIC_API_KEY 크레딧 불필요)
  */
 
-import Anthropic from '@anthropic-ai/sdk';
+import { spawnSync } from 'child_process';
 
 export interface ParsedProblem {
   problem_number: number;   // PDF에서의 순서 (01, 02...)
@@ -34,36 +37,48 @@ const PROMPT = `이 PDF의 각 문제 상단에 "[YYYY년 MM월 고N NN번/XX점
 {"problem_number": 3, "year": null, "month": null, "grade": null, "problem": null, "raw_text": ""}`;
 
 /**
- * PDF 버퍼를 Claude API로 분석해 문제 메타데이터 추출
+ * PDF 버퍼를 claude CLI 서브프로세스로 분석해 문제 메타데이터 추출.
+ * stream-json 입력 포맷으로 PDF base64를 전달해 현재 세션 토큰을 사용.
  */
 export async function parsePdfWithClaude(pdfBuffer: Buffer | ArrayBuffer): Promise<ParsedProblem[]> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY 환경변수가 설정되지 않았습니다');
-  }
-
-  const anthropic = new Anthropic({ apiKey });
   const buffer = pdfBuffer instanceof ArrayBuffer ? Buffer.from(pdfBuffer) : pdfBuffer;
   const base64 = buffer.toString('base64');
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'document',
-            source: { type: 'base64', media_type: 'application/pdf', data: base64 },
-          },
-          { type: 'text', text: PROMPT },
-        ],
-      },
-    ],
+  const inputMessage = JSON.stringify({
+    type: 'user',
+    message: {
+      role: 'user',
+      content: [
+        { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+        { type: 'text', text: PROMPT },
+      ],
+    },
   });
 
-  const responseText = message.content[0].type === 'text' ? message.content[0].text : '';
+  const result = spawnSync('claude', [
+    '--print',
+    '--input-format', 'stream-json',
+    '--output-format', 'stream-json',
+    '--verbose',
+    '--model', 'claude-sonnet-4-6',
+  ], {
+    input: inputMessage,
+    encoding: 'utf8',
+    maxBuffer: 20 * 1024 * 1024,
+  });
+
+  if (result.error) throw new Error(`claude CLI 실행 오류: ${result.error.message}`);
+  if (result.status !== 0) throw new Error(`claude CLI 오류 (exit ${result.status}): ${result.stderr?.slice(0, 500)}`);
+
+  // stream-json 출력에서 type=result 라인 추출
+  const resultLine = (result.stdout as string)
+    .split('\n')
+    .map(l => { try { return JSON.parse(l); } catch { return null; } })
+    .find(o => o?.type === 'result');
+
+  if (!resultLine) throw new Error(`claude CLI 응답 파싱 실패:\n${(result.stdout as string).slice(0, 500)}`);
+
+  const responseText: string = resultLine.result ?? '';
   const jsonMatch = responseText.match(/\[[\s\S]*\]/);
 
   if (!jsonMatch) {

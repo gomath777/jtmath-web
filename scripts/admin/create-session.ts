@@ -13,12 +13,16 @@
  *     [--label "다항식과 나머지정리 교육청 기출"] \
  *     [--subject gs1] \
  *     [--storage-prefix sessions/gs1/01_다항식] \
+ *     [--variant v2] \
  *     [--release] [--dry-run] [--json]
  *
  * 폴더 구조:
  *   기출/   → 1차시 (레벨1,2 / 레벨3+영상 / 레벨4+힌트북+영상)
  *   심화/   → 2차시 (1단계+힌트북 / 2단계+힌트북 / 레벨4-2+힌트북 / 3단계)
  *   레벨5/  → 4주차 (레벨5+힌트북)
+ *
+ * 같은 차시에 시험범위가 다른 학생용 변형판을 올릴 때는 --variant v2 (또는 다른 이름).
+ * 폴더는 "기출_PDF v2" 처럼 접미어 " v2"를 붙이면 자동 인식.
  */
 
 import * as fs from 'fs';
@@ -45,27 +49,31 @@ interface PdfFile {
 }
 
 function detectFileKind(filename: string): PdfFile {
-  const name = filename.replace(/\.pdf$/i, '');
-  const isHintbook = /^\[힌트북\]/.test(name);
+  // macOS 파일시스템은 한글을 NFD(decomposed)로 저장 → regex 리터럴(NFC)과 매치 실패 방지
+  const nfcFilename = filename.normalize('NFC');
+  const name = nfcFilename.replace(/\.pdf$/i, '');
+  const isHintbook = /^\[힌트북\]/.test(name) || /^고T의 힌트북\s*-/.test(name);
   const cleanName = name.replace(/^\[힌트북\]\s*/, '');
 
   let info: Omit<PdfFile, 'localPath' | 'displayName'> = { kind: 'level' };
 
   // 레벨 매칭: "레벨3", "레벨4-1", "레벨5-1"
-  const levelMatch = cleanName.match(/^레벨(\d+)(?:-(\d+))?/);
+  // 2026-04: 단원 prefix 허용 ("함수 레벨1", "다항식 나머지정리 레벨4-2" 등)
+  const levelMatch = cleanName.match(/(?:^|\s)레벨(\d+)(?:-(\d+))?/);
   if (levelMatch) {
     const level = parseInt(levelMatch[1]);
+    const variantStr = levelMatch[0].trim().replace(/^레벨/, '');
     if (level === 5) {
-      info = { kind: 'level5', level: 5, levelVariant: levelMatch[0].replace(/^레벨/, '') };
+      info = { kind: 'level5', level: 5, levelVariant: variantStr };
     } else {
-      info = { kind: 'level', level, levelVariant: levelMatch[0].replace(/^레벨/, '') };
+      info = { kind: 'level', level, levelVariant: variantStr };
     }
-  } else if (/^(\d+)단계/.test(cleanName)) {
-    // 심화: "1단계", "2단계"
-    const stageMatch = cleanName.match(/^(\d+)단계/);
+  } else if (/(?:^|\s)(\d+)단계/.test(cleanName)) {
+    // 심화: "1단계", "2단계" (prefix 허용: "다항식 3배수 1단계")
+    const stageMatch = cleanName.match(/(?:^|\s)(\d+)단계/);
     info = { kind: 'stage', stage: parseInt(stageMatch![1]) };
-  } else if (/^\d+$/.test(cleanName)) {
-    // 올스캔: "01", "02"
+  } else if (/^\d+$/.test(cleanName) || /^올\s?스캔/.test(cleanName)) {
+    // 올스캔: "01", "02", "올 스캔 중간범위#1"
     info = { kind: 'scan' };
   }
 
@@ -112,9 +120,16 @@ async function main() {
   const label = args.options.label;
   const subjectSlug = args.options.subject || null;
   const storagePrefix = args.options['storage-prefix'] || `sessions/auto/${curriculumId.slice(0, 8)}/w${week}s${session}`;
+  const variant = args.options.variant || 'default';
+  const uploadPrefix = variant === 'default' ? storagePrefix : `${storagePrefix}/${variant}`;
   const isDryRun = args.flags.has('dry-run');
   const shouldRelease = args.flags.has('release');
   const asJson = args.flags.has('json');
+  // --publish-date YYYY-MM-DD — 생략 시 오늘. content-pipeline build가 주차 기반으로 주입.
+  const publishDate = args.options['publish-date'] || new Date().toISOString().split('T')[0];
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(publishDate)) {
+    error(`--publish-date 형식 오류 (YYYY-MM-DD): ${publishDate}`);
+  }
 
   // Resolve contentDir - support both absolute and relative paths
   let resolvedDir = contentDir;
@@ -131,16 +146,20 @@ async function main() {
 
   dryRunBanner(isDryRun);
 
-  // Determine session type from folder name
-  const folderName = path.basename(resolvedDir);
-  const isGichul = folderName === '기출';    // 1차시
-  const isShimhwa = folderName === '심화';   // 2차시
-  const isLevel5 = folderName === '레벨5';    // 4주차
+  // Determine session type from folder name.
+  // 2026-04 재편으로 '기출'·'심화'·'레벨5'에 '_PDF'/'_모음' 접미어가 붙는 신구조 지원.
+  // 변형판은 같은 폴더명에 ' v2' (또는 ' v3' 등) 접미어를 붙임 → 동일 타입으로 인식.
+  const folderName = path.basename(resolvedDir).normalize('NFC');
+  const baseFolderName = folderName.replace(/\s+v\d+$/, '');
+  const isGichul = baseFolderName === '기출' || baseFolderName === '기출_PDF';     // 1차시
+  const isShimhwa = baseFolderName === '심화' || baseFolderName === '심화_PDF';    // 2차시
+  const isLevel5 = baseFolderName === '레벨5' || baseFolderName === '레벨5_모음' || baseFolderName === '_레벨5_모음';  // 레벨5 묶음
 
   info(`폴더: ${resolvedDir}`);
   info(`타입: ${isGichul ? '1차시 (기출)' : isShimhwa ? '2차시 (심화)' : isLevel5 ? '레벨5' : '알 수 없음'}`);
   info(`커리큘럼: ${curriculumId} (${week}주차 ${session}차시)`);
-  info(`저장 경로: ${storagePrefix}/`);
+  info(`Variant: ${variant}${variant !== 'default' ? ' (변형판)' : ''}`);
+  info(`저장 경로: ${uploadPrefix}/`);
   console.log('');
 
   // Scan PDFs
@@ -183,7 +202,7 @@ async function main() {
   const uploaded = new Map<string, { url: string; size: string }>();
 
   for (const f of pdfFiles) {
-    const storagePath = `${storagePrefix}/${f.displayName}`;
+    const storagePath = `${uploadPrefix}/${f.displayName}`;
     try {
       const { cdnUrl, skipped } = await uploadPdfFromPath(f.localPath, storagePath);
       const sizeMB = ((f.size || 0) / 1024 / 1024).toFixed(1);
@@ -223,9 +242,10 @@ async function main() {
       });
     }
 
-    // Group 2: 레벨3 (+ 해설강의 매칭)
+    // Group 2: 레벨3 (+ 해설강의 매칭 + 힌트북 있으면 포함)
     if (level3) {
       const u = uploaded.get(level3.displayName)!;
+      const hb3 = hintbookMap.get(level3.displayName);
       info('레벨3 PDF 해설강의 매칭 중...');
       let videos: Array<{ bunny_video_id: string; title: string; problem_number: number; raw_text: string }> = [];
       try {
@@ -243,6 +263,7 @@ async function main() {
           label: '레벨3',
           step: blocks.length + 1,
           pdf: { url: u.url, original_name: level3.displayName, file_size: u.size },
+          ...(hb3 ? { hintbook: { url: uploaded.get(hb3.displayName)!.url, original_name: hb3.displayName } } : {}),
           videos: videos.length > 0 ? videos : undefined,
         },
       });
@@ -364,13 +385,19 @@ async function main() {
   if (existing) {
     itemId = existing.id;
     info(`기존 curriculum_item 업데이트: ${itemId}`);
-    await sc.from('curriculum_items').update({
-      label: label || undefined,
-      is_released: shouldRelease || undefined,
-    }).eq('id', itemId);
+    // 변형판 업로드(variant !== default) 시에는 default 메타(label/release)는 건드리지 않음
+    if (variant === 'default') {
+      await sc.from('curriculum_items').update({
+        label: label || undefined,
+        is_released: shouldRelease || undefined,
+        publish_date: publishDate,
+      }).eq('id', itemId);
+    }
 
-    // Delete old blocks
-    await sc.from('session_blocks').delete().eq('curriculum_item_id', itemId);
+    // 같은 variant의 기존 블록만 삭제 (다른 variant는 보존)
+    await sc.from('session_blocks').delete()
+      .eq('curriculum_item_id', itemId)
+      .eq('variant', variant);
   } else {
     info('새 curriculum_item 생성...');
     const { data: created, error: err } = await sc
@@ -380,7 +407,7 @@ async function main() {
         week_number: week,
         session_number: session,
         label: label || `${week}주차 ${session}차시`,
-        publish_date: new Date().toISOString().split('T')[0],
+        publish_date: publishDate,
         is_released: shouldRelease,
       })
       .select('id')
@@ -395,6 +422,7 @@ async function main() {
     block_type: 'content_group',
     order_index: b.order_index,
     content: b.content,
+    variant,
   }));
 
   const { error: insertErr } = await sc.from('session_blocks').insert(blocksWithItem);

@@ -26,6 +26,20 @@ async function cmdAdd() {
   const birth = required(args, 'birth');
   const school = args.options.school || '';
   const phone = args.options.phone || '';
+  // --type 'online' (default, 기존 학생/온라인 스토어 학생) or 'offline' (학원 오프라인 수업생)
+  const studentType = (args.options.type || 'online').trim();
+  if (studentType !== 'online' && studentType !== 'offline') {
+    error(`--type 은 'online' 또는 'offline' 만 허용 (입력: ${studentType})`);
+  }
+
+  let grade: number | null = null;
+  if (args.options.grade !== undefined) {
+    const g = Number(args.options.grade);
+    if (![1, 2, 3].includes(g)) {
+      error(`--grade 는 1, 2, 3 만 허용 (입력: ${args.options.grade})`);
+    }
+    grade = g;
+  }
 
   if (birth.length !== 6 || !/^\d{6}$/.test(birth)) {
     error('--birth는 YYMMDD 6자리 숫자여야 합니다 (예: 080315)');
@@ -44,7 +58,7 @@ async function cmdAdd() {
   // Use register-from-sheet API logic (needs email)
   const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   const SERVICE_KEY = process.env.SUPABASE_SERVICE_KEY!;
-  const email = `${name}-${Date.now()}@jtmath.kr`;
+  const email = `${generateSlug()}-${Date.now()}@jtmath.kr`;
 
   info(`학생 등록 중: ${name}`);
 
@@ -75,8 +89,10 @@ async function cmdAdd() {
     name,
     birth_date: birth,
     school,
+    grade,
     phone_student: phone,
-    email,
+    phone_parent: '',
+    assignment_email: email,
   });
   if (profileErr) error(`프로필 생성 실패: ${profileErr.message}`);
 
@@ -92,13 +108,15 @@ async function cmdAdd() {
     profile_id: authUser.id,
     slug,
     birth_pin: birth,
+    student_type: studentType,
   });
   if (tokenErr) error(`토큰 생성 실패: ${tokenErr.message}`);
 
+  const urlPathPrefix = studentType === 'offline' ? '/c' : '/s';
   console.log('');
-  success(`등록 완료: ${name}`);
+  success(`등록 완료: ${name} (${studentType})`);
   info(`ID: ${authUser.id}`);
-  info(`링크: ${SITE_URL}/s/${slug}`);
+  info(`링크: ${SITE_URL}${urlPathPrefix}/${slug}`);
   info(`생년월일 PIN: ${birth}`);
 }
 
@@ -122,7 +140,7 @@ async function cmdList() {
 
   let query = sc
     .from('student_tokens')
-    .select('slug, last_accessed_at, is_active, profile_id, profiles!inner(name, school)')
+    .select('slug, last_accessed_at, is_active, profile_id, profiles!inner(name, school, grade)')
     .order('created_at', { ascending: false });
 
   if (profileIds) query = query.in('profile_id', profileIds);
@@ -134,9 +152,10 @@ async function cmdList() {
   }
 
   const rows = data.map(t => {
-    const p = t.profiles as unknown as { name: string; school: string };
+    const p = t.profiles as unknown as { name: string; school: string; grade: number | null };
     return {
       이름: p?.name || '?',
+      학년: p?.grade ? `고${p.grade}` : '-',
       학교: p?.school || '',
       링크: `/s/${t.slug}`,
       '최근 접속': t.last_accessed_at ? new Date(t.last_accessed_at).toLocaleDateString('ko-KR') : '-',
@@ -184,7 +203,7 @@ async function cmdInfo() {
   const sc = getServiceClient();
   const { data: profile } = await sc
     .from('profiles')
-    .select('id, name, birth_date, school, phone_student, email')
+    .select('id, name, birth_date, school, grade, phone_student, email')
     .eq('name', studentName)
     .maybeSingle();
   if (!profile) error(`학생 없음: ${studentName}`);
@@ -203,6 +222,7 @@ async function cmdInfo() {
   console.log(`📋 ${profile!.name}`);
   console.log(`   ID: ${profile!.id}`);
   console.log(`   생년월일: ${profile!.birth_date}`);
+  console.log(`   학년: ${profile!.grade ? `고${profile!.grade}` : '-'}`);
   console.log(`   학교: ${profile!.school || '-'}`);
   console.log(`   연락처: ${profile!.phone_student || '-'}`);
   if (token) {
@@ -244,7 +264,7 @@ async function main() {
 
   if (!cmd || cmd === 'help' || cmd === '--help') {
     console.log('사용법:');
-    console.log('  manage-student.ts add --name X --birth YYMMDD --school Y [--phone Z]');
+    console.log('  manage-student.ts add --name X --birth YYMMDD --school Y [--phone Z] [--grade 1|2|3] [--type online|offline]');
     console.log('  manage-student.ts list [--curriculum <id>]');
     console.log('  manage-student.ts link --student <이름> --curriculum <id>');
     console.log('  manage-student.ts info <이름>');

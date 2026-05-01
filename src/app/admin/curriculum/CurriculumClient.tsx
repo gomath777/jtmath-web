@@ -1,17 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import {
-  Users, CreditCard, BookOpen, LayoutDashboard, Calendar,
-  Plus, Loader2, CheckCircle, ChevronDown, ChevronUp, Send, X, Trash2, Edit3,
+  Users, BookOpen, Calendar,
+  Plus, Loader2, ChevronDown, ChevronUp, Send, X, Edit3,
+  FileText, Video, ChevronsDownUp, ChevronsUpDown,
 } from 'lucide-react';
 import SessionBlockEditor from './SessionBlockEditor';
+import AdminLayout from '@/components/admin/AdminLayout';
 
 interface LearningSet {
   id: string;
   title: string;
   pdf_filename: string | null;
+}
+
+interface SessionBlock {
+  id: string;
+  block_type: string;
+  order_index: number;
+  content: Record<string, unknown>;
 }
 
 interface CurriculumItem {
@@ -22,6 +30,7 @@ interface CurriculumItem {
   label: string;
   publish_date: string;
   learning_sets: LearningSet | null;
+  session_blocks: SessionBlock[];
 }
 
 interface Curriculum {
@@ -157,8 +166,19 @@ export default function CurriculumClient() {
   const [selectedCourse, setSelectedCourse] = useState('');
   const [assigning, setAssigning] = useState(false);
 
-  // 펼침 상태
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  // 펼침 상태 (여러 개 동시 가능)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const expandAll = () => setExpandedIds(new Set(curricula.map(c => c.id)));
+  const collapseAll = () => setExpandedIds(new Set());
 
   useEffect(() => { fetchCurricula(); }, []);
 
@@ -264,6 +284,24 @@ export default function CurriculumClient() {
       alert('배정 오류: ' + String(err));
     } finally { setAssigning(false); }
   };
+
+  // content_group 블록에서 PDF 수 / 영상 수 추출
+  function blockSummary(block: SessionBlock): { label: string; pdfs: number; videos: number } {
+    const c = block.content || {};
+    let pdfs = 0;
+    let videos = 0;
+    if (block.block_type === 'content_group') {
+      const pdfArr = Array.isArray(c.pdfs) ? c.pdfs : c.pdf ? [c.pdf] : [];
+      const hintbook = c.hintbook ? 1 : 0;
+      pdfs = pdfArr.length + hintbook;
+      videos = Array.isArray(c.videos) ? c.videos.length : 0;
+    } else if (block.block_type === 'pdf' || block.block_type === 'hintbook') {
+      pdfs = 1;
+    } else if (block.block_type === 'video_group') {
+      videos = Array.isArray(c.videos) ? c.videos.length : 1;
+    }
+    return { label: String(c.label || block.block_type), pdfs, videos };
+  }
 
   const formatDate = (d: string) => {
     const date = new Date(d + 'T00:00:00');
@@ -397,7 +435,18 @@ export default function CurriculumClient() {
     <AdminLayout activeNav="curriculum">
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-slate-800">커리큘럼 관리</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-bold text-slate-800">커리큘럼 관리</h2>
+            {curricula.length > 0 && (
+              expandedIds.size === curricula.length
+                ? <button onClick={collapseAll} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 font-medium">
+                    <ChevronsDownUp className="w-3.5 h-3.5" />전체 접기
+                  </button>
+                : <button onClick={expandAll} className="flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600 font-medium">
+                    <ChevronsUpDown className="w-3.5 h-3.5" />전체 펼치기
+                  </button>
+            )}
+          </div>
           <button onClick={() => setMode('create')}
             className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition-colors">
             <Plus className="w-4 h-4" />
@@ -416,12 +465,13 @@ export default function CurriculumClient() {
         ) : (
           <div className="space-y-3">
             {curricula.map(cur => {
-              const isExpanded = expandedId === cur.id;
+              const isExpanded = expandedIds.has(cur.id);
               const items = (cur.curriculum_items || []).sort((a, b) => a.session_number - b.session_number);
-              const linkedCount = items.filter(i => i.set_id).length;
+              const linkedCount = items.filter(i => (i.session_blocks || []).length > 0).length;
 
               return (
                 <div key={cur.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                  {/* 커리큘럼 헤더 */}
                   <div className="flex items-center gap-4 p-5">
                     <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
                       <Calendar className="w-5 h-5 text-blue-500" />
@@ -438,39 +488,79 @@ export default function CurriculumClient() {
                       className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-700 px-3 py-2 rounded-xl hover:bg-red-50">
                       <Send className="w-3 h-3" /> 배정
                     </button>
-                    <button onClick={() => setExpandedId(isExpanded ? null : cur.id)}
+                    <button onClick={() => toggleExpand(cur.id)}
                       className="text-slate-400 hover:text-slate-600">
                       {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                     </button>
                   </div>
 
+                  {/* 차시 목록 */}
                   {isExpanded && (
-                    <div className="border-t border-slate-100 px-5 py-3 space-y-1.5">
-                      {items.map(item => (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            setEditingItem({
-                              id: item.id,
-                              weekNumber: item.week_number,
-                              sessionNumber: item.session_number,
-                              label: item.label,
-                              subjectSlug: cur.subject_slug || undefined,
-                            });
-                            setMode('edit-session');
-                          }}
-                          className="flex items-center gap-3 text-sm w-full text-left p-2 -mx-2 rounded-lg hover:bg-slate-50 transition-colors group/item"
-                        >
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-lg ${
-                            item.session_number % 2 === 1 ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
-                          }`}>
-                            {formatDate(item.publish_date)}
-                          </span>
-                          <span className="text-xs text-slate-400 w-10">{item.session_number}차시</span>
-                          <span className="text-slate-600">{item.label || '-'}</span>
-                          <Edit3 className="w-3.5 h-3.5 text-slate-300 ml-auto opacity-0 group-hover/item:opacity-100 transition-opacity" />
-                        </button>
-                      ))}
+                    <div className="border-t border-slate-100 divide-y divide-slate-50">
+                      {items.map(item => {
+                        const blocks = (item.session_blocks || [])
+                          .sort((a, b) => a.order_index - b.order_index)
+                          .filter(b => b.block_type !== 'section_header');
+                        const hasContent = blocks.length > 0;
+
+                        return (
+                          <div key={item.id} className="group/item">
+                            {/* 차시 행 */}
+                            <div className="flex items-center gap-3 px-5 py-3">
+                              <span className={`shrink-0 text-xs font-bold px-2 py-0.5 rounded-lg ${
+                                item.session_number % 2 === 1 ? 'bg-green-100 text-green-700' : 'bg-purple-100 text-purple-700'
+                              }`}>
+                                {formatDate(item.publish_date)}
+                              </span>
+                              <span className="text-xs text-slate-400 w-10 shrink-0">{item.session_number}차시</span>
+                              <span className="text-sm text-slate-700 font-medium flex-1">{item.label || '(미설정)'}</span>
+                              {!hasContent && (
+                                <span className="text-xs text-slate-300">콘텐츠 없음</span>
+                              )}
+                              <button
+                                onClick={() => {
+                                  setEditingItem({
+                                    id: item.id,
+                                    weekNumber: item.week_number,
+                                    sessionNumber: item.session_number,
+                                    label: item.label,
+                                    subjectSlug: cur.subject_slug || undefined,
+                                  });
+                                  setMode('edit-session');
+                                }}
+                                className="opacity-0 group-hover/item:opacity-100 transition-opacity flex items-center gap-1 text-xs text-slate-400 hover:text-slate-600"
+                              >
+                                <Edit3 className="w-3.5 h-3.5" /> 편집
+                              </button>
+                            </div>
+
+                            {/* 블록 인라인 표시 */}
+                            {hasContent && (
+                              <div className="px-5 pb-3 flex flex-wrap gap-2">
+                                {blocks.map(block => {
+                                  const { label, pdfs, videos } = blockSummary(block);
+                                  return (
+                                    <div key={block.id}
+                                      className="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg px-3 py-1.5 text-xs">
+                                      <span className="text-slate-600 font-medium">{label}</span>
+                                      {pdfs > 0 && (
+                                        <span className="flex items-center gap-0.5 text-blue-500">
+                                          <FileText className="w-3 h-3" />{pdfs}
+                                        </span>
+                                      )}
+                                      {videos > 0 && (
+                                        <span className="flex items-center gap-0.5 text-emerald-500">
+                                          <Video className="w-3 h-3" />{videos}
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -563,43 +653,3 @@ export default function CurriculumClient() {
   );
 }
 
-// 어드민 레이아웃 (사이드바 포함)
-function AdminLayout({ children, activeNav }: { children: React.ReactNode; activeNav: string }) {
-  const navItems = [
-    { key: 'users', href: '/admin?tab=users', icon: Users, label: '수강생 관리' },
-    { key: 'payments', href: '/admin?tab=payments', icon: CreditCard, label: '결제 내역' },
-    { key: 'stats', href: '/admin?tab=stats', icon: LayoutDashboard, label: '현황 요약' },
-    { key: 'content', href: '/admin/content-library', icon: BookOpen, label: '보충자료' },
-    { key: 'curriculum', href: '/admin/curriculum', icon: Calendar, label: '커리큘럼' },
-  ];
-
-  return (
-    <div className="min-h-screen bg-[#F8F9FA] flex flex-col">
-      <header className="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="font-extrabold text-xl tracking-tight text-white hover:text-red-400 transition-colors">
-            jtmath <span className="text-red-500 text-base font-bold bg-white/10 px-2 py-0.5 rounded ml-1">ADMIN</span>
-          </Link>
-          <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors text-xs">대시보드 &rarr;</Link>
-        </div>
-      </header>
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-7xl flex gap-8">
-        <div className="w-56 shrink-0 hidden md:block">
-          <nav className="space-y-1 sticky top-24">
-            {navItems.map(item => (
-              <Link key={item.key} href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors ${
-                  activeNav === item.key
-                    ? 'bg-white text-red-600 shadow-sm border border-slate-100'
-                    : 'text-slate-600 hover:bg-slate-100'
-                }`}>
-                <item.icon className="w-5 h-5" />{item.label}
-              </Link>
-            ))}
-          </nav>
-        </div>
-        <div className="flex-1 min-w-0">{children}</div>
-      </main>
-    </div>
-  );
-}

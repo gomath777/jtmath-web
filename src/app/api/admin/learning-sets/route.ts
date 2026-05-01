@@ -13,15 +13,30 @@ export async function GET(req: NextRequest) {
     process.env.SUPABASE_SERVICE_KEY!
   );
 
-  const { data, error } = await serviceClient
+  const kind = req.nextUrl.searchParams.get('kind');
+
+  let query = serviceClient
     .from('learning_sets')
     .select(`
-      id, title, description, subject_slug, pdf_url, pdf_filename, created_at,
+      id, title, description, subject_slug, pdf_url, pdf_filename, pdfs,
+      kind, chapter_order, created_at,
       learning_set_videos (
         id, problem_number, bunny_video_id, title, is_matched, order_index
       )
-    `)
-    .order('created_at', { ascending: false });
+    `);
+
+  if (kind) {
+    query = query.eq('kind', kind);
+  }
+
+  // 개념강의는 chapter_order 순, 그 외는 최신순
+  if (kind === 'concept') {
+    query = query.order('chapter_order', { ascending: true });
+  } else {
+    query = query.order('created_at', { ascending: false });
+  }
+
+  const { data, error } = await query;
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);

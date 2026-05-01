@@ -9,6 +9,7 @@ import SeasonPlan from './SeasonPlan';
 import type { TodayTask } from './variants/types';
 import VariantB from './variants/VariantB';
 import { getVariantForSlug } from '@/lib/dashboardVariants';
+import MasterCalendarView from './MasterCalendarView';
 
 /** 이벤트 트래킹 — fire-and-forget. 실패해도 UX 방해 X. */
 function trackEvent(event_type: string, metadata?: Record<string, unknown>) {
@@ -36,6 +37,17 @@ interface CurriculumData {
   sessions: SessionItem[];
 }
 
+interface MasterSessionEntry {
+  id: string;
+  subject_slug: string;
+  subject_label: string;
+  week_number: number;
+  session_number: number;
+  label: string | null;
+  publishDate: string | null;
+  is_released: boolean;
+}
+
 interface DashboardData {
   profile: {
     name: string;
@@ -47,6 +59,8 @@ interface DashboardData {
   odapjiCount: number;
   todayTasks: TodayTask[];
   nextReleaseAt?: string;
+  isMaster?: boolean;
+  masterSessions?: MasterSessionEntry[];
 }
 
 interface ExamCountdown {
@@ -79,8 +93,8 @@ function buildCountdowns(profile: DashboardData['profile']): ExamCountdown[] {
       });
       return { label: e.label, date: e.raw, daysLeft, displayDate };
     })
-    // Only show countdowns that are today or in the future (or past within 7 days)
-    .filter(c => c.daysLeft >= -7)
+    // Only show countdowns that are today or in the future
+    .filter(c => c.daysLeft >= 0)
     .sort((a, b) => a.daysLeft - b.daysLeft);
 }
 
@@ -276,6 +290,18 @@ export default function StudentDashboardClient({
   }
 
   if (!data) return null;
+
+  // ─── 마스터 모드: 4주 캘린더 뷰 ─────────────────────────────────────────
+  if (data.isMaster) {
+    return (
+      <MasterCalendarView
+        profile={data.profile}
+        masterSessions={data.masterSessions || []}
+        slug={slug}
+        basePath={basePath}
+      />
+    );
+  }
 
   const countdowns = buildCountdowns(data.profile);
 

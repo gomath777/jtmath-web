@@ -2,7 +2,7 @@ import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Users, CreditCard, BookOpen, LayoutDashboard, Calendar } from 'lucide-react';
+import { Users, CreditCard, BookOpen, LayoutDashboard, Calendar, Video } from 'lucide-react';
 import ContentLibraryClient from './ContentLibraryClient';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map((e) => e.trim());
@@ -24,6 +24,7 @@ export default async function ContentLibraryPage() {
       id, title, description, subject_slug, pdf_filename, created_at,
       learning_set_videos ( id )
     `)
+    .or('kind.is.null,kind.eq.supplement')   // 개념강의는 별도 페이지에서 관리
     .order('created_at', { ascending: false });
 
   return (
@@ -62,6 +63,10 @@ export default async function ContentLibraryPage() {
             <Link href="/admin/content-library"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors bg-white text-red-600 shadow-sm border border-slate-100">
               <BookOpen className="w-5 h-5" />보충자료
+            </Link>
+            <Link href="/admin/concept-lectures"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100">
+              <Video className="w-5 h-5" />개념강의
             </Link>
             <Link href="/admin/curriculum"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100">
