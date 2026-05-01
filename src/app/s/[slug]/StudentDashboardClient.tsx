@@ -5,11 +5,10 @@ import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download, Chevro
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import ConceptLecturesSection from './ConceptLecturesSection';
-import SeasonPlan from './SeasonPlan';
 import type { TodayTask } from './variants/types';
-import VariantB from './variants/VariantB';
+import VariantA from './variants/VariantA';
 import { getVariantForSlug } from '@/lib/dashboardVariants';
-import MasterCalendarView from './MasterCalendarView';
+import SessionCalendarView from './SessionCalendarView';
 
 /** 이벤트 트래킹 — fire-and-forget. 실패해도 UX 방해 X. */
 function trackEvent(event_type: string, metadata?: Record<string, unknown>) {
@@ -37,7 +36,7 @@ interface CurriculumData {
   sessions: SessionItem[];
 }
 
-interface MasterSessionEntry {
+interface CalendarSessionEntry {
   id: string;
   subject_slug: string;
   subject_label: string;
@@ -48,7 +47,7 @@ interface MasterSessionEntry {
   is_released: boolean;
 }
 
-interface MasterConceptItem {
+interface CalendarConceptItem {
   id: string;
   title: string;
   subject_slug: string;
@@ -68,8 +67,8 @@ interface DashboardData {
   todayTasks: TodayTask[];
   nextReleaseAt?: string;
   isMaster?: boolean;
-  masterSessions?: MasterSessionEntry[];
-  masterConceptItems?: MasterConceptItem[];
+  calendarSessions?: CalendarSessionEntry[];
+  calendarConceptItems?: CalendarConceptItem[];
 }
 
 interface ExamCountdown {
@@ -345,9 +344,10 @@ export default function StudentDashboardClient({
     return (
       <div>
         {masterBanner}
-        <MasterCalendarView
-          masterSessions={data.masterSessions || []}
-          masterConceptItems={data.masterConceptItems}
+        <SessionCalendarView
+          mode="master"
+          sessions={data.calendarSessions || []}
+          conceptItems={data.calendarConceptItems}
           slug={slug}
           basePath={basePath}
         />
@@ -401,8 +401,19 @@ export default function StudentDashboardClient({
         )}
       </div>
 
-      {/* ─── 오늘 할 일 (Variant B: 주간 타임라인 + Hero + Mini) ─── */}
-      <VariantB
+      {/* ─── 4주 캘린더 (학생 모드: 미릴리즈/미래는 잠금 표시) ─── */}
+      <div className="mb-8">
+        <SessionCalendarView
+          mode="student"
+          sessions={data.calendarSessions || []}
+          conceptItems={data.calendarConceptItems}
+          slug={slug}
+          basePath={basePath}
+        />
+      </div>
+
+      {/* ─── 오늘 할 일 (Hero + Mini × 2) ─── */}
+      <VariantA
         tasks={data.todayTasks || []}
         nextReleaseAt={data.nextReleaseAt}
         curricula={data.curricula}
@@ -621,8 +632,6 @@ export default function StudentDashboardClient({
       </>
       )}
 
-      {/* ─── 시즌 학습 일정 (토글 무관 항상 표시) ─── */}
-      <SeasonPlan slug={slug} basePath={basePath} />
     </div>
   );
 }

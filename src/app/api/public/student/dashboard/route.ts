@@ -71,10 +71,8 @@ export async function GET(req: NextRequest) {
     .order('week_number', { ascending: true })
     .order('session_number', { ascending: true });
 
-  // 비마스터: 릴리즈된 세션만
-  const { data: studentSessions } = student.isMaster
-    ? await sessionQuery
-    : await sessionQuery.eq('is_released', true);
+  // 캘린더에는 미릴리즈도 포함(잠금 표시용). 학습 페이지/오늘 할 일 계산은 아래에서 is_released로 필터.
+  const { data: studentSessions } = await sessionQuery;
 
   // subject_slug별로 그룹핑 → 기존 curricula 구조와 호환 (released 세션만)
   const subjectGroups = new Map<string, {
@@ -107,8 +105,8 @@ export async function GET(req: NextRequest) {
 
   const curriculaWithSessions = Array.from(subjectGroups.values());
 
-  // ─── 마스터 전용: 4주 캘린더용 flat 세션 목록 ────────────────────────────
-  interface MasterSessionEntry {
+  // ─── 4주 캘린더용 flat 세션 목록 (마스터/학생 공통) ──────────────────────
+  interface CalendarSessionEntry {
     id: string;
     subject_slug: string;
     subject_label: string;
@@ -118,22 +116,19 @@ export async function GET(req: NextRequest) {
     publishDate: string | null;
     is_released: boolean;
   }
-  let masterSessions: MasterSessionEntry[] | undefined;
-  if (student.isMaster) {
-    masterSessions = (studentSessions || []).map(s => {
-      const lecture = s.lecture as unknown as { title: string } | null;
-      return {
-        id: s.id,
-        subject_slug: s.subject_slug,
-        subject_label: SUBJECT_LABEL[s.subject_slug] || s.subject_slug,
-        week_number: s.week_number,
-        session_number: s.session_number,
-        label: s.label ?? lecture?.title ?? null,
-        publishDate: s.publish_date as string | null,
-        is_released: s.is_released,
-      };
-    });
-  }
+  const calendarSessions: CalendarSessionEntry[] = (studentSessions || []).map(s => {
+    const lecture = s.lecture as unknown as { title: string } | null;
+    return {
+      id: s.id,
+      subject_slug: s.subject_slug,
+      subject_label: SUBJECT_LABEL[s.subject_slug] || s.subject_slug,
+      week_number: s.week_number,
+      session_number: s.session_number,
+      label: s.label ?? lecture?.title ?? null,
+      publishDate: s.publish_date as string | null,
+      is_released: s.is_released,
+    };
+  });
 
   // ─── 오답지 카운트 ────────────────────────────────────────────────────────
   const { count: odapjiCount } = await sc
@@ -187,11 +182,8 @@ export async function GET(req: NextRequest) {
     .not('set_id', 'is', null)
     .not('published_at', 'is', null)
     .order('published_at', { ascending: false });
-  // 비마스터: 현재 시각 이전 배정만 (학생에게 공개된 것만)
-  // 마스터: 미래 배정 포함 전체 조회
-  const { data: conceptAssigns } = student.isMaster
-    ? await conceptAssignsBase
-    : await conceptAssignsBase.lte('published_at', new Date().toISOString());
+  // 캘린더에는 미래 배정도 포함(잠금 표시). todayTasks는 아래 dueConcepts 필터로 오늘 이전만 사용.
+  const { data: conceptAssigns } = await conceptAssignsBase;
 
   const conceptSetIds = (conceptAssigns || []).map(a => a.set_id).filter(Boolean);
 
@@ -288,16 +280,14 @@ export async function GET(req: NextRequest) {
     todayTasks,
     nextReleaseAt: computeNextReleaseAt(),
     isMaster: student.isMaster ?? false,
-    ...(masterSessions !== undefined ? { masterSessions } : {}),
-    ...(student.isMaster ? {
-      masterConceptItems: conceptTasks.map(t => ({
-        id: t.id,
-        title: t.title,
-        subject_slug: t.subject_slug,
-        subject_label: t.subject_label,
-        publishDate: t.publishDate ?? null,
-      })),
-    } : {}),
+    calendarSessions,
+    calendarConceptItems: conceptTasks.map(t => ({
+      id: t.id,
+      title: t.title,
+      subject_slug: t.subject_slug,
+      subject_label: t.subject_label,
+      publishDate: t.publishDate ?? null,
+    })),
   });
   return setStudentCookie(res, newToken);
 }
