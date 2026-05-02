@@ -75,8 +75,16 @@ function todayKstYmd(): string {
 }
 
 function formatPublishLabel(ymd: string): string {
-  const [, m, d] = ymd.split('-');
-  return `${parseInt(m, 10)}/${parseInt(d, 10)} 공개`;
+  const date = new Date(ymd + 'T00:00:00Z');
+  const dow = date.getUTCDay(); // 0=Sun,1=Mon,...,6=Sat
+  let deployDate = date;
+  if (dow === 1) deployDate = new Date(date.getTime() - 86400000);      // Mon → Sun
+  else if (dow === 2) deployDate = new Date(date.getTime() - 2 * 86400000); // Tue → Sun
+  else if (dow === 4) deployDate = new Date(date.getTime() - 86400000);  // Thu → Wed
+  else if (dow === 5) deployDate = new Date(date.getTime() - 2 * 86400000); // Fri → Wed
+  const m = deployDate.getUTCMonth() + 1;
+  const d = deployDate.getUTCDate();
+  return `${m}/${d} 밤 배포예정`;
 }
 
 function ItemCard({
@@ -284,9 +292,10 @@ export default function SessionCalendarView({
           const satItems    = getItems([satYmd]);
 
           // 행 높이: 콘텐츠가 가장 많은 칸에 맞춰 통일 (오버레이 항목이 셀 밖으로 튀어나오는 것 방지)
-          const ITEM_H = 38; // ItemCard 평균 높이(px)
-          const HEAD_H = 30; // 날짜 숫자 영역
-          const PAD = 8;
+          // ITEM_H는 잠금 상태(M/D 공개 라벨 4줄) + 데스크톱 텍스트 렌더링 기준
+          const ITEM_H = 54;
+          const HEAD_H = 32;
+          const PAD = 10;
           const maxCount = Math.max(
             sunItems.length, monTueItems.length, wedItems.length, thuFriItems.length, satItems.length,
           );
@@ -304,9 +313,9 @@ export default function SessionCalendarView({
               <DayCell day={sat} ymd={satYmd} items={satItems} isSat {...common} />
 
               {/* 오버레이: 월·화 / 목·금 콘텐츠가 두 칸을 가로지르게 */}
-              <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none">
+              <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none z-10">
                 <div />
-                <div className="col-span-2 px-1 sm:px-1.5 pt-7 sm:pt-8 space-y-0.5">
+                <div className="col-span-2 px-1.5 sm:px-2 pt-6 sm:pt-7 pb-1 space-y-0.5 overflow-hidden">
                   {monTueItems.map((item, idx) => (
                     <div key={idx} className="pointer-events-auto">
                       <ItemCard item={item} {...common} />
@@ -314,7 +323,7 @@ export default function SessionCalendarView({
                   ))}
                 </div>
                 <div />
-                <div className="col-span-2 px-1 sm:px-1.5 pt-7 sm:pt-8 space-y-0.5">
+                <div className="col-span-2 px-1.5 sm:px-2 pt-6 sm:pt-7 pb-1 space-y-0.5 overflow-hidden">
                   {thuFriItems.map((item, idx) => (
                     <div key={idx} className="pointer-events-auto">
                       <ItemCard item={item} {...common} />

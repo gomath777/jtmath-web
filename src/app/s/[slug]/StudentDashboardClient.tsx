@@ -3,12 +3,36 @@
 import { useState, useEffect } from 'react';
 import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import ConceptLecturesSection from './ConceptLecturesSection';
 import type { TodayTask } from './variants/types';
-import VariantA from './variants/VariantA';
 import { getVariantForSlug } from '@/lib/dashboardVariants';
 import SessionCalendarView from './SessionCalendarView';
+
+function formatNextRelease(iso: string): string {
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+  const release = new Date(new Date(iso).getTime() + KST_OFFSET_MS);
+  const today = new Date(Date.now() + KST_OFFSET_MS);
+  const releaseYmd = release.toISOString().slice(0, 10);
+  const todayYmd = today.toISOString().slice(0, 10);
+
+  const dow = release.getUTCDay();
+  const dowLabel =
+    dow === 0 ? '일요일' :
+    dow === 3 ? '수요일' :
+    ['일', '월', '화', '수', '목', '금', '토'][dow] + '요일';
+
+  if (releaseYmd === todayYmd) return `${dowLabel} 밤 (오늘)`;
+
+  const diffDays = Math.round(
+    (new Date(releaseYmd + 'T00:00:00Z').getTime() -
+      new Date(todayYmd + 'T00:00:00Z').getTime()) / 86400000,
+  );
+  if (diffDays === 1) return `${dowLabel} 밤 (내일)`;
+
+  const m = release.getUTCMonth() + 1;
+  const d = release.getUTCDate();
+  return `${dowLabel} 밤 (${m}/${d})`;
+}
 
 /** 이벤트 트래킹 — fire-and-forget. 실패해도 UX 방해 X. */
 function trackEvent(event_type: string, metadata?: Record<string, unknown>) {
@@ -149,8 +173,6 @@ export default function StudentDashboardClient({
   const [verifying, setVerifying] = useState(false);
   const [activeTab, setActiveTab] = useState<TabKey>('learning');
   const [showAll, setShowAll] = useState(false);
-  const [conceptInitialSubject, setConceptInitialSubject] = useState<string | null>(null);
-  const router = useRouter();
   const [selectedCurriculumId, setSelectedCurriculumId] = useState<string | null>(null);
   const [masterViewMode, setMasterViewMode] = useState<'calendar' | 'student'>('calendar');
 
@@ -403,6 +425,12 @@ export default function StudentDashboardClient({
 
       {/* ─── 4주 캘린더 (학생 모드: 미릴리즈/미래는 잠금 표시) ─── */}
       <div className="mb-8">
+        {data.nextReleaseAt && (
+          <div className="mb-3 flex items-center gap-2 text-[12px] text-stone">
+            <span className="w-1.5 h-1.5 rounded-full bg-terracotta opacity-70" />
+            <span>다음 배포: {formatNextRelease(data.nextReleaseAt)}</span>
+          </div>
+        )}
         <SessionCalendarView
           mode="student"
           sessions={data.calendarSessions || []}
@@ -411,21 +439,6 @@ export default function StudentDashboardClient({
           basePath={basePath}
         />
       </div>
-
-      {/* ─── 오늘 할 일 (Hero + Mini × 2) ─── */}
-      <VariantA
-        tasks={data.todayTasks || []}
-        nextReleaseAt={data.nextReleaseAt}
-        curricula={data.curricula}
-        slug={slug}
-        basePath={basePath}
-        onOpenConcept={(setId, subjectSlug) => {
-          trackEvent('task_click', { kind: 'concept', id: setId });
-          setConceptInitialSubject(subjectSlug);
-          router.push(`${basePath}/${slug}/concept/${setId}`);
-        }}
-      />
-      <div id="all-content-anchor" />
 
       {/* ─── 전체 콘텐츠 보기 양방향 토글 ─── */}
       <button
@@ -568,7 +581,7 @@ export default function StudentDashboardClient({
         <ConceptLecturesSection
           slug={slug}
           basePath={basePath}
-          initialSubjectSlug={conceptInitialSubject}
+          initialSubjectSlug={null}
         />
       )}
 
