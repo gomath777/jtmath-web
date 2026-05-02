@@ -383,15 +383,28 @@ export default function StudentDashboardClient({
 
       {/* ─── Welcome hero ─── */}
       <div className="mb-10">
-        <h1 className="font-serif font-medium text-[36px] text-ink tracking-tightest leading-[1.05]">
-          {data.profile.name}
-          <span className="text-olive font-normal text-[22px] ml-1.5">
-            학생
-          </span>
-        </h1>
-        {data.profile.school && (
-          <p className="text-[13px] text-stone mt-2">{data.profile.school}</p>
-        )}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-serif font-medium text-[36px] text-ink tracking-tightest leading-[1.05]">
+              {data.profile.name}
+              <span className="text-olive font-normal text-[22px] ml-1.5">
+                학생
+              </span>
+            </h1>
+            {data.profile.school && (
+              <p className="text-[13px] text-stone mt-2">{data.profile.school}</p>
+            )}
+          </div>
+          <button
+            onClick={async () => {
+              await fetch('/api/public/student/logout', { method: 'POST' });
+              window.location.href = `/s/${slug}`;
+            }}
+            className="shrink-0 text-[12px] text-stone hover:text-terracotta transition-colors px-2 py-1"
+          >
+            로그아웃
+          </button>
+        </div>
 
         {countdowns.length > 0 && (
           <div className="flex flex-wrap gap-2 mt-5">
