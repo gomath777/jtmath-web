@@ -44,15 +44,11 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
 
 const LOCKED_STYLE = { bg: 'bg-gray-50', text: 'text-gray-400' };
 
-// 헤더: 일 | 월화(2칸) | 수 | 목금(2칸) | 토
-// grid-cols-7 내에서 col-span-2 병합
-const DOW_HEADERS = [
-  { label: '일', colSpan: 1, color: 'text-rose-400' },
-  { label: '월 · 화', colSpan: 2, color: 'text-stone' },
-  { label: '수', colSpan: 1, color: 'text-stone' },
-  { label: '목 · 금', colSpan: 2, color: 'text-stone' },
-  { label: '토', colSpan: 1, color: 'text-blue-400' },
-];
+const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
+
+type AnyItem =
+  | (CalendarSessionEntry & { kind: 'session' })
+  | (CalendarConceptItem & { kind: 'concept' });
 
 function getKstWeeks(): Date[][] {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
@@ -83,10 +79,6 @@ function formatPublishLabel(ymd: string): string {
   const [, m, d] = ymd.split('-');
   return `${parseInt(m, 10)}/${parseInt(d, 10)} 공개`;
 }
-
-type AnyItem =
-  | (CalendarSessionEntry & { kind: 'session' })
-  | (CalendarConceptItem & { kind: 'concept' });
 
 function ItemCard({
   item,
@@ -133,7 +125,6 @@ function ItemCard({
     );
   }
 
-  // concept
   const c = item;
   const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > todayYmd;
   const colorClass = studentLocked
@@ -161,6 +152,113 @@ function ItemCard({
     <Link href={`${basePath}/${slug}/concept/${c.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
       {inner}
     </Link>
+  );
+}
+
+interface CommonProps {
+  mode: 'master' | 'student';
+  slug: string;
+  basePath: string;
+  todayYmd: string;
+}
+
+function dayHeaderText(day: Date) {
+  const dayNum = day.getUTCDate();
+  return { dayNum, isFirstOfMonth: dayNum === 1, month: day.getUTCMonth() + 1 };
+}
+
+function SingleDayCell({
+  day,
+  ymd,
+  items,
+  isSun,
+  isSat,
+  ...common
+}: CommonProps & {
+  day: Date;
+  ymd: string;
+  items: AnyItem[];
+  isSun?: boolean;
+  isSat?: boolean;
+}) {
+  const isToday = ymd === common.todayYmd;
+  const { dayNum, isFirstOfMonth, month } = dayHeaderText(day);
+
+  return (
+    <div className={`min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
+      isToday
+        ? 'border-terracotta/50 bg-terracotta/5'
+        : (isSun || isSat)
+        ? 'border-border-cream bg-sand/30'
+        : 'border-border-cream bg-ivory'
+    }`}>
+      <div className={`text-[11px] font-medium mb-1 ${
+        isToday ? 'text-terracotta' : isSun ? 'text-rose-400' : isSat ? 'text-blue-400' : 'text-charcoal'
+      }`}>
+        {dayNum}
+        {isFirstOfMonth && (
+          <span className="ml-0.5 text-stone font-normal text-[10px]">{month}월</span>
+        )}
+      </div>
+      <div className="space-y-0.5">
+        {items.map((item, idx) => (
+          <ItemCard key={idx} item={item} {...common} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function MergedWindowCell({
+  dayA,
+  dayB,
+  ymdA,
+  ymdB,
+  items,
+  ...common
+}: CommonProps & {
+  dayA: Date;
+  dayB: Date;
+  ymdA: string;
+  ymdB: string;
+  items: AnyItem[];
+}) {
+  const isToday = ymdA === common.todayYmd || ymdB === common.todayYmd;
+  const a = dayHeaderText(dayA);
+  const b = dayHeaderText(dayB);
+
+  return (
+    <div className={`col-span-2 min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
+      isToday
+        ? 'border-terracotta/50 bg-terracotta/5'
+        : 'border-border-cream bg-ivory'
+    }`}>
+      {/* 두 날짜 숫자 — 점선 디바이더로 살짝 구분 */}
+      <div className="grid grid-cols-2 mb-1">
+        <div className={`text-[11px] font-medium pr-1 ${
+          isToday && ymdA === common.todayYmd ? 'text-terracotta' : 'text-charcoal'
+        }`}>
+          {a.dayNum}
+          {a.isFirstOfMonth && (
+            <span className="ml-0.5 text-stone font-normal text-[10px]">{a.month}월</span>
+          )}
+        </div>
+        <div className={`text-[11px] font-medium pl-1.5 border-l border-dashed border-stone/30 ${
+          isToday && ymdB === common.todayYmd ? 'text-terracotta' : 'text-charcoal'
+        }`}>
+          {b.dayNum}
+          {b.isFirstOfMonth && (
+            <span className="ml-0.5 text-stone font-normal text-[10px]">{b.month}월</span>
+          )}
+        </div>
+      </div>
+      {/* 콘텐츠는 좌→우/상→하 자연스럽게 */}
+      <div className="space-y-0.5">
+        {items.map((item, idx) => (
+          <ItemCard key={idx} item={item} {...common} />
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -199,128 +297,52 @@ export default function SessionCalendarView({
     return items;
   }
 
+  const common = { mode, slug, basePath, todayYmd };
+
   return (
     <div>
-      {/* 헤더: 일 | 월화 | 수 | 목금 | 토 */}
+      {/* 헤더: 일 월 화 수 목 금 토 — 7칸 개별 표기 유지 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {DOW_HEADERS.map((h, i) => (
+        {DOW_LABELS.map((label, i) => (
           <div
-            key={i}
-            className={`text-center text-[11px] font-medium tracking-wide py-1 ${h.color} ${h.colSpan === 2 ? 'col-span-2' : ''}`}
+            key={label}
+            className={`text-center text-[11px] font-medium tracking-wide py-1 ${
+              i === 0 ? 'text-rose-400' : i === 6 ? 'text-blue-400' : 'text-stone'
+            }`}
           >
-            {h.label}
+            {label}
           </div>
         ))}
       </div>
 
       <div className="space-y-1">
         {weeks.map((week, wi) => {
-          // 일(0), 월(1), 화(2), 수(3), 목(4), 금(5), 토(6)
-          const sun  = week[0];
-          const mon  = week[1];
-          const tue  = week[2];
-          const wed  = week[3];
-          const thu  = week[4];
-          const fri  = week[5];
-          const sat  = week[6];
-
-          const sunYmd  = toYmd(sun);
-          const monYmd  = toYmd(mon);
-          const tueYmd  = toYmd(tue);
-          const wedYmd  = toYmd(wed);
-          const thuYmd  = toYmd(thu);
-          const friYmd  = toYmd(fri);
-          const satYmd  = toYmd(sat);
-
-          const isTodayMonTue = todayYmd === monYmd || todayYmd === tueYmd;
-          const isTodayThuFri = todayYmd === thuYmd || todayYmd === friYmd;
-
-          const monTueItems = getItems([monYmd, tueYmd]);
-          const thuFriItems = getItems([thuYmd, friYmd]);
-
-          // 단독 칸(일/수/토) 렌더
-          function SingleDay({ ymd, day, isSun, isSat }: { ymd: string; day: Date; isSun?: boolean; isSat?: boolean }) {
-            const isToday = ymd === todayYmd;
-            const dayNum = day.getUTCDate();
-            const singleItems = getItems([ymd]);
-            return (
-              <div className={`min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
-                isToday
-                  ? 'border-terracotta/50 bg-terracotta/5'
-                  : (isSun || isSat)
-                  ? 'border-border-cream bg-sand/30'
-                  : 'border-border-cream bg-ivory'
-              }`}>
-                <div className={`text-[11px] font-medium mb-1 ${
-                  isToday ? 'text-terracotta' : isSun ? 'text-rose-400' : isSat ? 'text-blue-400' : 'text-charcoal'
-                }`}>
-                  {dayNum}
-                  {dayNum === 1 && (
-                    <span className="ml-0.5 text-stone font-normal text-[10px]">{day.getUTCMonth() + 1}월</span>
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  {singleItems.map((item, idx) => (
-                    <ItemCard key={idx} item={item} mode={mode} slug={slug} basePath={basePath} todayYmd={todayYmd} />
-                  ))}
-                </div>
-              </div>
-            );
-          }
-
-          // 병합 칸(월화 / 목금) 렌더
-          function MergedWindow({
-            days,
-            ymds,
-            items,
-            isToday,
-          }: {
-            days: Date[];
-            ymds: string[];
-            items: AnyItem[];
-            isToday: boolean;
-          }) {
-            const startNum = days[0].getUTCDate();
-            const endNum = days[1].getUTCDate();
-            const startMonth = days[0].getUTCMonth() + 1;
-            return (
-              <div className={`col-span-2 min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
-                isToday
-                  ? 'border-terracotta/50 bg-terracotta/5'
-                  : 'border-border-cream bg-ivory'
-              }`}>
-                <div className={`text-[11px] font-medium mb-1 ${isToday ? 'text-terracotta' : 'text-charcoal'}`}>
-                  {startNum}–{endNum}
-                  {startNum === 1 && (
-                    <span className="ml-0.5 text-stone font-normal text-[10px]">{startMonth}월</span>
-                  )}
-                </div>
-                <div className="space-y-0.5">
-                  {items.map((item, idx) => (
-                    <ItemCard key={idx} item={item} mode={mode} slug={slug} basePath={basePath} todayYmd={todayYmd} />
-                  ))}
-                </div>
-              </div>
-            );
-          }
+          const [sun, mon, tue, wed, thu, fri, sat] = week;
+          const sunYmd = toYmd(sun);
+          const monYmd = toYmd(mon);
+          const tueYmd = toYmd(tue);
+          const wedYmd = toYmd(wed);
+          const thuYmd = toYmd(thu);
+          const friYmd = toYmd(fri);
+          const satYmd = toYmd(sat);
 
           return (
             <div key={wi} className="grid grid-cols-7 gap-1">
-              <SingleDay ymd={sunYmd} day={sun} isSun />
-              <MergedWindow
-                days={[mon, tue]}
-                ymds={[monYmd, tueYmd]}
-                items={monTueItems}
-                isToday={isTodayMonTue}
+              <SingleDayCell day={sun} ymd={sunYmd} items={getItems([sunYmd])} isSun {...common} />
+              <MergedWindowCell
+                dayA={mon} dayB={tue}
+                ymdA={monYmd} ymdB={tueYmd}
+                items={getItems([monYmd, tueYmd])}
+                {...common}
               />
-              <SingleDay ymd={wedYmd} day={wed} />
-              <MergedWindow
-                days={[thu, fri]}
-                ymds={[thuYmd, friYmd]}
-                items={thuFriItems}
-                isToday={isTodayThuFri}
+              <SingleDayCell day={wed} ymd={wedYmd} items={getItems([wedYmd])} {...common} />
+              <MergedWindowCell
+                dayA={thu} dayB={fri}
+                ymdA={thuYmd} ymdB={friYmd}
+                items={getItems([thuYmd, friYmd])}
+                {...common}
               />
-              <SingleDay ymd={satYmd} day={sat} isSat />
+              <SingleDayCell day={sat} ymd={satYmd} items={getItems([satYmd])} isSat {...common} />
             </div>
           );
         })}
