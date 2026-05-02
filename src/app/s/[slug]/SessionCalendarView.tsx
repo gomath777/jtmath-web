@@ -44,13 +44,34 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
 
 const LOCKED_STYLE = { bg: 'bg-gray-50', text: 'text-gray-400' };
 
-type AnyItem =
-  | (CalendarSessionEntry & { kind: 'session' })
-  | (CalendarConceptItem & { kind: 'concept' });
+// 헤더: 일 | 월화(2칸) | 수 | 목금(2칸) | 토
+// grid-cols-7 내에서 col-span-2 병합
+const DOW_HEADERS = [
+  { label: '일', colSpan: 1, color: 'text-rose-400' },
+  { label: '월 · 화', colSpan: 2, color: 'text-stone' },
+  { label: '수', colSpan: 1, color: 'text-stone' },
+  { label: '목 · 금', colSpan: 2, color: 'text-stone' },
+  { label: '토', colSpan: 1, color: 'text-blue-400' },
+];
 
-function addDay(ymd: string, days: number): string {
-  const d = new Date(ymd + 'T00:00:00Z');
-  d.setUTCDate(d.getUTCDate() + days);
+function getKstWeeks(): Date[][] {
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+  const nowMs = Date.now() + KST_OFFSET_MS;
+  const dayOfWeek = new Date(nowMs).getUTCDay();
+  const lastSundayMs = nowMs - (dayOfWeek + 7) * 86400000;
+
+  const weeks: Date[][] = [];
+  for (let w = 0; w < 4; w++) {
+    const week: Date[] = [];
+    for (let d = 0; d < 7; d++) {
+      week.push(new Date(lastSundayMs + (w * 7 + d) * 86400000));
+    }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+function toYmd(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
@@ -63,110 +84,83 @@ function formatPublishLabel(ymd: string): string {
   return `${parseInt(m, 10)}/${parseInt(d, 10)} 공개`;
 }
 
-// 4 study weeks: last week, this week, next week, week+2 (Mon-based)
-function getStudyWeeks() {
-  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-  const nowMs = Date.now() + KST_OFFSET_MS;
-  const dayOfWeek = new Date(nowMs).getUTCDay();
-  const daysFromMon = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const thisMonMs = nowMs - daysFromMon * 86400000;
+type AnyItem =
+  | (CalendarSessionEntry & { kind: 'session' })
+  | (CalendarConceptItem & { kind: 'concept' });
 
-  return [-1, 0, 1, 2].map(w => {
-    const monMs = thisMonMs + w * 7 * 86400000;
-    const monYmd = new Date(monMs).toISOString().slice(0, 10);
-    const label = w === -1 ? '지난주' : w === 0 ? '이번주' : w === 1 ? '다음주' : '2주후';
-    return { label, monYmd };
-  });
-}
-
-interface WindowBlockProps {
-  items: AnyItem[];
+function ItemCard({
+  item,
+  mode,
+  slug,
+  basePath,
+  todayYmd,
+}: {
+  item: AnyItem;
   mode: 'master' | 'student';
   slug: string;
   basePath: string;
   todayYmd: string;
-  windowYmds: string[];
-}
+}) {
+  if (item.kind === 'session') {
+    const s = item;
+    const subjectColor = SUBJECT_COLOR[s.subject_slug] || { bg: 'bg-sand', text: 'text-charcoal' };
+    const studentLocked = mode === 'student' && !s.is_released;
+    const color = studentLocked ? LOCKED_STYLE : subjectColor;
+    const isFuture = !!s.publishDate && s.publishDate > todayYmd;
 
-function WindowBlock({ items, mode, slug, basePath, todayYmd, windowYmds }: WindowBlockProps) {
-  const isCurrentWindow = windowYmds.includes(todayYmd);
-
-  return (
-    <div className={`min-h-[56px] rounded-xl border p-1.5 ${
-      isCurrentWindow
-        ? 'border-terracotta/50 bg-terracotta/5'
-        : 'border-border-cream bg-ivory'
-    }`}>
-      {items.length === 0 ? (
-        <div className="h-full flex items-center justify-center text-[10px] text-stone/25">—</div>
-      ) : (
-        <div className="space-y-0.5">
-          {items.map(item => {
-            if (item.kind === 'session') {
-              const s = item;
-              const color = (mode === 'student' && !s.is_released)
-                ? LOCKED_STYLE
-                : (SUBJECT_COLOR[s.subject_slug] || { bg: 'bg-sand', text: 'text-charcoal' });
-              const studentLocked = mode === 'student' && !s.is_released;
-              const isFuture = !!s.publishDate && s.publishDate > todayYmd;
-
-              const inner = (
-                <>
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
-                    <span className="font-medium truncate text-[9px] sm:text-[10px]">{s.subject_label}</span>
-                  </div>
-                  <div className="font-mono text-[8px] opacity-60">W{s.week_number}-S{s.session_number}</div>
-                  {s.label && <div className="truncate opacity-80 text-[9px]">{s.label}</div>}
-                  {studentLocked && isFuture && s.publishDate && (
-                    <div className="text-[8px] mt-0.5 opacity-70">{formatPublishLabel(s.publishDate.slice(0, 10))}</div>
-                  )}
-                </>
-              );
-
-              const base = `block rounded-lg px-1 py-0.5 leading-tight ${color.bg} ${color.text}`;
-              if (studentLocked) {
-                return <div key={s.id} className={`${base} cursor-not-allowed`}>{inner}</div>;
-              }
-              return (
-                <Link key={s.id} href={`${basePath}/${slug}/session/${s.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
-                  {inner}
-                </Link>
-              );
-            } else {
-              const c = item;
-              const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > todayYmd;
-              const colorClass = studentLocked
-                ? `${LOCKED_STYLE.bg} ${LOCKED_STYLE.text}`
-                : 'bg-green-50 text-green-700';
-
-              const inner = (
-                <>
-                  <div className="flex items-center gap-0.5">
-                    <span className="text-[9px]">{studentLocked ? '🔒' : '📚'}</span>
-                    <span className="font-medium truncate text-[9px] sm:text-[10px]">{c.subject_label || '개념강의'}</span>
-                  </div>
-                  <div className="truncate opacity-80 text-[9px]">{c.title}</div>
-                  {studentLocked && c.publishDate && (
-                    <div className="text-[8px] mt-0.5 opacity-70">{formatPublishLabel(c.publishDate.slice(0, 10))}</div>
-                  )}
-                </>
-              );
-
-              const base = `block rounded-lg px-1 py-0.5 leading-tight ${colorClass}`;
-              if (studentLocked) {
-                return <div key={c.id} className={`${base} cursor-not-allowed`}>{inner}</div>;
-              }
-              return (
-                <Link key={c.id} href={`${basePath}/${slug}/concept/${c.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
-                  {inner}
-                </Link>
-              );
-            }
-          })}
+    const inner = (
+      <>
+        <div className="flex items-center gap-0.5 mb-0.5">
+          <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
+          <span className="font-medium truncate text-[9px] sm:text-[10px]">{s.subject_label}</span>
         </div>
+        <div className="font-mono text-[8px] sm:text-[9px] opacity-60">W{s.week_number}-S{s.session_number}</div>
+        {s.label && <div className="truncate opacity-80 mt-0.5 text-[9px] sm:text-[10px]">{s.label}</div>}
+        {studentLocked && isFuture && s.publishDate && (
+          <div className="text-[8px] sm:text-[9px] mt-0.5 opacity-70">{formatPublishLabel(s.publishDate.slice(0, 10))}</div>
+        )}
+      </>
+    );
+
+    const base = `block rounded-lg px-1 sm:px-1.5 py-0.5 sm:py-1 leading-tight ${color.bg} ${color.text}`;
+    if (studentLocked) {
+      return <div className={`${base} cursor-not-allowed`} aria-disabled>{inner}</div>;
+    }
+    return (
+      <Link href={`${basePath}/${slug}/session/${s.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
+        {inner}
+      </Link>
+    );
+  }
+
+  // concept
+  const c = item;
+  const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > todayYmd;
+  const colorClass = studentLocked
+    ? `${LOCKED_STYLE.bg} ${LOCKED_STYLE.text}`
+    : 'bg-green-50 text-green-700';
+
+  const inner = (
+    <>
+      <div className="flex items-center gap-0.5 mb-0.5">
+        <span className="text-[9px]">{studentLocked ? '🔒' : '📚'}</span>
+        <span className="font-medium truncate text-[9px] sm:text-[10px]">{c.subject_label || '개념강의'}</span>
+      </div>
+      <div className="truncate opacity-80 text-[9px] sm:text-[10px]">{c.title}</div>
+      {studentLocked && c.publishDate && (
+        <div className="text-[8px] sm:text-[9px] mt-0.5 opacity-70">{formatPublishLabel(c.publishDate.slice(0, 10))}</div>
       )}
-    </div>
+    </>
+  );
+
+  const base = `block rounded-lg px-1 sm:px-1.5 py-0.5 sm:py-1 leading-tight ${colorClass}`;
+  if (studentLocked) {
+    return <div className={`${base} cursor-not-allowed`} aria-disabled>{inner}</div>;
+  }
+  return (
+    <Link href={`${basePath}/${slug}/concept/${c.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
+      {inner}
+    </Link>
   );
 }
 
@@ -177,7 +171,7 @@ export default function SessionCalendarView({
   slug,
   basePath = '/s',
 }: SessionCalendarViewProps) {
-  const studyWeeks = getStudyWeeks();
+  const weeks = getKstWeeks();
   const todayYmd = todayKstYmd();
 
   const sessionsByDate = new Map<string, CalendarSessionEntry[]>();
@@ -196,7 +190,7 @@ export default function SessionCalendarView({
     conceptsByDate.get(ymd)!.push(c);
   }
 
-  function getWindowItems(ymds: string[]): AnyItem[] {
+  function getItems(ymds: string[]): AnyItem[] {
     const items: AnyItem[] = [];
     for (const ymd of ymds) {
       for (const s of sessionsByDate.get(ymd) || []) items.push({ ...s, kind: 'session' });
@@ -206,48 +200,137 @@ export default function SessionCalendarView({
   }
 
   return (
-    <div className="space-y-1.5">
-      {/* Header */}
-      <div className="grid grid-cols-[3rem_1fr_1fr] gap-2">
-        <div />
-        <div className="text-center text-[11px] font-semibold text-stone tracking-wide">월 · 화</div>
-        <div className="text-center text-[11px] font-semibold text-stone tracking-wide">목 · 금</div>
+    <div>
+      {/* 헤더: 일 | 월화 | 수 | 목금 | 토 */}
+      <div className="grid grid-cols-7 gap-1 mb-1">
+        {DOW_HEADERS.map((h, i) => (
+          <div
+            key={i}
+            className={`text-center text-[11px] font-medium tracking-wide py-1 ${h.color} ${h.colSpan === 2 ? 'col-span-2' : ''}`}
+          >
+            {h.label}
+          </div>
+        ))}
       </div>
 
-      {studyWeeks.map(({ label, monYmd }) => {
-        const tueYmd = addDay(monYmd, 1);
-        const thuYmd = addDay(monYmd, 3);
-        const friYmd = addDay(monYmd, 4);
+      <div className="space-y-1">
+        {weeks.map((week, wi) => {
+          // 일(0), 월(1), 화(2), 수(3), 목(4), 금(5), 토(6)
+          const sun  = week[0];
+          const mon  = week[1];
+          const tue  = week[2];
+          const wed  = week[3];
+          const thu  = week[4];
+          const fri  = week[5];
+          const sat  = week[6];
 
-        return (
-          <div key={monYmd} className="grid grid-cols-[3rem_1fr_1fr] gap-2 items-stretch">
-            <div className="text-[10px] text-stone/50 flex items-center justify-end pr-1">
-              {label}
+          const sunYmd  = toYmd(sun);
+          const monYmd  = toYmd(mon);
+          const tueYmd  = toYmd(tue);
+          const wedYmd  = toYmd(wed);
+          const thuYmd  = toYmd(thu);
+          const friYmd  = toYmd(fri);
+          const satYmd  = toYmd(sat);
+
+          const isTodayMonTue = todayYmd === monYmd || todayYmd === tueYmd;
+          const isTodayThuFri = todayYmd === thuYmd || todayYmd === friYmd;
+
+          const monTueItems = getItems([monYmd, tueYmd]);
+          const thuFriItems = getItems([thuYmd, friYmd]);
+
+          // 단독 칸(일/수/토) 렌더
+          function SingleDay({ ymd, day, isSun, isSat }: { ymd: string; day: Date; isSun?: boolean; isSat?: boolean }) {
+            const isToday = ymd === todayYmd;
+            const dayNum = day.getUTCDate();
+            const singleItems = getItems([ymd]);
+            return (
+              <div className={`min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
+                isToday
+                  ? 'border-terracotta/50 bg-terracotta/5'
+                  : (isSun || isSat)
+                  ? 'border-border-cream bg-sand/30'
+                  : 'border-border-cream bg-ivory'
+              }`}>
+                <div className={`text-[11px] font-medium mb-1 ${
+                  isToday ? 'text-terracotta' : isSun ? 'text-rose-400' : isSat ? 'text-blue-400' : 'text-charcoal'
+                }`}>
+                  {dayNum}
+                  {dayNum === 1 && (
+                    <span className="ml-0.5 text-stone font-normal text-[10px]">{day.getUTCMonth() + 1}월</span>
+                  )}
+                </div>
+                <div className="space-y-0.5">
+                  {singleItems.map((item, idx) => (
+                    <ItemCard key={idx} item={item} mode={mode} slug={slug} basePath={basePath} todayYmd={todayYmd} />
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          // 병합 칸(월화 / 목금) 렌더
+          function MergedWindow({
+            days,
+            ymds,
+            items,
+            isToday,
+          }: {
+            days: Date[];
+            ymds: string[];
+            items: AnyItem[];
+            isToday: boolean;
+          }) {
+            const startNum = days[0].getUTCDate();
+            const endNum = days[1].getUTCDate();
+            const startMonth = days[0].getUTCMonth() + 1;
+            return (
+              <div className={`col-span-2 min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
+                isToday
+                  ? 'border-terracotta/50 bg-terracotta/5'
+                  : 'border-border-cream bg-ivory'
+              }`}>
+                <div className={`text-[11px] font-medium mb-1 ${isToday ? 'text-terracotta' : 'text-charcoal'}`}>
+                  {startNum}–{endNum}
+                  {startNum === 1 && (
+                    <span className="ml-0.5 text-stone font-normal text-[10px]">{startMonth}월</span>
+                  )}
+                </div>
+                <div className="space-y-0.5">
+                  {items.map((item, idx) => (
+                    <ItemCard key={idx} item={item} mode={mode} slug={slug} basePath={basePath} todayYmd={todayYmd} />
+                  ))}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div key={wi} className="grid grid-cols-7 gap-1">
+              <SingleDay ymd={sunYmd} day={sun} isSun />
+              <MergedWindow
+                days={[mon, tue]}
+                ymds={[monYmd, tueYmd]}
+                items={monTueItems}
+                isToday={isTodayMonTue}
+              />
+              <SingleDay ymd={wedYmd} day={wed} />
+              <MergedWindow
+                days={[thu, fri]}
+                ymds={[thuYmd, friYmd]}
+                items={thuFriItems}
+                isToday={isTodayThuFri}
+              />
+              <SingleDay ymd={satYmd} day={sat} isSat />
             </div>
-            <WindowBlock
-              items={getWindowItems([monYmd, tueYmd])}
-              mode={mode}
-              slug={slug}
-              basePath={basePath}
-              todayYmd={todayYmd}
-              windowYmds={[monYmd, tueYmd]}
-            />
-            <WindowBlock
-              items={getWindowItems([thuYmd, friYmd])}
-              mode={mode}
-              slug={slug}
-              basePath={basePath}
-              todayYmd={todayYmd}
-              windowYmds={[thuYmd, friYmd]}
-            />
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
 
-      <div className="mt-2 flex items-center gap-3 text-[11px] text-stone">
+      <div className="mt-3 flex items-center gap-3 text-[11px] text-stone">
         <span>✅ 공개됨</span>
         <span>🔒 {mode === 'master' ? '미릴리즈' : '예정'}</span>
         <span>📚 개념강의</span>
+        <span className="ml-auto text-[10px] opacity-60">지난주 ~ 다음 2주</span>
       </div>
     </div>
   );
