@@ -43,7 +43,6 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
 };
 
 const LOCKED_STYLE = { bg: 'bg-gray-50', text: 'text-gray-400' };
-
 const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 type AnyItem =
@@ -162,17 +161,19 @@ interface CommonProps {
   todayYmd: string;
 }
 
-function dayHeaderText(day: Date) {
+function dayHeader(day: Date) {
   const dayNum = day.getUTCDate();
   return { dayNum, isFirstOfMonth: dayNum === 1, month: day.getUTCMonth() + 1 };
 }
 
-function SingleDayCell({
+// 단독 셀: 자체 콘텐츠 + 자체 테두리. 일/수/토 + 단독 모드에서 월·화·목·금
+function DayCell({
   day,
   ymd,
   items,
   isSun,
   isSat,
+  hideContent,
   ...common
 }: CommonProps & {
   day: Date;
@@ -180,12 +181,13 @@ function SingleDayCell({
   items: AnyItem[];
   isSun?: boolean;
   isSat?: boolean;
+  hideContent?: boolean; // 월·화·목·금처럼 콘텐츠를 오버레이로 그릴 때 true
 }) {
   const isToday = ymd === common.todayYmd;
-  const { dayNum, isFirstOfMonth, month } = dayHeaderText(day);
+  const { dayNum, isFirstOfMonth, month } = dayHeader(day);
 
   return (
-    <div className={`min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
+    <div className={`h-full rounded-xl border p-1 sm:p-1.5 ${
       isToday
         ? 'border-terracotta/50 bg-terracotta/5'
         : (isSun || isSat)
@@ -200,64 +202,13 @@ function SingleDayCell({
           <span className="ml-0.5 text-stone font-normal text-[10px]">{month}월</span>
         )}
       </div>
-      <div className="space-y-0.5">
-        {items.map((item, idx) => (
-          <ItemCard key={idx} item={item} {...common} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function MergedWindowCell({
-  dayA,
-  dayB,
-  ymdA,
-  ymdB,
-  items,
-  ...common
-}: CommonProps & {
-  dayA: Date;
-  dayB: Date;
-  ymdA: string;
-  ymdB: string;
-  items: AnyItem[];
-}) {
-  const isToday = ymdA === common.todayYmd || ymdB === common.todayYmd;
-  const a = dayHeaderText(dayA);
-  const b = dayHeaderText(dayB);
-
-  return (
-    <div className={`col-span-2 min-h-[80px] rounded-xl border p-1 sm:p-1.5 ${
-      isToday
-        ? 'border-terracotta/50 bg-terracotta/5'
-        : 'border-border-cream bg-ivory'
-    }`}>
-      {/* 두 날짜 숫자 — 점선 디바이더로 살짝 구분 */}
-      <div className="grid grid-cols-2 mb-1">
-        <div className={`text-[11px] font-medium pr-1 ${
-          isToday && ymdA === common.todayYmd ? 'text-terracotta' : 'text-charcoal'
-        }`}>
-          {a.dayNum}
-          {a.isFirstOfMonth && (
-            <span className="ml-0.5 text-stone font-normal text-[10px]">{a.month}월</span>
-          )}
+      {!hideContent && (
+        <div className="space-y-0.5">
+          {items.map((item, idx) => (
+            <ItemCard key={idx} item={item} {...common} />
+          ))}
         </div>
-        <div className={`text-[11px] font-medium pl-1.5 border-l border-dashed border-stone/30 ${
-          isToday && ymdB === common.todayYmd ? 'text-terracotta' : 'text-charcoal'
-        }`}>
-          {b.dayNum}
-          {b.isFirstOfMonth && (
-            <span className="ml-0.5 text-stone font-normal text-[10px]">{b.month}월</span>
-          )}
-        </div>
-      </div>
-      {/* 콘텐츠는 좌→우/상→하 자연스럽게 */}
-      <div className="space-y-0.5">
-        {items.map((item, idx) => (
-          <ItemCard key={idx} item={item} {...common} />
-        ))}
-      </div>
+      )}
     </div>
   );
 }
@@ -301,7 +252,7 @@ export default function SessionCalendarView({
 
   return (
     <div>
-      {/* 헤더: 일 월 화 수 목 금 토 — 7칸 개별 표기 유지 */}
+      {/* 헤더: 일·월·화·수·목·금·토 7개 개별 라벨 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {DOW_LABELS.map((label, i) => (
           <div
@@ -326,23 +277,52 @@ export default function SessionCalendarView({
           const friYmd = toYmd(fri);
           const satYmd = toYmd(sat);
 
+          const sunItems    = getItems([sunYmd]);
+          const monTueItems = getItems([monYmd, tueYmd]);
+          const wedItems    = getItems([wedYmd]);
+          const thuFriItems = getItems([thuYmd, friYmd]);
+          const satItems    = getItems([satYmd]);
+
+          // 행 높이: 콘텐츠가 가장 많은 칸에 맞춰 통일 (오버레이 항목이 셀 밖으로 튀어나오는 것 방지)
+          const ITEM_H = 38; // ItemCard 평균 높이(px)
+          const HEAD_H = 30; // 날짜 숫자 영역
+          const PAD = 8;
+          const maxCount = Math.max(
+            sunItems.length, monTueItems.length, wedItems.length, thuFriItems.length, satItems.length,
+          );
+          const rowHeight = Math.max(80, HEAD_H + maxCount * ITEM_H + PAD);
+
           return (
-            <div key={wi} className="grid grid-cols-7 gap-1">
-              <SingleDayCell day={sun} ymd={sunYmd} items={getItems([sunYmd])} isSun {...common} />
-              <MergedWindowCell
-                dayA={mon} dayB={tue}
-                ymdA={monYmd} ymdB={tueYmd}
-                items={getItems([monYmd, tueYmd])}
-                {...common}
-              />
-              <SingleDayCell day={wed} ymd={wedYmd} items={getItems([wedYmd])} {...common} />
-              <MergedWindowCell
-                dayA={thu} dayB={fri}
-                ymdA={thuYmd} ymdB={friYmd}
-                items={getItems([thuYmd, friYmd])}
-                {...common}
-              />
-              <SingleDayCell day={sat} ymd={satYmd} items={getItems([satYmd])} isSat {...common} />
+            <div key={wi} className="grid grid-cols-7 gap-1 relative" style={{ height: rowHeight }}>
+              {/* 배경: 7개 개별 셀 (월·화·목·금은 날짜만) */}
+              <DayCell day={sun} ymd={sunYmd} items={sunItems} isSun {...common} />
+              <DayCell day={mon} ymd={monYmd} items={[]} hideContent {...common} />
+              <DayCell day={tue} ymd={tueYmd} items={[]} hideContent {...common} />
+              <DayCell day={wed} ymd={wedYmd} items={wedItems} {...common} />
+              <DayCell day={thu} ymd={thuYmd} items={[]} hideContent {...common} />
+              <DayCell day={fri} ymd={friYmd} items={[]} hideContent {...common} />
+              <DayCell day={sat} ymd={satYmd} items={satItems} isSat {...common} />
+
+              {/* 오버레이: 월·화 / 목·금 콘텐츠가 두 칸을 가로지르게 */}
+              <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none">
+                <div />
+                <div className="col-span-2 px-1 sm:px-1.5 pt-7 sm:pt-8 space-y-0.5">
+                  {monTueItems.map((item, idx) => (
+                    <div key={idx} className="pointer-events-auto">
+                      <ItemCard item={item} {...common} />
+                    </div>
+                  ))}
+                </div>
+                <div />
+                <div className="col-span-2 px-1 sm:px-1.5 pt-7 sm:pt-8 space-y-0.5">
+                  {thuFriItems.map((item, idx) => (
+                    <div key={idx} className="pointer-events-auto">
+                      <ItemCard item={item} {...common} />
+                    </div>
+                  ))}
+                </div>
+                <div />
+              </div>
             </div>
           );
         })}
