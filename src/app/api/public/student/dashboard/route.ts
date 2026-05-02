@@ -216,7 +216,8 @@ export async function GET(req: NextRequest) {
       items.forEach((item, idx) => {
         const set = setMap.get(item.setId);
         if (!set) return;
-        const publishDate = idx === 0 ? ymdKst(publishedAt) : addDaysKst(publishedAt, 3);
+        // 수업 윈도우(월화 or 목금) 내에서 균등 배분: idx 0→당일, idx 1+→다음날
+        const publishDate = addDaysKst(publishedAt, Math.min(idx, 1));
         conceptTasks.push({
           kind: 'concept',
           id: set.id,
