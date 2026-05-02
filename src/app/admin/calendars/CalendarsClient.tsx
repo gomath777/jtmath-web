@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import SessionCalendarView from '@/app/s/[slug]/SessionCalendarView';
 
 interface CalendarSessionEntry {
@@ -40,6 +41,8 @@ function gradeLabel(g: number | null): string {
 }
 
 export default function CalendarsClient({ students }: { students: Student[] }) {
+  const [mode, setMode] = useState<'master' | 'student'>('master');
+
   const groups: Array<{ grade: number | null; students: Student[] }> = [];
   for (const s of students) {
     const last = groups[groups.length - 1];
@@ -51,9 +54,31 @@ export default function CalendarsClient({ students }: { students: Student[] }) {
     <div className="min-h-screen bg-[#F8F9FA] py-8 px-4">
       <header className="max-w-5xl mx-auto mb-8">
         <Link href="/admin" className="text-xs text-slate-500 hover:text-slate-900">← 어드민 홈</Link>
-        <h1 className="text-2xl font-bold text-slate-900 mt-2">학생 캘린더</h1>
-        <p className="text-sm text-slate-500 mt-1">
-          학년 → 가나다 순. 캘린더 항목을 클릭하면 해당 학생의 세션 페이지로 이동합니다 (마스터 모드).
+        <div className="flex items-center justify-between mt-2 gap-4 flex-wrap">
+          <h1 className="text-2xl font-bold text-slate-900">학생 캘린더</h1>
+          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 text-xs">
+            <button
+              onClick={() => setMode('master')}
+              className={`px-3 py-1.5 rounded-md font-medium transition ${
+                mode === 'master' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              마스터 뷰
+            </button>
+            <button
+              onClick={() => setMode('student')}
+              className={`px-3 py-1.5 rounded-md font-medium transition ${
+                mode === 'student' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              학생 뷰
+            </button>
+          </div>
+        </div>
+        <p className="text-sm text-slate-500 mt-2">
+          {mode === 'master'
+            ? '학년 → 가나다 순. 미릴리즈 항목도 클릭 가능 (마스터 모드).'
+            : '학생이 실제로 보는 화면. 미릴리즈는 잠금 카드로 표시되고 클릭이 비활성화됩니다.'}
         </p>
         <p className="text-xs text-slate-400 mt-1">전체 {students.length}명</p>
       </header>
@@ -101,7 +126,7 @@ export default function CalendarsClient({ students }: { students: Student[] }) {
                     </p>
                   ) : (
                     <SessionCalendarView
-                      mode="master"
+                      mode={mode}
                       sessions={s.sessions}
                       conceptItems={s.concepts}
                       slug={s.slug}
