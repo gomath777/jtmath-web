@@ -213,11 +213,18 @@ export async function GET(req: NextRequest) {
 
     for (const [publishedAt, items] of Array.from(byWeek.entries())) {
       items.sort((a, b) => (a.chapter_order ?? 999) - (b.chapter_order ?? 999));
+
+      // 수업 요일 패턴: 일요일 공개(→월) = 월·화·목·금, 수요일 공개(→목) = 목·금
+      const kstYmd = ymdKst(publishedAt);
+      const dowKst = new Date(kstYmd + 'T00:00:00Z').getUTCDay();
+      const weekOffsets = dowKst === 1 ? [0, 1, 3, 4] : dowKst === 4 ? [0, 1] : [0];
+
       items.forEach((item, idx) => {
         const set = setMap.get(item.setId);
         if (!set) return;
-        // 수업 윈도우(월화 or 목금) 내에서 균등 배분: idx 0→당일, idx 1+→다음날
-        const publishDate = addDaysKst(publishedAt, Math.min(idx, 1));
+        const slot = idx % weekOffsets.length;
+        const extraWeek = Math.floor(idx / weekOffsets.length);
+        const publishDate = addDaysKst(publishedAt, extraWeek * 7 + weekOffsets[slot]);
         conceptTasks.push({
           kind: 'concept',
           id: set.id,
