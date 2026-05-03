@@ -131,6 +131,7 @@ export default function CalendarsClient({ students }: { students: Student[] }) {
                       conceptItems={s.concepts}
                       slug={s.slug}
                       basePath="/s"
+                      previewBase="/api/admin/preview"
                     />
                   )}
                 </section>

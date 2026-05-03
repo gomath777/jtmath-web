@@ -27,6 +27,7 @@ interface SessionCalendarViewProps {
   conceptItems?: CalendarConceptItem[];
   slug: string;
   basePath?: string;
+  previewBase?: string; // admin only: /api/admin/preview?slug=...&to=...
 }
 
 const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
@@ -93,12 +94,14 @@ function ItemCard({
   slug,
   basePath,
   todayYmd,
+  previewBase,
 }: {
   item: AnyItem;
   mode: 'master' | 'student';
   slug: string;
   basePath: string;
   todayYmd: string;
+  previewBase?: string;
 }) {
   if (item.kind === 'session') {
     const s = item;
@@ -125,8 +128,12 @@ function ItemCard({
     if (studentLocked) {
       return <div className={`${base} cursor-not-allowed`} aria-disabled>{inner}</div>;
     }
+    const sessionTarget = `${basePath}/${slug}/session/${s.id}`;
+    const sessionHref = previewBase
+      ? `${previewBase}?slug=${slug}&to=${encodeURIComponent(sessionTarget)}`
+      : sessionTarget;
     return (
-      <Link href={`${basePath}/${slug}/session/${s.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
+      <Link href={sessionHref} className={`${base} hover:opacity-80 transition-opacity`}>
         {inner}
       </Link>
     );
@@ -158,8 +165,12 @@ function ItemCard({
   if (studentLocked) {
     return <div className={`${base} cursor-not-allowed`} aria-disabled>{inner}</div>;
   }
+  const conceptTarget = `${basePath}/${slug}/concept/${c.id}`;
+  const conceptHref = previewBase
+    ? `${previewBase}?slug=${slug}&to=${encodeURIComponent(conceptTarget)}`
+    : conceptTarget;
   return (
-    <Link href={`${basePath}/${slug}/concept/${c.id}`} className={`${base} hover:opacity-80 transition-opacity`}>
+    <Link href={conceptHref} className={`${base} hover:opacity-80 transition-opacity`}>
       {inner}
     </Link>
   );
@@ -170,6 +181,7 @@ interface CommonProps {
   slug: string;
   basePath: string;
   todayYmd: string;
+  previewBase?: string;
 }
 
 function dayHeader(day: Date) {
@@ -230,6 +242,7 @@ export default function SessionCalendarView({
   conceptItems = [],
   slug,
   basePath = '/s',
+  previewBase,
 }: SessionCalendarViewProps) {
   const weeks = getKstWeeks();
   const todayYmd = todayKstYmd();
@@ -259,7 +272,7 @@ export default function SessionCalendarView({
     return items;
   }
 
-  const common = { mode, slug, basePath, todayYmd };
+  const common = { mode, slug, basePath, todayYmd, previewBase };
 
   return (
     <div>
