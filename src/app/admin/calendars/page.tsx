@@ -115,7 +115,7 @@ export default async function AdminCalendarsPage() {
       list.sort((x, y) => (x.chapter_order ?? 999) - (y.chapter_order ?? 999));
       const kstYmd = ymdKst(publishedAt);
       const dowKst = new Date(kstYmd + 'T00:00:00Z').getUTCDay();
-      const weekOffsets = dowKst === 1 ? [0, 1, 3, 4] : dowKst === 4 ? [0, 1] : [0];
+      const weekOffsets = dowKst === 1 ? [0, 0, 3, 3] : dowKst === 4 ? [0, 0] : [0];
       list.forEach((item, idx) => {
         const set = setMap.get(item.setId);
         if (!set) return;

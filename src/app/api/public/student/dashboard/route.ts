@@ -217,7 +217,7 @@ export async function GET(req: NextRequest) {
       // 수업 요일 패턴: 일요일 공개(→월) = 월·화·목·금, 수요일 공개(→목) = 목·금
       const kstYmd = ymdKst(publishedAt);
       const dowKst = new Date(kstYmd + 'T00:00:00Z').getUTCDay();
-      const weekOffsets = dowKst === 1 ? [0, 1, 3, 4] : dowKst === 4 ? [0, 1] : [0];
+      const weekOffsets = dowKst === 1 ? [0, 0, 3, 3] : dowKst === 4 ? [0, 0] : [0];
 
       items.forEach((item, idx) => {
         const set = setMap.get(item.setId);
