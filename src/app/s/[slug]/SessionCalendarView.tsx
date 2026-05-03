@@ -133,7 +133,10 @@ function ItemCard({
   }
 
   const c = item;
-  const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > todayYmd;
+  const d = new Date(todayYmd + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() + 1);
+  const tomorrowYmd = d.toISOString().slice(0, 10);
+  const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > tomorrowYmd;
   const colorClass = studentLocked
     ? `${LOCKED_STYLE.bg} ${LOCKED_STYLE.text}`
     : 'bg-green-50 text-green-700';

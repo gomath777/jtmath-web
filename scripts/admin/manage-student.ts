@@ -177,7 +177,7 @@ async function cmdLink() {
   const { data: profile } = await sc.from('profiles').select('id, name').eq('name', studentName).maybeSingle();
   if (!profile) error(`학생 없음: ${studentName}`);
 
-  const { data: curriculum } = await sc.from('curricula').select('id, title').eq('id', curriculumId).maybeSingle();
+  const { data: curriculum } = await sc.from('curricula').select('id, title, subject_slug').eq('id', curriculumId).maybeSingle();
   if (!curriculum) error(`커리큘럼 없음: ${curriculumId}`);
 
   const { error: linkErr } = await sc.from('student_curriculum_links').insert({
@@ -194,6 +194,37 @@ async function cmdLink() {
   }
 
   success(`배정 완료: ${studentName} → ${curriculum!.title}`);
+
+  // curriculum_items → student_sessions 자동 생성
+  const { data: items } = await sc
+    .from('curriculum_items')
+    .select('week_number, session_number, label, publish_date')
+    .eq('curriculum_id', curriculumId)
+    .order('week_number')
+    .order('session_number');
+
+  if (!items?.length) {
+    info('차시 없음 — student_sessions 생성 스킵');
+    return;
+  }
+
+  const TODAY = new Date().toISOString().slice(0, 10);
+  const sessionRows = items.map(item => ({
+    profile_id: profile!.id,
+    subject_slug: curriculum!.subject_slug,
+    week_number: item.week_number,
+    session_number: item.session_number,
+    label: item.label || null,
+    publish_date: item.publish_date,
+    is_released: false,
+  }));
+
+  const { error: ssErr } = await sc.from('student_sessions').insert(sessionRows);
+  if (ssErr) {
+    warn(`student_sessions 생성 실패: ${ssErr.message}`);
+  } else {
+    info(`student_sessions ${sessionRows.length}개 생성 완료 (기본 잠김 상태)`);
+  }
 }
 
 async function cmdInfo() {
