@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import { ExternalLink } from 'lucide-react';
-import PublicHeader from '../_shared/PublicHeader';
-import PublicFooter from '../_shared/PublicFooter';
 
 const YOUTUBE_BACKUP_URL = 'https://youtu.be/4ObLI1aK6m0';
 
@@ -13,10 +11,8 @@ export const metadata: Metadata = {
 
 export default function OTPage() {
   return (
-    <div className="min-h-screen bg-parchment flex flex-col">
-      <PublicHeader />
-
-      <main className="flex-1 max-w-3xl w-full mx-auto px-5 py-12 sm:py-16">
+    <div className="min-h-screen bg-parchment">
+      <main className="max-w-3xl w-full mx-auto px-5 py-12 sm:py-16">
         {/* Hero */}
         <header className="mb-10 sm:mb-12">
           <p className="text-[11px] tracking-[0.18em] uppercase text-stone font-medium mb-3">
@@ -195,8 +191,6 @@ export default function OTPage() {
           </section>
         </div>
       </main>
-
-      <PublicFooter />
     </div>
   );
 }
