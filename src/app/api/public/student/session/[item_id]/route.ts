@@ -22,10 +22,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // 1. student_session 조회 (lecture JOIN)
+  // 1. student_session 조회 (lecture LEFT JOIN — lecture_id 없어도 통과)
   const { data: ss, error: ssError } = await sc
     .from('student_sessions')
-    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures!inner(id, title, subject_slug)')
+    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures(id, title, subject_slug)')
     .eq('id', item_id)
     .single();
 
@@ -45,27 +45,29 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
 
   // 4. variant는 student_sessions에서 직접 사용
   const requestedVariant = ss.variant;
-  const lecture = ss.lecture as unknown as { id: string; title: string; subject_slug: string };
+  const lecture = ss.lecture as unknown as { id: string; title: string; subject_slug: string } | null;
 
   // 5. session_blocks 조회 — lecture_id + variant (fallback → default)
   let blocks: unknown[] = [];
-  if (requestedVariant !== 'default') {
-    const { data: variantBlocks } = await sc
-      .from('session_blocks')
-      .select('*')
-      .eq('lecture_id', lecture.id)
-      .eq('variant', requestedVariant)
-      .order('order_index', { ascending: true });
-    if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
-  }
-  if (blocks.length === 0) {
-    const { data: defaultBlocks } = await sc
-      .from('session_blocks')
-      .select('*')
-      .eq('lecture_id', lecture.id)
-      .eq('variant', 'default')
-      .order('order_index', { ascending: true });
-    blocks = defaultBlocks || [];
+  if (lecture?.id) {
+    if (requestedVariant !== 'default') {
+      const { data: variantBlocks } = await sc
+        .from('session_blocks')
+        .select('*')
+        .eq('lecture_id', lecture.id)
+        .eq('variant', requestedVariant)
+        .order('order_index', { ascending: true });
+      if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
+    }
+    if (blocks.length === 0) {
+      const { data: defaultBlocks } = await sc
+        .from('session_blocks')
+        .select('*')
+        .eq('lecture_id', lecture.id)
+        .eq('variant', 'default')
+        .order('order_index', { ascending: true });
+      blocks = defaultBlocks || [];
+    }
   }
 
   // 6. 영상 시청 진도
@@ -92,7 +94,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
       id: ss.id,
       week_number: ss.week_number,
       session_number: ss.session_number,
-      label: ss.label ?? lecture.title,
+      label: ss.label ?? lecture?.title ?? null,
       publish_date: ss.publish_date,
       is_released: ss.is_released,
     },
