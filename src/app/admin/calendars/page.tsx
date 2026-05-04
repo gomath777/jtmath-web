@@ -78,30 +78,20 @@ export default async function AdminCalendarsPage() {
       const cb = ba.content_block as { id: string; subject_slug: string; title: string; category: string; unit_number: number | null } | null;
       if (!cb) continue;
       const parsed = parseSlotLabel(ba.slot_label);
-      if (cb.category === 'concept') {
-        const arr = conceptsByProfile.get(ba.profile_id) || [];
-        arr.push({
-          id: ba.id,
-          title: ba.slot_label ?? cb.title,
-          subject_slug: cb.subject_slug,
-          subject_label: SUBJECT_LABEL[cb.subject_slug] || cb.subject_slug,
-          publishDate: ba.scheduled_date,
-        });
-        conceptsByProfile.set(ba.profile_id, arr);
-      } else {
-        const arr = sessionsByProfile.get(ba.profile_id) || [];
-        arr.push({
-          id: ba.id,
-          subject_slug: cb.subject_slug,
-          subject_label: SUBJECT_LABEL[cb.subject_slug] || cb.subject_slug,
-          week_number: parsed?.week_number ?? 1,
-          session_number: parsed?.session_number ?? 1,
-          label: ba.slot_label ?? cb.title,
-          publishDate: ba.scheduled_date,
-          is_released: ba.is_released,
-        });
-        sessionsByProfile.set(ba.profile_id, arr);
-      }
+      // 신 모델에서는 concept 포함 모든 BA를 session 경로(/session/<ba.id>)로 연결.
+      // 학생 대시보드와 동일한 방식 — concept BA도 block_contents를 session route로 렌더링.
+      const arr = sessionsByProfile.get(ba.profile_id) || [];
+      arr.push({
+        id: ba.id,
+        subject_slug: cb.subject_slug,
+        subject_label: SUBJECT_LABEL[cb.subject_slug] || cb.subject_slug,
+        week_number: parsed?.week_number ?? 1,
+        session_number: parsed?.session_number ?? 1,
+        label: ba.slot_label ?? cb.title,
+        publishDate: ba.scheduled_date,
+        is_released: ba.is_released,
+      });
+      sessionsByProfile.set(ba.profile_id, arr);
     }
   } else {
     // ── 구 모델 ──────────────────────────────────────────────────────────────
