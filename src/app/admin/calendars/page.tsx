@@ -87,7 +87,7 @@ export default async function AdminCalendarsPage() {
         subject_label: SUBJECT_LABEL[cb.subject_slug] || cb.subject_slug,
         week_number: parsed?.week_number ?? 0,
         session_number: parsed?.session_number ?? 0,
-        label: ba.slot_label ?? cb.title,
+        label: ba.slot_label ? `${ba.slot_label} ${cb.title}` : cb.title,
         publishDate: ba.scheduled_date,
         is_released: ba.is_released,
       });

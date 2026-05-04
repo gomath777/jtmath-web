@@ -122,7 +122,7 @@ async function getDashboardFromBlocks(
     const week_number = parsed?.week_number ?? 0;
     const session_number = parsed?.session_number ?? 0;
     const publishDate = ba.scheduled_date as string | null;
-    const label = ba.slot_label ?? cb.title;
+    const label = ba.slot_label ? `${ba.slot_label} ${cb.title}` : cb.title;
 
     // 신 모델에서는 category(concept/gichul/shimhwa) 구분 없이 모두 세션으로 처리.
     // concept BA들도 block_contents에 컨텐츠가 있으므로 /session/<ba.id> 경로로 연결.
