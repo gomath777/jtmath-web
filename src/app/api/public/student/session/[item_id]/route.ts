@@ -28,10 +28,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  const useNewModel = process.env.USE_NEW_BLOCKS_MODEL === 'true';
-
-  // ─── NEW MODEL: block_assignments ────────────────────────────────────────────
-  if (useNewModel) {
+  // ─── NEW MODEL: block_assignments (always try first) ─────────────────────────
+  {
     const { data: baRaw, error: baError } = await (sc as any)
       .from('block_assignments')
       .select(`
@@ -127,7 +125,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     return setStudentCookie(res, newToken);
   }
 
-  // ─── LEGACY MODEL ────────────────────────────────────────────────────────────
+  // ─── LEGACY MODEL fallback ───────────────────────────────────────────────────
   return getLegacySession(req, sc, student, item_id);
 }
 
