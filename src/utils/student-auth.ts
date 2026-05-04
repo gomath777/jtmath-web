@@ -7,6 +7,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const SECRET_KEY = process.env.STUDENT_TOKEN_SECRET || 'dev-fallback-secret-change-me';
+// Legacy key used before STUDENT_TOKEN_SECRET was added to Vercel env vars
+const LEGACY_KEY = 'dev-fallback-secret-change-me';
 const COOKIE_NAME = 'student_session';
 const EXPIRY_DAYS = 50;
 
@@ -19,11 +21,11 @@ interface TokenPayload {
 
 // --- Crypto helpers (Edge Runtime compatible, zero dependencies) ---
 
-async function getKey(): Promise<CryptoKey> {
+async function getKey(secret = SECRET_KEY): Promise<CryptoKey> {
   const encoder = new TextEncoder();
   return crypto.subtle.importKey(
     'raw',
-    encoder.encode(SECRET_KEY),
+    encoder.encode(secret),
     { name: 'HMAC', hash: 'SHA-256' },
     false,
     ['sign', 'verify'],
@@ -71,12 +73,12 @@ export async function signToken(profileId: string, slug: string, isMaster?: bool
   return `${payloadB64}.${sigB64}`;
 }
 
-export async function verifyToken(token: string): Promise<TokenPayload | null> {
+async function verifyTokenWithKey(token: string, secret: string): Promise<TokenPayload | null> {
   try {
     const [payloadB64, sigB64] = token.split('.');
     if (!payloadB64 || !sigB64) return null;
 
-    const key = await getKey();
+    const key = await getKey(secret);
     const encoder = new TextEncoder();
     const isValid = await crypto.subtle.verify(
       'HMAC',
@@ -90,13 +92,20 @@ export async function verifyToken(token: string): Promise<TokenPayload | null> {
     const payloadStr = new TextDecoder().decode(new Uint8Array(base64UrlDecode(payloadB64)));
     const payload: TokenPayload = JSON.parse(payloadStr);
 
-    // Check expiry
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
 
     return payload;
   } catch {
     return null;
   }
+}
+
+export async function verifyToken(token: string): Promise<TokenPayload | null> {
+  const result = await verifyTokenWithKey(token, SECRET_KEY);
+  if (result) return result;
+  // Fallback: accept tokens signed with the old dev key (issued before STUDENT_TOKEN_SECRET was set)
+  if (SECRET_KEY !== LEGACY_KEY) return verifyTokenWithKey(token, LEGACY_KEY);
+  return null;
 }
 
 // --- Cookie helpers ---
