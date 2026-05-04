@@ -52,7 +52,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
       return getLegacySession(req, sc, student, item_id);
     }
 
-    if (ba.profile_id !== student.profileId) {
+    if (!student.isMaster && ba.profile_id !== student.profileId) {
       return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
     }
     if (!ba.is_released && !student.isMaster) {
@@ -142,7 +142,7 @@ async function getLegacySession(
     .single();
 
   if (ssError || !ss) return NextResponse.json({ error: '차시를 찾을 수 없습니다' }, { status: 404 });
-  if (ss.profile_id !== student.profileId) return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
+  if (!student.isMaster && ss.profile_id !== student.profileId) return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
   if (!ss.is_released && !student.isMaster) return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
 
   const requestedVariant = ss.variant;
