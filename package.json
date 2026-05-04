@@ -15,6 +15,7 @@
     "admin:variant": "tsx scripts/admin/set-variant.ts",
     "admin:migrate": "tsx scripts/admin/migrate.ts",
     "admin:migrate-to-lectures": "tsx scripts/admin/migrate-to-lectures.ts",
+    "admin:rebuild-migrate": "tsx scripts/admin/rebuild-migrate.ts",
     "admin:assign": "tsx scripts/admin/assign-lecture.ts",
     "admin:upload-ds2-pdfs": "tsx scripts/admin/upload-ds2-pdfs.ts",
     "admin:upload-ds2-videos": "tsx scripts/admin/upload-ds2-videos.ts",

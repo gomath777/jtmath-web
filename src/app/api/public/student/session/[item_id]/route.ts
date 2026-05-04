@@ -9,11 +9,17 @@ const SUBJECT_LABEL: Record<string, string> = {
   ht: '확률과통계', gi: '기하', s2: '수학2',
 };
 
+// "1주 1차시" → { week_number, session_number }
+function parseSlotLabel(label: string | null): { week_number: number; session_number: number } | null {
+  if (!label) return null;
+  const m = label.match(/^(\d+)주\s*(\d+)차시/);
+  if (!m) return null;
+  return { week_number: parseInt(m[1]), session_number: parseInt(m[2]) };
+}
+
 export async function GET(req: NextRequest, { params }: { params: Promise<{ item_id: string }> }) {
   const student = await getStudentFromRequest(req);
-  if (!student) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  if (!student) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { item_id } = await params;
 
@@ -22,58 +28,148 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // 1. student_session 조회 (lecture LEFT JOIN — lecture_id 없어도 통과)
-  const { data: ss, error: ssError } = await sc
-    .from('student_sessions')
-    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures(id, title, subject_slug)')
-    .eq('id', item_id)
-    .single();
+  const useNewModel = process.env.USE_NEW_BLOCKS_MODEL === 'true';
 
-  if (ssError || !ss) {
-    return NextResponse.json({ error: '차시를 찾을 수 없습니다' }, { status: 404 });
-  }
+  // ─── NEW MODEL: block_assignments ────────────────────────────────────────────
+  if (useNewModel) {
+    const { data: baRaw, error: baError } = await (sc as any)
+      .from('block_assignments')
+      .select(`
+        id, profile_id, scheduled_date, slot_label, is_released, variant, notes,
+        content_block:content_blocks (
+          id, subject_slug, title, category, unit_number
+        )
+      `)
+      .eq('id', item_id)
+      .single();
 
-  // 2. 권한 확인
-  if (ss.profile_id !== student.profileId) {
-    return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
-  }
+    const ba = baRaw as {
+      id: string; profile_id: string; scheduled_date: string;
+      slot_label: string | null; is_released: boolean; variant: string; notes: string | null;
+      content_block: { id: string; subject_slug: string; title: string; category: string; unit_number: number | null } | null;
+    } | null;
 
-  // 3. 공개 여부 (마스터는 미릴리즈 세션도 접근 가능)
-  if (!ss.is_released && !student.isMaster) {
-    return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
-  }
+    if (baError || !ba) {
+      // fallback: try legacy student_session id (links shared before migration)
+      return getLegacySession(req, sc, student, item_id);
+    }
 
-  // 4. variant는 student_sessions에서 직접 사용
-  const requestedVariant = ss.variant;
-  const lecture = ss.lecture as unknown as { id: string; title: string; subject_slug: string } | null;
+    if (ba.profile_id !== student.profileId) {
+      return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
+    }
+    if (!ba.is_released && !student.isMaster) {
+      return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
+    }
 
-  // 5. session_blocks 조회 — lecture_id + variant (fallback → default)
-  let blocks: unknown[] = [];
-  if (lecture?.id) {
+    const cb = ba.content_block as unknown as {
+      id: string; subject_slug: string; title: string; category: string; unit_number: number | null;
+    } | null;
+
+    if (!cb) return NextResponse.json({ error: '콘텐츠 블럭을 찾을 수 없습니다' }, { status: 404 });
+
+    // block_contents 조회 — variant fallback → default
+    let blocks: unknown[] = [];
+    const requestedVariant = (ba.variant as string) || 'default';
+
     if (requestedVariant !== 'default') {
       const { data: variantBlocks } = await sc
-        .from('session_blocks')
+        .from('block_contents')
         .select('*')
-        .eq('lecture_id', lecture.id)
+        .eq('content_block_id', cb.id)
         .eq('variant', requestedVariant)
         .order('order_index', { ascending: true });
       if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
     }
     if (blocks.length === 0) {
       const { data: defaultBlocks } = await sc
-        .from('session_blocks')
+        .from('block_contents')
         .select('*')
-        .eq('lecture_id', lecture.id)
+        .eq('content_block_id', cb.id)
         .eq('variant', 'default')
+        .order('order_index', { ascending: true });
+      blocks = defaultBlocks || [];
+    }
+
+    const { data: progress } = await sc
+      .from('video_watch_progress')
+      .select('bunny_video_id, watch_percent, completed')
+      .eq('user_id', student.profileId);
+
+    const progressMap: Record<string, { watch_percent: number; completed: boolean }> = {};
+    (progress || []).forEach((p: { bunny_video_id: string; watch_percent: number; completed: boolean }) => {
+      progressMap[p.bunny_video_id] = { watch_percent: p.watch_percent, completed: p.completed };
+    });
+
+    if (!student.isMaster) {
+      await sc.from('student_tokens')
+        .update({ last_accessed_at: new Date().toISOString() })
+        .eq('slug', student.slug);
+    }
+
+    const parsed = parseSlotLabel(ba.slot_label);
+    const newToken = await renewToken(student);
+    const res = NextResponse.json({
+      item: {
+        id: ba.id,
+        week_number: parsed?.week_number ?? 1,
+        session_number: parsed?.session_number ?? 1,
+        label: ba.slot_label ?? cb.title,
+        publish_date: ba.scheduled_date,
+        is_released: ba.is_released,
+      },
+      curriculum: {
+        title: SUBJECT_LABEL[cb.subject_slug] || cb.subject_slug,
+        subject_slug: cb.subject_slug,
+      },
+      blocks,
+      progress: progressMap,
+    });
+    return setStudentCookie(res, newToken);
+  }
+
+  // ─── LEGACY MODEL ────────────────────────────────────────────────────────────
+  return getLegacySession(req, sc, student, item_id);
+}
+
+async function getLegacySession(
+  _req: NextRequest,
+  sc: any,
+  student: any,
+  item_id: string,
+) {
+  const { data: ss, error: ssError } = await sc
+    .from('student_sessions')
+    .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, variant, lecture:lectures(id, title, subject_slug)')
+    .eq('id', item_id)
+    .single();
+
+  if (ssError || !ss) return NextResponse.json({ error: '차시를 찾을 수 없습니다' }, { status: 404 });
+  if (ss.profile_id !== student.profileId) return NextResponse.json({ error: '접근 권한이 없습니다' }, { status: 403 });
+  if (!ss.is_released && !student.isMaster) return NextResponse.json({ error: '아직 공개되지 않은 차시입니다' }, { status: 403 });
+
+  const requestedVariant = ss.variant;
+  const lecture = ss.lecture as unknown as { id: string; title: string; subject_slug: string } | null;
+
+  let blocks: unknown[] = [];
+  if (lecture?.id) {
+    if (requestedVariant !== 'default') {
+      const { data: variantBlocks } = await sc
+        .from('session_blocks').select('*')
+        .eq('lecture_id', lecture.id).eq('variant', requestedVariant)
+        .order('order_index', { ascending: true });
+      if (variantBlocks && variantBlocks.length > 0) blocks = variantBlocks;
+    }
+    if (blocks.length === 0) {
+      const { data: defaultBlocks } = await sc
+        .from('session_blocks').select('*')
+        .eq('lecture_id', lecture.id).eq('variant', 'default')
         .order('order_index', { ascending: true });
       blocks = defaultBlocks || [];
     }
   }
 
-  // 6. 영상 시청 진도
   const { data: progress } = await sc
-    .from('video_watch_progress')
-    .select('bunny_video_id, watch_percent, completed')
+    .from('video_watch_progress').select('bunny_video_id, watch_percent, completed')
     .eq('user_id', student.profileId);
 
   const progressMap: Record<string, { watch_percent: number; completed: boolean }> = {};
@@ -82,8 +178,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
   });
 
   if (!student.isMaster) {
-    await sc
-      .from('student_tokens')
+    await sc.from('student_tokens')
       .update({ last_accessed_at: new Date().toISOString() })
       .eq('slug', student.slug);
   }
@@ -91,17 +186,11 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ item
   const newToken = await renewToken(student);
   const res = NextResponse.json({
     item: {
-      id: ss.id,
-      week_number: ss.week_number,
-      session_number: ss.session_number,
+      id: ss.id, week_number: ss.week_number, session_number: ss.session_number,
       label: ss.label ?? lecture?.title ?? null,
-      publish_date: ss.publish_date,
-      is_released: ss.is_released,
+      publish_date: ss.publish_date, is_released: ss.is_released,
     },
-    curriculum: {
-      title: SUBJECT_LABEL[ss.subject_slug] || ss.subject_slug,
-      subject_slug: ss.subject_slug,
-    },
+    curriculum: { title: SUBJECT_LABEL[ss.subject_slug] || ss.subject_slug, subject_slug: ss.subject_slug },
     blocks,
     progress: progressMap,
   });
