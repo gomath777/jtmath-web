@@ -49,7 +49,7 @@ function getSubLabel(label: string): string {
   return '기본 문제';
 }
 
-// ─── 타임라인 스텝 ──────────────────────────────────────────────────────────────
+// ─── 타임라인 스텝 (개념강의 전용) ─────────────────────────────────────────────
 function TimelineStep({
   number,
   title,
@@ -65,7 +65,6 @@ function TimelineStep({
 }) {
   return (
     <div className="flex gap-4">
-      {/* 번호 + 연결선 */}
       <div className="flex flex-col items-center shrink-0" style={{ width: 32 }}>
         <div className="w-8 h-8 rounded-full border-2 border-terracotta bg-ivory flex items-center justify-center shrink-0">
           <span className="text-[13px] font-semibold text-terracotta">{number}</span>
@@ -75,7 +74,6 @@ function TimelineStep({
         )}
       </div>
 
-      {/* 콘텐츠 */}
       <div className={`flex-1 min-w-0 ${isLast ? 'pb-2' : 'pb-7'}`}>
         <h3 className="text-[16px] font-semibold text-ink tracking-tight leading-tight mt-0.5">
           {title}
@@ -201,7 +199,6 @@ function ConceptLayout({
         description="영상 시청 후, 개념서를 풀며 배운 내용을 정리하세요"
         isLast
       >
-        {/* 개념서 카드 */}
         <div className={`rounded-xl border border-border-cream p-5 text-center mb-4 transition-colors ${allVideosWatched ? 'bg-sand' : 'bg-sand/50'}`}>
           <BookOpen className={`w-7 h-7 mx-auto mb-2 ${allVideosWatched ? 'text-terracotta' : 'text-stone'}`} />
           {pageRange ? (
@@ -221,7 +218,6 @@ function ConceptLayout({
           )}
         </div>
 
-        {/* 풀이 후 체크리스트 */}
         <div className="rounded-xl border border-border-cream bg-ivory overflow-hidden">
           <div className="px-4 py-2.5 border-b border-border-cream">
             <span className="text-[11px] font-semibold tracking-[0.08em] uppercase text-stone">풀이 후</span>
@@ -246,37 +242,30 @@ function ConceptLayout({
   );
 }
 
-// ─── 메인 컴포넌트 ─────────────────────────────────────────────────────────────
-export default function ContentGroupBlock({
-  content,
+// ─── 기출/심화 레이아웃 ─────────────────────────────────────────────────────────
+function GichulLayout({
+  data,
   progress,
-  subjectSlug,
   progressEndpoint,
 }: {
-  content: Record<string, unknown>;
+  data: ContentGroupContent;
   progress: ProgressMap;
-  subjectSlug: string;
   progressEndpoint?: string;
 }) {
-  const data = content as unknown as ContentGroupContent;
-  const videos = data.videos || [];
-
-  // videos 또는 단일 pdf 있으면 개념강의 레이아웃
-  if (videos.length > 0 || data.pdf) {
-    return <ConceptLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
-  }
-
-  // ─── 기존 레이아웃 (기출/심화 세션) ────────────────────────────────────────
   const label = data.label || '';
   const description = data.description;
   const pdf = data.pdf;
   const pdfs = data.pdfs || (pdf ? [pdf] : []);
   const hintbook = data.hintbook;
+  const videos = (data.videos || []).slice().sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
   const subLabel = getSubLabel(label);
+
+  const [activeVideo, setActiveVideo] = useState<number | null>(null);
 
   return (
     <div className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
-      <div className="px-6 pt-6 pb-4">
+      {/* 헤더 */}
+      <div className="px-6 pt-5 pb-4 border-b border-border-cream">
         <div className="flex items-baseline gap-3">
           {data.step != null && (
             <span className="font-serif font-medium text-terracotta text-[26px] leading-none tracking-tight shrink-0">
@@ -285,42 +274,47 @@ export default function ContentGroupBlock({
           )}
           <div className="min-w-0">
             <h3 className="font-serif font-medium text-[19px] text-ink tracking-tight leading-tight">{label}</h3>
-            <p className="text-[11px] tracking-[0.1em] uppercase text-stone mt-1.5">{subLabel}</p>
+            <p className="text-[11px] tracking-[0.1em] uppercase text-stone mt-1">{subLabel}</p>
           </div>
         </div>
         {description && (
-          <p className="text-[13px] text-olive mt-3 leading-relaxed whitespace-pre-line">{description}</p>
+          <p className="text-[13px] text-olive mt-2.5 leading-relaxed whitespace-pre-line">{description}</p>
         )}
       </div>
 
-      <div className="px-4 pb-3 space-y-2">
-        {pdfs.map((p, idx) => {
-          const url = p.url || p.cdn_url || '';
-          const name = p.original_name || 'document.pdf';
-          return (
-            <a
-              key={idx}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all"
-            >
-              <FileText className="w-5 h-5 text-charcoal shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[14px] font-medium text-ink truncate tracking-tight">{name}</p>
-                {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
-              </div>
-              <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
-                <Download className="w-3 h-3" />
-                PDF
-              </div>
-            </a>
-          );
-        })}
-      </div>
+      {/* 문제지 */}
+      {pdfs.length > 0 && (
+        <div className="px-4 pt-4 pb-1 space-y-2">
+          <p className="text-[11px] font-semibold tracking-[0.08em] uppercase text-stone px-1 mb-2">문제지</p>
+          {pdfs.map((p, idx) => {
+            const url = p.url || p.cdn_url || '';
+            const name = p.original_name || 'document.pdf';
+            return (
+              <a
+                key={idx}
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
+              >
+                <FileText className="w-5 h-5 text-charcoal shrink-0" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-[14px] font-medium text-ink truncate tracking-tight">{name}</p>
+                  {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
+                </div>
+                <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
+                  <Download className="w-3 h-3" />
+                  PDF
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      )}
 
+      {/* 힌트북 */}
       {hintbook && (
-        <div className="px-4 pb-3">
+        <div className="px-4 pt-3 pb-1">
           <a
             href={hintbook.url || hintbook.cdn_url || ''}
             target="_blank"
@@ -336,6 +330,84 @@ export default function ContentGroupBlock({
           </a>
         </div>
       )}
+
+      {/* 해설강의 */}
+      {videos.length > 0 && (
+        <div className="px-4 pt-4 pb-4">
+          <p className="text-[11px] font-semibold tracking-[0.08em] uppercase text-stone px-1 mb-2">해설강의</p>
+          <div className="rounded-xl border border-border-cream overflow-hidden bg-sand divide-y divide-border-cream">
+            {videos.map((video, idx) => {
+              const p = progress[video.bunny_video_id];
+              const isActive = activeVideo === idx;
+              const isDone = p?.completed;
+              const videoLabel = video.title || `${video.problem_number}번 해설강의`;
+
+              return (
+                <div key={idx}>
+                  <button
+                    onClick={() => setActiveVideo(isActive ? null : idx)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${isActive ? 'bg-white' : 'hover:bg-white/60'}`}
+                  >
+                    {isDone
+                      ? <CheckCircle2 className="w-4 h-4 text-terracotta shrink-0" />
+                      : <Play className={`w-4 h-4 shrink-0 ${isActive ? 'text-terracotta' : 'text-stone'}`} />
+                    }
+                    <span className={`text-[13px] flex-1 leading-snug ${isDone ? 'text-stone line-through' : 'text-charcoal'} ${isActive ? 'font-medium text-ink no-underline' : ''}`}
+                      style={isDone && !isActive ? {} : { textDecoration: 'none' }}>
+                      {videoLabel}
+                    </span>
+                    {video.duration_seconds ? (
+                      <span className="text-[12px] text-stone shrink-0">{formatDuration(video.duration_seconds)}</span>
+                    ) : p && !isDone ? (
+                      <span className="text-[11px] text-stone shrink-0">{p.watch_percent}%</span>
+                    ) : null}
+                  </button>
+                  {isActive && (
+                    <div className="px-4 pb-4 pt-2 bg-white">
+                      <LearningVideoPlayer
+                        bunnyVideoId={video.bunny_video_id}
+                        initialProgress={p?.watch_percent || 0}
+                        initialCompleted={p?.completed || false}
+                        progressEndpoint={progressEndpoint}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
+}
+
+// ─── 메인 컴포넌트 ─────────────────────────────────────────────────────────────
+export default function ContentGroupBlock({
+  content,
+  progress,
+  subjectSlug,
+  progressEndpoint,
+}: {
+  content: Record<string, unknown>;
+  progress: ProgressMap;
+  subjectSlug: string;
+  progressEndpoint?: string;
+}) {
+  const data = content as unknown as ContentGroupContent;
+
+  // page_range 있으면 개념강의 블럭
+  if (data.page_range) {
+    return <ConceptLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
+  }
+
+  // 라벨에 레벨/올스캔/단계 등 기출 키워드 있으면 기출/심화 블럭
+  const label = data.label || '';
+  const isGichul = /레벨|올스캔|올 스캔|단계/i.test(label);
+  if (isGichul) {
+    return <GichulLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
+  }
+
+  // 기본값: 개념강의 레이아웃 (page_range 미설정된 경우 포함)
+  return <ConceptLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
 }
