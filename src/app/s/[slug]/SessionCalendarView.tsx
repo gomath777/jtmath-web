@@ -116,7 +116,6 @@ function ItemCard({
           <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
           <span className="font-medium truncate text-[9px] sm:text-[10px]">{s.subject_label}</span>
         </div>
-        <div className="font-mono text-[8px] sm:text-[9px] opacity-60">W{s.week_number}-S{s.session_number}</div>
         {s.label && <div className="truncate opacity-80 mt-0.5 text-[9px] sm:text-[10px]">{s.label}</div>}
         {studentLocked && isFuture && s.publishDate && (
           <div className="text-[8px] sm:text-[9px] mt-0.5 opacity-70">{formatPublishLabel(s.publishDate.slice(0, 10))}</div>

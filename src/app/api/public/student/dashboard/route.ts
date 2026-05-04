@@ -119,8 +119,8 @@ async function getDashboardFromBlocks(
     if (!cb) continue;
 
     const parsed = parseSlotLabel(ba.slot_label);
-    const week_number = parsed?.week_number ?? 1;
-    const session_number = parsed?.session_number ?? 1;
+    const week_number = parsed?.week_number ?? 0;
+    const session_number = parsed?.session_number ?? 0;
     const publishDate = ba.scheduled_date as string | null;
     const label = ba.slot_label ?? cb.title;
 
@@ -182,10 +182,10 @@ async function getDashboardFromBlocks(
       sessionTasks.push({
         kind: 'session',
         id: s.id,
-        title: s.label || `${s.week_number}주차 ${s.session_number}차시`,
+        title: s.label || (s.week_number > 0 ? `${s.week_number}주차 ${s.session_number}차시` : ''),
         subject_slug: c.subject_slug,
         subject_label: c.title,
-        meta: `${c.title} · ${s.week_number}주차 ${s.session_number}차시`,
+        meta: s.week_number > 0 ? `${c.title} · ${s.week_number}주차 ${s.session_number}차시` : c.title,
         isOverdue,
         isToday,
         publishDate,
