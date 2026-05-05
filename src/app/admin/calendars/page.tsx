@@ -93,6 +93,27 @@ export default async function AdminCalendarsPage() {
       });
       sessionsByProfile.set(ba.profile_id, arr);
     }
+
+    // ── 신 모델에서도 student_sessions 병합 (lecture 기반 배정 혼용 기간) ────
+    const { data: allSS } = await sc
+      .from('student_sessions')
+      .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, lecture:lectures(title)');
+
+    for (const s of allSS || []) {
+      const lecture = s.lecture as unknown as { title: string } | null;
+      const arr = sessionsByProfile.get(s.profile_id) || [];
+      arr.push({
+        id: s.id,
+        subject_slug: s.subject_slug,
+        subject_label: SUBJECT_LABEL[s.subject_slug] || s.subject_slug,
+        week_number: s.week_number,
+        session_number: s.session_number,
+        label: s.label ?? lecture?.title ?? null,
+        publishDate: s.publish_date as string | null,
+        is_released: s.is_released,
+      });
+      sessionsByProfile.set(s.profile_id, arr);
+    }
   } else {
     // ── 구 모델 ──────────────────────────────────────────────────────────────
     const { data: allSessions } = await sc
