@@ -157,6 +157,53 @@ async function getDashboardFromBlocks(
     });
   }
 
+  // ── student_sessions 병합 (lecture 기반 배정 혼용 기간) ──────────────────────
+  // block_assignments 에서 이미 채워진 (subject, week, session) 조합은 스킵해 중복 방지.
+  {
+    const baKeys = new Set(calendarSessions.map(s => `${s.subject_slug}:${s.week_number}:${s.session_number}`));
+
+    const { data: ssList } = await sc
+      .from('student_sessions')
+      .select('id, subject_slug, week_number, session_number, label, publish_date, is_released, lecture:lectures(title)')
+      .eq('profile_id', profileId)
+      .order('publish_date', { ascending: true });
+
+    for (const ss of ssList ?? []) {
+      if (baKeys.has(`${ss.subject_slug}:${ss.week_number}:${ss.session_number}`)) continue;
+      const lecture = ss.lecture as { title: string } | null;
+      const label = ss.label ?? lecture?.title ?? null;
+      const publishDate = ss.publish_date as string | null;
+      calendarSessions.push({
+        id: ss.id,
+        subject_slug: ss.subject_slug,
+        subject_label: SUBJECT_LABEL[ss.subject_slug] || ss.subject_slug,
+        week_number: ss.week_number,
+        session_number: ss.session_number,
+        label,
+        publishDate,
+        is_released: ss.is_released,
+      });
+
+      if (!ss.is_released) continue;
+      const subj = ss.subject_slug;
+      if (!subjectGroups.has(subj)) {
+        subjectGroups.set(subj, {
+          id: subj,
+          title: SUBJECT_LABEL[subj] || subj,
+          subject_slug: subj,
+          sessions: [],
+        });
+      }
+      subjectGroups.get(subj)!.sessions.push({
+        id: ss.id,
+        week_number: ss.week_number,
+        session_number: ss.session_number,
+        label: label ?? '',
+        publishDate,
+      });
+    }
+  }
+
   const curriculaWithSessions = Array.from(subjectGroups.values());
 
   // 오늘 할 일

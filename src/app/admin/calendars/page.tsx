@@ -95,11 +95,21 @@ export default async function AdminCalendarsPage() {
     }
 
     // ── 신 모델에서도 student_sessions 병합 (lecture 기반 배정 혼용 기간) ────
+    // block_assignments 에서 이미 채워진 (profile, subject, week, session) 조합은 스킵해 중복 방지.
+    const baKeys = new Set<string>();
+    for (const [pid, entries] of Array.from(sessionsByProfile.entries())) {
+      for (const e of entries) {
+        baKeys.add(`${pid}:${e.subject_slug}:${e.week_number}:${e.session_number}`);
+      }
+    }
+
     const { data: allSS } = await sc
       .from('student_sessions')
       .select('id, profile_id, subject_slug, week_number, session_number, label, publish_date, is_released, lecture:lectures(title)');
 
     for (const s of allSS || []) {
+      const key = `${s.profile_id}:${s.subject_slug}:${s.week_number}:${s.session_number}`;
+      if (baKeys.has(key)) continue;
       const lecture = s.lecture as unknown as { title: string } | null;
       const arr = sessionsByProfile.get(s.profile_id) || [];
       arr.push({
