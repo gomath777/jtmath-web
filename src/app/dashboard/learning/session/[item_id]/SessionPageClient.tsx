@@ -23,6 +23,13 @@ interface SessionData {
   progress: ProgressMap;
 }
 
+function isShimhwaSession(blocks: SessionBlock[]): boolean {
+  return blocks.some(b => {
+    const c = b.content as Record<string, unknown>;
+    return c?.side_a !== undefined || c?.is_bonus === true;
+  });
+}
+
 export default function SessionPageClient({
   itemId,
   backHref = '/dashboard/learning',
@@ -111,16 +118,51 @@ export default function SessionPageClient({
       </header>
 
       {/* ─── Blocks ─── */}
-      <div className="space-y-5">
-        {blocks.length === 0 ? (
-          <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
-            <BookOpen className="w-10 h-10 mx-auto mb-3 text-stone" />
-            <p className="text-[14px] text-olive">
-              아직 학습 콘텐츠가 준비되지 않았습니다
-            </p>
+      {blocks.length === 0 ? (
+        <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
+          <BookOpen className="w-10 h-10 mx-auto mb-3 text-stone" />
+          <p className="text-[14px] text-olive">
+            아직 학습 콘텐츠가 준비되지 않았습니다
+          </p>
+        </div>
+      ) : isShimhwaSession(blocks) ? (
+        /* ── 심화유형 타임라인 레이아웃 ── */
+        <div className="relative">
+          {/* 세로 연결선 */}
+          <div className="absolute left-[10px] top-10 bottom-10 w-px bg-gradient-to-b from-terracotta/30 via-terracotta/20 to-transparent" />
+          <div className="space-y-5">
+            {blocks.map((block, idx) => {
+              const c = block.content as Record<string, unknown>;
+              const isOptional = c?.is_optional === true;
+              const isBonus = c?.is_bonus === true;
+              const step = c?.step as number | undefined;
+
+              return (
+                <div key={block.id} className="relative pl-9">
+                  {/* 스텝 원형 인디케이터 */}
+                  <div className={`absolute left-0 top-[21px] w-[21px] h-[21px] rounded-full border-2 flex items-center justify-center z-10 bg-ivory
+                    ${isOptional ? 'border-stone/30' : isBonus ? 'border-terracotta/25' : 'border-terracotta/60'}`}
+                  >
+                    {isBonus ? (
+                      <span className="text-[8px] font-bold text-terracotta/40">+</span>
+                    ) : step != null ? (
+                      <span className="text-[10px] font-semibold text-terracotta/80">{step}</span>
+                    ) : null}
+                  </div>
+                  <BlockRenderer
+                    block={block}
+                    progress={progress}
+                    subjectSlug={curriculum.subject_slug}
+                    progressEndpoint={progressEndpoint}
+                  />
+                </div>
+              );
+            })}
           </div>
-        ) : (
-          blocks.map(block => (
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {blocks.map(block => (
             <BlockRenderer
               key={block.id}
               block={block}
@@ -128,9 +170,9 @@ export default function SessionPageClient({
               subjectSlug={curriculum.subject_slug}
               progressEndpoint={progressEndpoint}
             />
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
