@@ -535,7 +535,7 @@ function GichulLayout({
                     <div className="px-4 pb-4 pt-2 bg-white">
                       <LearningVideoPlayer
                         bunnyVideoId={video.bunny_video_id}
-                        libraryId="566809"
+                        libraryId="622509"
                         initialProgress={p?.watch_percent || 0}
                         initialCompleted={p?.completed || false}
                         progressEndpoint={progressEndpoint}
