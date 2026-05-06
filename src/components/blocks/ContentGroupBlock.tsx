@@ -21,16 +21,26 @@ interface VideoItem {
   duration_seconds?: number | null;
 }
 
+interface SideContent {
+  label: string;
+  pdf: PdfItem;
+  hintbook?: PdfItem;
+}
+
 interface ContentGroupContent {
   label: string;
   step?: number | string;
   description?: string;
+  is_optional?: boolean;
+  is_bonus?: boolean;
   pdf?: PdfItem;
   pdfs?: PdfItem[];
   hintbook?: PdfItem;
   videos?: VideoItem[];
   page_range?: string;
   guide_text?: string;
+  side_a?: SideContent;
+  side_b?: SideContent;
 }
 
 function formatDuration(seconds: number): string {
@@ -243,6 +253,146 @@ function ConceptLayout({
   );
 }
 
+// ─── 심화유형 A/B 양면 한 칸 ─────────────────────────────────────────────────
+function SidePanel({ side }: { side: SideContent }) {
+  const url = side.pdf.url || side.pdf.cdn_url || '';
+  const hintUrl = side.hintbook ? (side.hintbook.url || side.hintbook.cdn_url || '') : '';
+  return (
+    <div className="p-4 space-y-2">
+      <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-stone mb-2.5">{side.label}</p>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group flex items-center gap-2.5 px-3 py-3 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
+      >
+        <FileText className="w-4 h-4 text-charcoal shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-medium text-ink truncate">{side.pdf.original_name}</p>
+          {side.pdf.file_size && <p className="text-[10px] text-stone mt-0.5">{side.pdf.file_size}</p>}
+        </div>
+        <div className="shrink-0 flex items-center gap-1 text-[10px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-2 py-1 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory transition-all">
+          <Download className="w-3 h-3" />
+          PDF
+        </div>
+      </a>
+      {side.hintbook && (
+        <a
+          href={hintUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
+        >
+          <Lightbulb className="w-3.5 h-3.5 text-terracotta shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
+            <p className="text-[11px] text-olive">힌트만 보고 재도전</p>
+          </div>
+          <Download className="w-3 h-3 text-terracotta/60 shrink-0" />
+        </a>
+      )}
+    </div>
+  );
+}
+
+// ─── 심화유형 A·B 2열 레이아웃 ───────────────────────────────────────────────
+function ShimhwaPairLayout({ data }: { data: ContentGroupContent }) {
+  const sideA = data.side_a!;
+  const sideB = data.side_b!;
+  const stepStr = data.step != null
+    ? (typeof data.step === 'number' ? String(data.step).padStart(2, '0') : data.step)
+    : null;
+
+  return (
+    <div className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
+      {/* 헤더 */}
+      <div className="px-6 pt-5 pb-4 border-b border-border-cream">
+        <div className="flex items-baseline gap-3">
+          {stepStr && (
+            <span className="font-serif font-medium text-terracotta text-[26px] leading-none tracking-tight shrink-0">
+              {stepStr}
+            </span>
+          )}
+          <div className="flex-1 flex items-baseline gap-2.5 flex-wrap">
+            <h3 className="font-serif font-medium text-[19px] text-ink tracking-tight leading-tight">{data.label}</h3>
+            {data.is_optional && (
+              <span className="text-[10px] tracking-wider uppercase font-medium text-stone bg-sand border border-border-cream px-2 py-0.5 rounded-full">
+                선택
+              </span>
+            )}
+          </div>
+        </div>
+        {data.is_optional && (
+          <p className="text-[12px] text-stone mt-1.5 leading-snug">
+            어려워서 안 해도 됩니다. 도전하고 싶은 학생만!
+          </p>
+        )}
+        {data.description && (
+          <p className="text-[13px] text-olive mt-2 leading-relaxed">{data.description}</p>
+        )}
+      </div>
+
+      {/* A | B 2열 */}
+      <div className="grid grid-cols-2 divide-x divide-border-cream">
+        <SidePanel side={sideA} />
+        <SidePanel side={sideB} />
+      </div>
+    </div>
+  );
+}
+
+// ─── 보충 학습지 레이아웃 ────────────────────────────────────────────────────
+function BonusLayout({ data }: { data: ContentGroupContent }) {
+  const pdf = data.pdf!;
+  const hintbook = data.hintbook;
+  const pdfUrl = pdf.url || pdf.cdn_url || '';
+  const hintUrl = hintbook ? (hintbook.url || hintbook.cdn_url || '') : '';
+
+  return (
+    <div className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
+      <div className="px-6 pt-4 pb-3 border-b border-border-cream flex items-center gap-2.5">
+        <span className="text-[10px] tracking-[0.1em] uppercase font-semibold text-stone bg-sand border border-border-cream px-2 py-0.5 rounded-full">
+          보충 학습지
+        </span>
+        <h3 className="font-serif font-medium text-[17px] text-ink tracking-tight">{data.label}</h3>
+      </div>
+      <div className="px-4 py-4 space-y-2">
+        <a
+          href={pdfUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
+        >
+          <FileText className="w-5 h-5 text-charcoal shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[14px] font-medium text-ink truncate tracking-tight">{pdf.original_name}</p>
+            {pdf.file_size && <p className="text-[11px] text-stone mt-0.5">{pdf.file_size}</p>}
+          </div>
+          <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
+            <Download className="w-3 h-3" />
+            PDF
+          </div>
+        </a>
+        {hintbook && (
+          <a
+            href={hintUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
+          >
+            <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
+              <p className="text-[12px] text-olive">각 문항 힌트만 보고 재도전</p>
+            </div>
+            <Download className="w-3.5 h-3.5 text-terracotta/60 shrink-0" />
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── 기출/심화 레이아웃 ─────────────────────────────────────────────────────────
 function GichulLayout({
   data,
@@ -417,6 +567,16 @@ export default function ContentGroupBlock({
 }) {
   const data = content as unknown as ContentGroupContent;
 
+  // A/B 2열 심화유형
+  if (data.side_a && data.side_b) {
+    return <ShimhwaPairLayout data={data} />;
+  }
+
+  // 보충 학습지
+  if (data.is_bonus) {
+    return <BonusLayout data={data} />;
+  }
+
   // page_range 있으면 개념강의 블럭
   if (data.page_range) {
     return <ConceptLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
@@ -429,6 +589,6 @@ export default function ContentGroupBlock({
     return <GichulLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
   }
 
-  // 기본값: 개념강의 레이아웃 (page_range 미설정된 경우 포함)
+  // 기본값: 개념강의 레이아웃
   return <ConceptLayout data={data} progress={progress} progressEndpoint={progressEndpoint} />;
 }
