@@ -1,7 +1,6 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { Download, FileText, Play } from 'lucide-react';
-
-const CONCEPT_LIBRARY_ID = '566809';
+import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
 
 export const metadata = {
   title: '대수 개념 8~14차시 보충자료',

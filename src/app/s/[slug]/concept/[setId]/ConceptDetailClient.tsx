@@ -8,8 +8,7 @@ import {
 } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
 import { SUBJECT_LABELS } from '@/components/blocks/types';
-
-const CONCEPT_LIBRARY_ID = '566809';
+import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
 
 interface PdfItem {
   url: string;

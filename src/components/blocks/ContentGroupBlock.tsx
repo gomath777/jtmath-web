@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, FileText, Play, CheckCircle2, BookOpen, Lightbulb } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
+import { CONCEPT_LIBRARY_ID, EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
 import type { ProgressMap } from './types';
 
 interface PdfItem {
@@ -189,7 +190,7 @@ function ConceptLayout({
                     <div className="px-4 pb-4 pt-2 bg-white">
                       <LearningVideoPlayer
                         bunnyVideoId={video.bunny_video_id}
-                        libraryId="566809"
+                        libraryId={CONCEPT_LIBRARY_ID}
                         initialProgress={p?.watch_percent || 0}
                         initialCompleted={p?.completed || false}
                         progressEndpoint={progressEndpoint}
@@ -535,7 +536,7 @@ function GichulLayout({
                     <div className="px-4 pb-4 pt-2 bg-white">
                       <LearningVideoPlayer
                         bunnyVideoId={video.bunny_video_id}
-                        libraryId="622509"
+                        libraryId={EXAM_LIBRARY_ID}
                         initialProgress={p?.watch_percent || 0}
                         initialCompleted={p?.completed || false}
                         progressEndpoint={progressEndpoint}

@@ -3,8 +3,7 @@ import { PlayCircle, ChevronLeft, BookMarked } from 'lucide-react';
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import BunnyVideoPlayer from '@/components/BunnyVideoPlayer';
-
-const BUNNY_EXAM_LIBRARY_ID = process.env.BUNNY_EXAM_LIBRARY_ID || '622509';
+import { EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
 
 const SUBJECT_NAMES: Record<string, string> = {
   gs1: '공통수학1',
@@ -140,7 +139,7 @@ export default async function PracticePage({
         )}
 
         <BunnyVideoPlayer
-          libraryId={BUNNY_EXAM_LIBRARY_ID}
+          libraryId={EXAM_LIBRARY_ID}
           videoId={currentVideo?.bunny_video_id ?? ''}
           lessonId=""
           startPositionSecs={0}

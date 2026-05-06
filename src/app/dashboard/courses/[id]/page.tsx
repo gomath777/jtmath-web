@@ -3,8 +3,7 @@ import { Download, PlayCircle, MessageCircle, ChevronLeft, CheckCircle2 } from '
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import BunnyVideoPlayer from '@/components/BunnyVideoPlayer';
-
-const BUNNY_LIBRARY_ID = process.env.BUNNY_LIBRARY_ID || '566809';
+import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
 
 export default async function CourseViewerPage({
   params,
@@ -279,7 +278,7 @@ export default async function CourseViewerPage({
               </div>
               <div className="rounded-xl overflow-hidden border border-white/[0.1] shadow-2xl bg-black aspect-video bg-opacity-50">
                 <BunnyVideoPlayer
-                  libraryId={BUNNY_LIBRARY_ID}
+                  libraryId={CONCEPT_LIBRARY_ID}
                   videoId={currentLesson?.bunny_video_id ?? ''}
                   lessonId={currentLesson?.id ?? ''}
                   startPositionSecs={savedPositionSecs}

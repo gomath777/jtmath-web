@@ -2,8 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronDown, ChevronUp, Download, PlayCircle, FileText } from 'lucide-react';
-
-const BUNNY_LIBRARY_ID = '622509';
+import { EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
 
 interface Video {
   title: string;
@@ -295,7 +294,7 @@ export default function SupplementsClient({ userName }: { userName: string }) {
                   </div>
                   <div className="aspect-video bg-black">
                     <iframe
-                      src={`https://iframe.mediadelivery.net/embed/${BUNNY_LIBRARY_ID}/${chapter.summaryVideoId}?autoplay=false&preload=true`}
+                      src={`https://iframe.mediadelivery.net/embed/${EXAM_LIBRARY_ID}/${chapter.summaryVideoId}?autoplay=false&preload=true`}
                       className="w-full h-full border-0"
                       allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
                       allowFullScreen
@@ -305,7 +304,7 @@ export default function SupplementsClient({ userName }: { userName: string }) {
               )}
               {/* Individual Videos */}
               {chapter.videos.map((video) => (
-                <VideoItem key={video.bunnyId} video={video} libraryId={BUNNY_LIBRARY_ID} />
+                <VideoItem key={video.bunnyId} video={video} libraryId={EXAM_LIBRARY_ID} />
               ))}
             </div>
           </div>
