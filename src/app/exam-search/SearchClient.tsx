@@ -121,12 +121,17 @@ function parseQuery(input: string): Token[] {
 
     // bare year: 2-digit (24) or 4-digit (2024) — only if plausible
     if (/^\d{4}$/.test(part)) {
+      const yy = +part.slice(0, 2), mm = +part.slice(2, 4);
+      // Try as YYMM compact code first (e.g. "2410" → year=2024, month=10)
+      if (mm >= 1 && mm <= 12) {
+        tokens.push({ year: normalizeYear(yy), month: mm });
+        continue;
+      }
       const n = +part;
       if (n >= 1990 && n <= 2099) { tokens.push({ year: n }); continue; }
     }
     if (/^\d{2}$/.test(part)) {
-      // ambiguous — could be year or problem. Prefer year if input has other 학년/번 already? Skip: treat as text fallback
-      // Better: try as year only when paired with other date-like tokens. For simplicity, treat as text.
+      // ambiguous — could be year or problem. For simplicity, treat as text.
     }
 
     // fallback: free text
