@@ -38,15 +38,6 @@ const SECTIONS = [
       { id: '314d17a7-b989-4d96-a449-d391403f6565', label: '24년 10월 고1 18번', num: 3 },
     ],
   },
-  {
-    level: '레벨4-2',
-    pdf: {
-      url: 'https://mathgo-pdfs.b-cdn.net/sessions/gs1/04_여러가지방정식/w1s1/여러가지 방정식 레벨4-2 v2.pdf',
-      name: '여러가지 방정식 레벨4-2',
-      size: '2.1 MB',
-    },
-    videos: [],
-  },
 ];
 
 export default function Gs1EquationsLv34Page() {
