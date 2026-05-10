@@ -166,6 +166,31 @@ async function getLegacySession(
     }
   }
 
+  // lecture_id 없이 curriculum_item_id로만 연결된 경우 (admin:session CLI로 생성된 차시)
+  if (blocks.length === 0 && !lecture?.id) {
+    const { data: links } = await sc
+      .from('student_curriculum_links')
+      .select('curriculum_id')
+      .eq('profile_id', ss.profile_id);
+    const curriculumIds = (links ?? []).map((l: { curriculum_id: string }) => l.curriculum_id);
+    if (curriculumIds.length > 0) {
+      const { data: ciList } = await sc
+        .from('curriculum_items')
+        .select('id')
+        .in('curriculum_id', curriculumIds)
+        .eq('week_number', ss.week_number)
+        .eq('session_number', ss.session_number);
+      const ciIds = (ciList ?? []).map((c: { id: string }) => c.id);
+      if (ciIds.length > 0) {
+        const { data: ciBlocks } = await sc
+          .from('session_blocks').select('*')
+          .in('curriculum_item_id', ciIds)
+          .order('order_index', { ascending: true });
+        blocks = ciBlocks || [];
+      }
+    }
+  }
+
   const { data: progress } = await sc
     .from('video_watch_progress').select('bunny_video_id, watch_percent, completed')
     .eq('user_id', student.profileId);
