@@ -172,7 +172,15 @@ async function getLegacySession(
       .from('student_curriculum_links')
       .select('curriculum_id')
       .eq('profile_id', ss.profile_id);
-    const curriculumIds = (links ?? []).map((l: { curriculum_id: string }) => l.curriculum_id);
+    let curriculumIds = (links ?? []).map((l: { curriculum_id: string }) => l.curriculum_id);
+
+    // 커리큘럼 배정 없는 학생은 subject_slug의 모든 커리큘럼에서 week/session 매칭
+    if (curriculumIds.length === 0) {
+      const { data: allCurricula } = await sc
+        .from('curricula').select('id').eq('subject_slug', ss.subject_slug);
+      curriculumIds = (allCurricula ?? []).map((c: { id: string }) => c.id);
+    }
+
     if (curriculumIds.length > 0) {
       const { data: ciList } = await sc
         .from('curriculum_items')
