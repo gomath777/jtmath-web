@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
   let q = sc
     .from('curricula')
     .select('id, title, subject_slug, schedule_pattern, start_date, description, created_at')
+    .is('archived_at', null)
     .order('start_date', { ascending: false });
 
   if (subject) q = q.eq('subject_slug', subject);

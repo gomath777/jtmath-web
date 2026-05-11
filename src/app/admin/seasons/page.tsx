@@ -21,6 +21,7 @@ export default async function AdminSeasonsPage() {
   const { data: seasons } = await sc
     .from('curricula')
     .select('id, title, subject_slug, schedule_pattern, start_date, description, created_at')
+    .is('archived_at', null)
     .order('start_date', { ascending: false });
 
   const ids = (seasons || []).map((s: { id: string }) => s.id);
