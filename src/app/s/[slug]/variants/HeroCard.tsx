@@ -17,7 +17,9 @@ interface Props {
  * 세션 URL은 `${basePath}/${slug}/session/${id}` (online: /s, offline: /c).
  */
 export default function HeroCard({ task, slug, basePath, onOpenConcept }: Props) {
-  const sessionHref = task.kind === 'session' ? `${basePath}/${slug}/session/${task.id}` : null;
+  const sessionHref = task.kind === 'session'
+    ? (task.lessonSlug ? `/lesson/${task.lessonSlug}` : `${basePath}/${slug}/session/${task.id}`)
+    : null;
   const Icon = task.kind === 'concept' ? Video : BookOpen;
 
   const body = (

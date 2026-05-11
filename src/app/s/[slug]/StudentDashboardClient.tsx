@@ -51,6 +51,7 @@ interface SessionItem {
   session_number: number;
   label: string;
   publishDate?: string | null;
+  lessonSlug?: string | null;
 }
 
 interface CurriculumData {
@@ -69,6 +70,7 @@ interface CalendarSessionEntry {
   label: string | null;
   publishDate: string | null;
   is_released: boolean;
+  lessonSlug?: string | null;
 }
 
 interface CalendarConceptItem {
@@ -160,10 +162,13 @@ const AUDIENCE_LABEL: Record<string, string> = {
 export default function StudentDashboardClient({
   slug,
   basePath = '/s',
+  dashboardEndpoint = '/api/public/student/dashboard',
 }: {
   slug: string;
-  /** URL prefix: '/s' (online portal) or '/c' (offline classroom). 세션 링크 조립에 사용. */
+  /** URL prefix: '/s' (online portal), '/c' (offline classroom), or '/st' (new system). 세션 링크 조립에 사용. */
   basePath?: string;
+  /** Dashboard data endpoint. Default `/api/public/student/dashboard` for legacy /s; `/api/public/student/st-dashboard` for new /st (SLA only). */
+  dashboardEndpoint?: string;
 }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -183,7 +188,7 @@ export default function StudentDashboardClient({
 
   const fetchDashboard = async () => {
     try {
-      const res = await fetch(`/api/public/student/dashboard?slug=${slug}`);
+      const res = await fetch(`${dashboardEndpoint}?slug=${slug}`);
       if (res.status === 401) {
         setNeedsVerify(true);
         setLoading(false);
@@ -566,7 +571,7 @@ export default function StudentDashboardClient({
                 activeCurriculum.sessions.map(session => (
                   <Link
                     key={session.id}
-                    href={`${basePath}/${slug}/session/${session.id}`}
+                    href={session.lessonSlug ? `/lesson/${session.lessonSlug}` : `${basePath}/${slug}/session/${session.id}`}
                     className="group bg-ivory border border-border-cream rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-white hover:shadow-ring-warm transition-all"
                   >
                     <div className="flex-1 min-w-0">

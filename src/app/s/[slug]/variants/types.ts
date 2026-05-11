@@ -18,7 +18,9 @@ export interface TodayTask {
   /**
    * 세션 task일 때 클라이언트가 동적으로 조립: `${basePath}/${slug}/session/${id}`.
    * concept은 onOpenConcept 콜백 사용.
+   * `lessonSlug` 있으면 신 시스템 `/lesson/{slug}` 사용.
    */
+  lessonSlug?: string | null;
   concept_set_id?: string;
   isOverdue?: boolean;
   isToday?: boolean;
@@ -31,6 +33,7 @@ export interface SessionSummary {
   session_number: number;
   label: string;
   publishDate?: string | null;
+  lessonSlug?: string | null;
 }
 
 export interface CurriculumSummary {

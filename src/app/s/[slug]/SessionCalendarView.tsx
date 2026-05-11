@@ -11,6 +11,8 @@ interface CalendarSessionEntry {
   label: string | null;
   publishDate: string | null;
   is_released: boolean;
+  /** Optional: if set, card link uses `/lesson/{slug}` instead of `${basePath}/${slug}/session/${id}`. */
+  lessonSlug?: string | null;
 }
 
 interface CalendarConceptItem {
@@ -127,7 +129,9 @@ function ItemCard({
     if (studentLocked) {
       return <div className={`${base} cursor-not-allowed`} aria-disabled>{inner}</div>;
     }
-    const sessionTarget = `${basePath}/${slug}/session/${s.id}`;
+    const sessionTarget = s.lessonSlug
+      ? `/lesson/${s.lessonSlug}`
+      : `${basePath}/${slug}/session/${s.id}`;
     const sessionHref = previewBase
       ? `${previewBase}?slug=${slug}&to=${encodeURIComponent(sessionTarget)}`
       : sessionTarget;
