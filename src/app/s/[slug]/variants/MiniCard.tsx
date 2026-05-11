@@ -13,10 +13,12 @@ interface Props {
 
 /**
  * Hero 아래 보조 Mini 카드. NEW · "지난 주" 라벨(시간 기반)만.
- * 세션 URL은 `${basePath}/${slug}/session/${id}`.
+ * 세션 URL은 lessonSlug 있으면 `/lesson/{slug}`, 없으면 legacy redirect.
  */
 export default function MiniCard({ task, slug, basePath, onOpenConcept }: Props) {
-  const sessionHref = task.kind === 'session' ? `${basePath}/${slug}/session/${task.id}` : null;
+  const sessionHref = task.kind === 'session'
+    ? (task.lessonSlug ? `/lesson/${task.lessonSlug}` : `${basePath}/${slug}/session/${task.id}`)
+    : null;
   const Icon = task.kind === 'concept' ? Video : BookOpen;
 
   const body = (

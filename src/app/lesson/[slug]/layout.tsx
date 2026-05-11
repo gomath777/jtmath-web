@@ -3,9 +3,10 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: '고T수학',
   description: '학습 페이지',
+  robots: { index: false, follow: false },
 };
 
-export default function StudentPortalLayout({
+export default function LessonLayout({
   children,
 }: {
   children: React.ReactNode;

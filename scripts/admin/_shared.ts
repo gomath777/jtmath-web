@@ -138,3 +138,63 @@ export function printHelp(scriptName: string, usage: string, examples: string[])
   examples.forEach(e => console.log(`  ${e}`));
   console.log('');
 }
+
+// --- Public slug generation (한글 → 영문 슬러그) ---
+
+const KEYWORD_TO_SLUG: Array<[RegExp, string]> = [
+  [/다항식|나머지정리|인수정리/, 'poly'],
+  [/삼각함수.*활용|삼각함수활용/, 'trig-app'],
+  [/삼각함수/, 'trig'],
+  [/순열.*조합|경우의 ?수/, 'permcomb'],
+  [/이차방정식|이차함수/, 'quad'],
+  [/여러가지 ?방정식|방정식.*부등식|부등식/, 'eqineq'],
+  [/지수.*로그|로그/, 'log'],
+  [/지수/, 'expn'],
+  [/미분/, 'diff'],
+  [/적분/, 'integ'],
+  [/극한|수열의 ?극한/, 'limit'],
+  [/수열/, 'seq'],
+  [/확률/, 'prob'],
+  [/통계/, 'stat'],
+  [/도형의 ?방정식|도형/, 'geom'],
+  [/집합|명제/, 'set'],
+  [/함수/, 'func'],
+  [/벡터/, 'vec'],
+];
+
+function transliterateKorean(label: string): string {
+  for (const [re, en] of KEYWORD_TO_SLUG) {
+    if (re.test(label)) return en;
+  }
+  return '';
+}
+
+export function buildPublicSlug({
+  subjectSlug,
+  week,
+  session,
+  label,
+  explicitSuffix,
+  itemId,
+}: {
+  subjectSlug: string;
+  week: number | null;
+  session: number | null;
+  label?: string;
+  explicitSuffix?: string;
+  itemId?: string;
+}): string {
+  const parts: string[] = [subjectSlug.toLowerCase()];
+  if (week != null) parts.push(`w${week}`);
+  if (session != null) parts.push(`s${session}`);
+
+  let suffix = explicitSuffix?.trim().toLowerCase() || '';
+  if (suffix && /^[a-z0-9][a-z0-9-]*[a-z0-9]$/.test(suffix)) {
+    parts.push(suffix);
+  } else {
+    const auto = label ? transliterateKorean(label) : '';
+    if (auto) parts.push(auto);
+    else if (itemId) parts.push(itemId.slice(0, 6));
+  }
+  return parts.join('-');
+}

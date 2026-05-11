@@ -10,6 +10,7 @@
     "upload": "node scripts/upload-videos.mjs",
     "admin:session": "tsx scripts/admin/create-session.ts",
     "admin:release": "tsx scripts/admin/release-session.ts",
+    "admin:assign-lesson": "tsx scripts/admin/assign-lesson.ts",
     "admin:student": "tsx scripts/admin/manage-student.ts",
     "admin:curriculum": "tsx scripts/admin/manage-curriculum.ts",
     "admin:variant": "tsx scripts/admin/set-variant.ts",

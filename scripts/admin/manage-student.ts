@@ -195,35 +195,44 @@ async function cmdLink() {
 
   success(`배정 완료: ${studentName} → ${curriculum!.title}`);
 
-  // curriculum_items → student_sessions 자동 생성
+  // curriculum_items → student_lesson_assignments 자동 생성 (신 모델)
   const { data: items } = await sc
     .from('curriculum_items')
-    .select('week_number, session_number, label, publish_date')
+    .select('id, week_number, session_number, label, publish_date, is_released')
     .eq('curriculum_id', curriculumId)
     .order('week_number')
     .order('session_number');
 
   if (!items?.length) {
-    info('차시 없음 — student_sessions 생성 스킵');
+    info('차시 없음 — SLA 생성 스킵');
     return;
   }
 
-  const TODAY = new Date().toISOString().slice(0, 10);
-  const sessionRows = items.map(item => ({
-    profile_id: profile!.id,
-    subject_slug: curriculum!.subject_slug,
-    week_number: item.week_number,
-    session_number: item.session_number,
-    label: item.label || null,
-    publish_date: item.publish_date,
-    is_released: false,
-  }));
+  const slaRows = items
+    .filter(item => item.publish_date)
+    .map(item => ({
+      profile_id: profile!.id,
+      curriculum_item_id: item.id,
+      scheduled_date: item.publish_date,
+      status: item.is_released ? 'released' : 'pending',
+      released_at: item.is_released
+        ? new Date(item.publish_date + 'T12:00:00Z').toISOString()
+        : null,
+      variant: 'default',
+    }));
 
-  const { error: ssErr } = await sc.from('student_sessions').insert(sessionRows);
-  if (ssErr) {
-    warn(`student_sessions 생성 실패: ${ssErr.message}`);
+  if (slaRows.length === 0) {
+    info('publish_date 있는 차시 없음 — SLA 생성 스킵');
+    return;
+  }
+
+  const { error: slaErr } = await sc
+    .from('student_lesson_assignments')
+    .upsert(slaRows, { onConflict: 'profile_id,curriculum_item_id,scheduled_date', ignoreDuplicates: true });
+  if (slaErr) {
+    warn(`SLA 생성 실패: ${slaErr.message}`);
   } else {
-    info(`student_sessions ${sessionRows.length}개 생성 완료 (기본 잠김 상태)`);
+    info(`SLA ${slaRows.length}개 생성/유지 완료`);
   }
 }
 

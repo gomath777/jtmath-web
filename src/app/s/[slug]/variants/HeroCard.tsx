@@ -14,10 +14,12 @@ interface Props {
 /**
  * 풀블리드 Hero 카드.
  * 학습 완료 / 영상 진도 추적을 대시보드에서 제거한 뒤: NEW 뱃지와 "지난 주" 라벨(시간 기반)만.
- * 세션 URL은 `${basePath}/${slug}/session/${id}` (online: /s, offline: /c).
+ * 세션 URL은 lessonSlug 있으면 `/lesson/{slug}`, 없으면 legacy redirect.
  */
 export default function HeroCard({ task, slug, basePath, onOpenConcept }: Props) {
-  const sessionHref = task.kind === 'session' ? `${basePath}/${slug}/session/${task.id}` : null;
+  const sessionHref = task.kind === 'session'
+    ? (task.lessonSlug ? `/lesson/${task.lessonSlug}` : `${basePath}/${slug}/session/${task.id}`)
+    : null;
   const Icon = task.kind === 'concept' ? Video : BookOpen;
 
   const body = (
