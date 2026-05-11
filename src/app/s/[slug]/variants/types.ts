@@ -16,9 +16,9 @@ export interface TodayTask {
   subject_label: string;
   meta: string;
   /**
-   * 세션 링크: lessonSlug 있으면 `/lesson/{lessonSlug}`, 없으면 legacy `${basePath}/${slug}/session/${id}` redirect.
+   * 세션 task일 때 클라이언트가 동적으로 조립: `${basePath}/${slug}/session/${id}`.
+   * concept은 onOpenConcept 콜백 사용.
    */
-  lessonSlug?: string | null;
   concept_set_id?: string;
   isOverdue?: boolean;
   isToday?: boolean;
@@ -31,7 +31,6 @@ export interface SessionSummary {
   session_number: number;
   label: string;
   publishDate?: string | null;
-  lessonSlug?: string | null;
 }
 
 export interface CurriculumSummary {

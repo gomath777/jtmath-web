@@ -29,7 +29,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   parseArgs, getServiceClient, log, error, success, info, warn,
-  dryRunBanner, required, printHelp, printJson, buildPublicSlug,
+  dryRunBanner, required, printHelp, printJson,
 } from './_shared';
 import { uploadPdfFromPath } from '../../src/utils/bunny-storage';
 import { parsePdfWithClaude } from '../../src/lib/parse-pdf';
@@ -428,59 +428,14 @@ async function main() {
   const { error: insertErr } = await sc.from('session_blocks').insert(blocksWithItem);
   if (insertErr) error(`블록 삽입 실패: ${insertErr.message}`);
 
-  // public_slug 보강 (variant === 'default' 일 때만; 변형판은 같은 페이지를 공유)
-  let publicSlug: string | null = null;
-  if (variant === 'default') {
-    const { data: itemRow } = await sc
-      .from('curriculum_items')
-      .select('public_slug, curriculum:curricula!inner(subject_slug)')
-      .eq('id', itemId)
-      .single();
-    const existingSlug = (itemRow as unknown as { public_slug: string | null } | null)?.public_slug;
-    const subjectSlug = ((itemRow as unknown as { curriculum: { subject_slug: string } } | null)?.curriculum?.subject_slug) || '';
-    if (!existingSlug) {
-      const candidate = buildPublicSlug({
-        subjectSlug,
-        week,
-        session,
-        label: label || undefined,
-        explicitSuffix: args.options['public-slug'],
-        itemId,
-      });
-      // 중복 회피
-      let finalSlug = candidate;
-      for (let i = 2; i < 10; i++) {
-        const { data: conflict } = await sc
-          .from('curriculum_items')
-          .select('id')
-          .eq('public_slug', finalSlug)
-          .neq('id', itemId)
-          .maybeSingle();
-        if (!conflict) break;
-        finalSlug = `${candidate}-${i}`;
-      }
-      const { error: slugErr } = await sc
-        .from('curriculum_items')
-        .update({ public_slug: finalSlug })
-        .eq('id', itemId);
-      if (slugErr) warn(`public_slug 채움 실패: ${slugErr.message}`);
-      else publicSlug = finalSlug;
-    } else {
-      publicSlug = existingSlug;
-    }
-  }
-
   console.log('');
   success(`세션 학습페이지 생성 완료!`);
   info(`curriculum_item_id: ${itemId}`);
   info(`블록: ${blocks.length}개`);
   if (shouldRelease) success('릴리즈 처리됨 (is_released = true)');
-  if (publicSlug) {
-    success(`공개 URL: https://jtmath.kr/lesson/${publicSlug}`);
-  }
 
   if (asJson) {
-    printJson({ itemId, blocks: blocksWithItem.length, released: shouldRelease, publicSlug });
+    printJson({ itemId, blocks: blocksWithItem.length, released: shouldRelease });
   }
 }
 

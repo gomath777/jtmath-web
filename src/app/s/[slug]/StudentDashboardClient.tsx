@@ -51,7 +51,6 @@ interface SessionItem {
   session_number: number;
   label: string;
   publishDate?: string | null;
-  lessonSlug?: string | null;
 }
 
 interface CurriculumData {
@@ -70,7 +69,6 @@ interface CalendarSessionEntry {
   label: string | null;
   publishDate: string | null;
   is_released: boolean;
-  lessonSlug?: string | null;
 }
 
 interface CalendarConceptItem {
@@ -568,7 +566,7 @@ export default function StudentDashboardClient({
                 activeCurriculum.sessions.map(session => (
                   <Link
                     key={session.id}
-                    href={session.lessonSlug ? `/lesson/${session.lessonSlug}` : `${basePath}/${slug}/session/${session.id}`}
+                    href={`${basePath}/${slug}/session/${session.id}`}
                     className="group bg-ivory border border-border-cream rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-white hover:shadow-ring-warm transition-all"
                   >
                     <div className="flex-1 min-w-0">
