@@ -13,6 +13,7 @@ interface CalendarSessionEntry {
   label: string | null;
   publishDate: string | null;
   is_released: boolean;
+  lessonSlug?: string | null;
 }
 
 interface CalendarConceptItem {
