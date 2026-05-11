@@ -122,6 +122,14 @@ async function main() {
   const storagePrefix = args.options['storage-prefix'] || `sessions/auto/${curriculumId.slice(0, 8)}/w${week}s${session}`;
   const variant = args.options.variant || 'default';
   const uploadPrefix = variant === 'default' ? storagePrefix : `${storagePrefix}/${variant}`;
+  // v3 신규 메타: 어드민 카탈로그 노션 구조용
+  const unitName = args.options.unit || null;                  // 단원명 (예: "다항식과 나머지정리")
+  const category = args.options.category || null;              // 'gichul' | 'shimhwa' | 'review' | 'concept' | 'bonus'
+  const variantLabel = args.options['variant-label'] || null;  // 'A' / 'B' / null=default (시즌 일괄 펼침 대상)
+  const sortOrder = args.options['sort-order'] ? parseInt(args.options['sort-order']) : null;
+  if (category && !['gichul', 'shimhwa', 'review', 'concept', 'bonus'].includes(category)) {
+    error(`--category 는 gichul/shimhwa/review/concept/bonus 중 하나 (입력: ${category})`);
+  }
   const isDryRun = args.flags.has('dry-run');
   const shouldRelease = args.flags.has('release');
   const asJson = args.flags.has('json');
@@ -372,29 +380,38 @@ async function main() {
   // Upsert curriculum_item
   const sc = getServiceClient();
 
-  // Check if item exists
-  const { data: existing } = await sc
+  // Check if item exists (v3: archived_at IS NULL + category·variant_label·unit_name 매칭)
+  let existingQuery = sc
     .from('curriculum_items')
     .select('id')
     .eq('curriculum_id', curriculumId)
     .eq('week_number', week)
     .eq('session_number', session)
-    .maybeSingle();
+    .is('archived_at', null);
+  if (category) existingQuery = existingQuery.eq('category', category);
+  else existingQuery = existingQuery.is('category', null);
+  if (variantLabel) existingQuery = existingQuery.eq('variant_label', variantLabel);
+  else existingQuery = existingQuery.is('variant_label', null);
+  if (unitName) existingQuery = existingQuery.eq('unit_name', unitName);
+  const { data: existing } = await existingQuery.maybeSingle();
 
   let itemId: string;
   if (existing) {
     itemId = existing.id;
     info(`기존 curriculum_item 업데이트: ${itemId}`);
-    // 변형판 업로드(variant !== default) 시에는 default 메타(label/release)는 건드리지 않음
     if (variant === 'default') {
-      await sc.from('curriculum_items').update({
+      const metaUpdate: Record<string, unknown> = {
         label: label || undefined,
         is_released: shouldRelease || undefined,
         publish_date: publishDate,
-      }).eq('id', itemId);
+      };
+      if (unitName !== null) metaUpdate.unit_name = unitName;
+      if (category !== null) metaUpdate.category = category;
+      if (variantLabel !== null) metaUpdate.variant_label = variantLabel;
+      if (sortOrder !== null) metaUpdate.sort_order = sortOrder;
+      await sc.from('curriculum_items').update(metaUpdate).eq('id', itemId);
     }
 
-    // 같은 variant의 기존 블록만 삭제 (다른 variant는 보존)
     await sc.from('session_blocks').delete()
       .eq('curriculum_item_id', itemId)
       .eq('variant', variant);
@@ -409,6 +426,10 @@ async function main() {
         label: label || `${week}주차 ${session}차시`,
         publish_date: publishDate,
         is_released: shouldRelease,
+        unit_name: unitName,
+        category,
+        variant_label: variantLabel,
+        sort_order: sortOrder,
       })
       .select('id')
       .single();

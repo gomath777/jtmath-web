@@ -115,6 +115,13 @@ export default async function AdminDashboardPage({
               학습 페이지 (신)
             </Link>
             <Link
+              href="/admin/seasons"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <Calendar className="w-5 h-5" />
+              시즌 관리
+            </Link>
+            <Link
               href="/admin/content-library"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
             >

@@ -18,17 +18,22 @@ export default async function AdminLessonsPage() {
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
+  const { data: seasons } = await sc
+    .from('curricula')
+    .select('id, title, subject_slug, start_date')
+    .order('start_date', { ascending: false });
+
   const { data: items } = await sc
     .from('curriculum_items')
     .select(`
-      id, week_number, session_number, label, title, publish_date, is_released, public_slug,
-      curriculum:curricula!inner ( id, subject_slug, title )
+      id, week_number, session_number, label, title, unit_name, category, variant_label,
+      publish_date, is_released, public_slug, sort_order, curriculum_id
     `)
+    .is('archived_at', null)
     .order('week_number', { ascending: true, nullsFirst: false })
     .order('session_number', { ascending: true, nullsFirst: false })
-    .limit(500);
+    .order('sort_order', { ascending: true, nullsFirst: true });
 
-  // 각 lesson에 배정된 학생 수 - 별도 쿼리
   const itemIds = (items || []).map((i: { id: string }) => i.id);
   const { data: counts } = itemIds.length > 0
     ? await sc.from('student_lesson_assignments').select('curriculum_item_id').in('curriculum_item_id', itemIds)
@@ -38,5 +43,11 @@ export default async function AdminLessonsPage() {
     countMap[r.curriculum_item_id] = (countMap[r.curriculum_item_id] || 0) + 1;
   });
 
-  return <LessonsClient items={(items as never) || []} countMap={countMap} />;
+  return (
+    <LessonsClient
+      seasons={(seasons as never) || []}
+      items={(items as never) || []}
+      countMap={countMap}
+    />
+  );
 }
