@@ -223,17 +223,20 @@ export default function LessonsClient({
                                       {group.map(i => {
                                         const display = formatLessonLabel(i);
                                         return (
-                                          <Link
+                                          <div
                                             key={i.id}
-                                            href={`/admin/lessons/${i.id}`}
-                                            className="block px-3 py-2 rounded-lg bg-parchment border border-border-cream hover:bg-white hover:shadow-ring-warm transition-all"
+                                            className="group flex items-center gap-2 px-3 py-2 rounded-lg bg-parchment border border-border-cream hover:bg-white hover:shadow-ring-warm transition-all"
                                           >
-                                            <div className="flex items-center gap-2">
+                                            <Link
+                                              href={`/admin/lessons/${i.id}`}
+                                              className="flex-1 flex items-center gap-2 min-w-0"
+                                              title="학생 배정"
+                                            >
                                               <span className="text-[10px] tracking-wider uppercase text-stone w-12 shrink-0">
                                                 {i.session_number ? `${i.session_number}차시` : '-'}
                                               </span>
                                               {i.variant_label && (
-                                                <span className="text-[10px] uppercase bg-terracotta/15 text-terracotta px-1.5 py-0.5 rounded-full font-medium">
+                                                <span className="text-[10px] uppercase bg-terracotta/15 text-terracotta px-1.5 py-0.5 rounded-full font-medium shrink-0">
                                                   {i.variant_label}
                                                 </span>
                                               )}
@@ -243,11 +246,25 @@ export default function LessonsClient({
                                               <span className="text-[10px] text-stone shrink-0">
                                                 {countMap[i.id] || 0}명
                                               </span>
-                                            </div>
-                                            {i.publish_date && (
-                                              <p className="text-[10px] text-stone mt-0.5 ml-14">📅 {i.publish_date}</p>
+                                            </Link>
+                                            {i.public_slug && (
+                                              <a
+                                                href={`/lesson/${i.public_slug}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                onClick={e => e.stopPropagation()}
+                                                className="shrink-0 text-stone hover:text-terracotta px-1.5 py-1 rounded transition-colors"
+                                                title="학습 페이지 미리보기 (새 탭)"
+                                                aria-label="학습 페이지 미리보기"
+                                              >
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                                                  <polyline points="15 3 21 3 21 9"/>
+                                                  <line x1="10" y1="14" x2="21" y2="3"/>
+                                                </svg>
+                                              </a>
                                             )}
-                                          </Link>
+                                          </div>
                                         );
                                       })}
                                     </div>
