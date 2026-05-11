@@ -8,6 +8,7 @@ interface Season {
   title: string;
   subject_slug: string | null;
   start_date: string;
+  description: string | null;
 }
 
 interface LessonItem {
@@ -33,6 +34,8 @@ const SUBJECT_LABEL: Record<string, string> = {
   ht: '확률과통계', gi: '기하', s2: '수학2',
 };
 
+const SUBJECT_ORDER = ['gs1', 'gs2', 'ds2', 'mj1', 'mj2', 'ht', 'gi'];
+
 const CATEGORY_META: Record<string, { label: string; color: string }> = {
   gichul:  { label: '교육청 기출',         color: 'bg-amber-100 text-amber-900 border-amber-200' },
   shimhwa: { label: '심화유형 + 누적복습', color: 'bg-emerald-100 text-emerald-900 border-emerald-200' },
@@ -41,7 +44,19 @@ const CATEGORY_META: Record<string, { label: string; color: string }> = {
   bonus:   { label: '보충자료',            color: 'bg-rose-100 text-rose-900 border-rose-200' },
 };
 
-const CATEGORY_ORDER = ['concept', 'gichul', 'shimhwa', 'review', 'bonus'];
+const CATEGORY_ORDER_GICHUL = ['gichul', 'shimhwa', 'review', 'bonus'];
+const CATEGORY_ORDER_CONCEPT = ['concept'];
+
+type Mode = 'gichul' | 'concept';
+
+function formatLessonLabel(i: LessonItem): string {
+  if (i.title) return i.title;
+  const parts: string[] = [];
+  if (i.week_number && i.session_number) parts.push(`${i.week_number}주 ${i.session_number}차시`);
+  if (i.unit_name) parts.push(i.unit_name);
+  if (parts.length > 0) return parts.join(' · ');
+  return i.label || '(라벨 미설정)';
+}
 
 export default function LessonsClient({
   seasons,
@@ -52,24 +67,23 @@ export default function LessonsClient({
   items: LessonItem[];
   countMap: Record<string, number>;
 }) {
-  const [seasonId, setSeasonId] = useState<string>(seasons[0]?.id || '');
+  // 과목 목록 (시즌이 있는 과목만)
+  const subjects = useMemo(() => {
+    const set = new Set<string>();
+    seasons.forEach(s => { if (s.subject_slug) set.add(s.subject_slug); });
+    return SUBJECT_ORDER.filter(s => set.has(s));
+  }, [seasons]);
 
-  const itemsInSeason = useMemo(
-    () => items.filter(i => i.curriculum_id === seasonId),
-    [items, seasonId],
+  const [subject, setSubject] = useState<string>(subjects[0] || 'gs1');
+  const [mode, setMode] = useState<Mode>('gichul');
+
+  const subjectSeasons = useMemo(
+    () => seasons.filter(s => s.subject_slug === subject),
+    [seasons, subject],
   );
 
-  const weeks = useMemo(() => {
-    const byWeek = new Map<number, LessonItem[]>();
-    itemsInSeason.forEach(i => {
-      const w = i.week_number ?? 0;
-      if (!byWeek.has(w)) byWeek.set(w, []);
-      byWeek.get(w)!.push(i);
-    });
-    return Array.from(byWeek.entries()).sort((a, b) => a[0] - b[0]);
-  }, [itemsInSeason]);
-
-  const activeSeason = seasons.find(s => s.id === seasonId);
+  // 활성 카테고리 필터
+  const categoryOrder = mode === 'gichul' ? CATEGORY_ORDER_GICHUL : CATEGORY_ORDER_CONCEPT;
 
   return (
     <div className="min-h-screen bg-parchment py-8 px-4">
@@ -78,7 +92,7 @@ export default function LessonsClient({
           <div>
             <Link href="/admin" className="text-[12px] text-stone hover:text-terracotta">← 어드민</Link>
             <h1 className="font-serif text-[24px] text-ink mt-1">학습 페이지 카탈로그</h1>
-            <p className="text-[12px] text-stone mt-0.5">시즌별로 진도 한눈에 보기 + 페이지 클릭 → 학생 배정</p>
+            <p className="text-[12px] text-stone mt-0.5">과목 탭 → 시즌별 진도 한눈에 보기 + 페이지 클릭 → 학생 배정</p>
           </div>
           <Link
             href="/admin/seasons"
@@ -88,107 +102,167 @@ export default function LessonsClient({
           </Link>
         </header>
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {seasons.length === 0 ? (
+        {/* 모드 토글 */}
+        <div className="mb-4 inline-flex rounded-xl border border-border-cream bg-ivory p-1">
+          <button
+            onClick={() => setMode('gichul')}
+            className={`px-4 py-1.5 rounded-lg text-[12px] font-medium transition ${
+              mode === 'gichul' ? 'bg-terracotta text-ivory' : 'text-stone hover:text-ink'
+            }`}
+          >
+            기출·심화
+          </button>
+          <button
+            onClick={() => setMode('concept')}
+            className={`px-4 py-1.5 rounded-lg text-[12px] font-medium transition ${
+              mode === 'concept' ? 'bg-terracotta text-ivory' : 'text-stone hover:text-ink'
+            }`}
+          >
+            개념강의
+          </button>
+        </div>
+
+        {/* 과목 탭 */}
+        <div className="mb-6 flex flex-wrap gap-2 border-b border-border-cream pb-3">
+          {subjects.length === 0 ? (
             <p className="text-stone text-[13px]">
               시즌이 없습니다. <Link href="/admin/seasons" className="text-terracotta hover:underline">시즌 관리</Link>에서 먼저 만드세요.
             </p>
           ) : (
-            seasons.map(s => (
+            subjects.map(s => (
               <button
-                key={s.id}
-                onClick={() => setSeasonId(s.id)}
-                className={`px-4 py-2 rounded-xl text-[13px] font-medium transition-all border ${
-                  seasonId === s.id
-                    ? 'bg-terracotta text-ivory border-terracotta'
-                    : 'bg-ivory text-charcoal border-border-cream hover:bg-sand'
+                key={s}
+                onClick={() => setSubject(s)}
+                className={`px-5 py-2 rounded-t-xl text-[14px] font-medium transition border-b-2 -mb-[1px] ${
+                  subject === s
+                    ? 'border-terracotta text-terracotta'
+                    : 'border-transparent text-stone hover:text-ink'
                 }`}
               >
-                <span className="text-[11px] opacity-80 mr-1">[{SUBJECT_LABEL[s.subject_slug || ''] || s.subject_slug || '-'}]</span>
-                {s.title}
+                {SUBJECT_LABEL[s] || s}
               </button>
             ))
           )}
         </div>
 
-        {activeSeason && (
-          <div className="space-y-4">
-            {weeks.length === 0 ? (
-              <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
-                <p className="font-serif text-[17px] text-ink tracking-tight">아직 페이지가 없습니다</p>
-                <p className="text-[13px] text-stone mt-2">
-                  CLI <code className="bg-sand px-2 py-0.5 rounded">npm run admin:session</code> 로 페이지 생성 후 다시 확인하세요.
-                </p>
-              </div>
-            ) : (
-              weeks.map(([w, list]) => {
-                const unitName = list.find(i => i.unit_name)?.unit_name;
-                const byCat = new Map<string, LessonItem[]>();
-                list.forEach(i => {
-                  const c = i.category || 'unknown';
-                  if (!byCat.has(c)) byCat.set(c, []);
-                  byCat.get(c)!.push(i);
-                });
-                const cats = Array.from(byCat.entries())
-                  .sort(([a], [b]) => {
-                    const ai = CATEGORY_ORDER.indexOf(a);
-                    const bi = CATEGORY_ORDER.indexOf(b);
-                    return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
-                  });
+        {/* 시즌 섹션들 */}
+        {subjectSeasons.length === 0 ? (
+          <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-16 text-center">
+            <p className="font-serif text-[17px] text-ink tracking-tight">이 과목에 시즌이 없습니다</p>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {subjectSeasons.map(season => {
+              const seasonItems = items.filter(i => i.curriculum_id === season.id && (
+                mode === 'gichul'
+                  ? (i.category !== 'concept')
+                  : (i.category === 'concept')
+              ));
 
-                return (
-                  <section key={w} className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
-                    <div className="px-5 py-3 bg-sand border-b border-border-cream flex items-baseline gap-3">
-                      <span className="text-[12px] tracking-wider uppercase text-stone font-medium">{w}주차</span>
-                      <h2 className="font-serif text-[17px] text-ink tracking-tight">{unitName || '(단원명 미설정)'}</h2>
+              const byWeek = new Map<number, LessonItem[]>();
+              seasonItems.forEach(i => {
+                const w = i.week_number ?? 0;
+                if (!byWeek.has(w)) byWeek.set(w, []);
+                byWeek.get(w)!.push(i);
+              });
+              const weeks = Array.from(byWeek.entries()).sort((a, b) => a[0] - b[0]);
+
+              return (
+                <section key={season.id}>
+                  <div className="mb-3 flex items-baseline gap-3">
+                    <h2 className="font-serif text-[20px] text-ink tracking-tight">{season.title}</h2>
+                    <span className="text-[12px] text-stone">{season.start_date} · {seasonItems.length}개 페이지</span>
+                  </div>
+
+                  {weeks.length === 0 ? (
+                    <div className="bg-ivory border border-border-cream rounded-2xl px-6 py-8 text-center">
+                      <p className="text-[13px] text-stone">
+                        아직 페이지가 없습니다. CLI <code className="bg-sand px-1.5 py-0.5 rounded">npm run admin:session</code> 또는 자연어로 추가하세요.
+                      </p>
                     </div>
-                    <div className={`grid gap-0 ${cats.length >= 2 ? 'sm:grid-cols-2' : 'grid-cols-1'} divide-y sm:divide-y-0 sm:divide-x divide-border-cream`}>
-                      {cats.map(([cat, group]) => {
-                        const meta = CATEGORY_META[cat] || { label: cat, color: 'bg-stone/10 text-stone border-stone/20' };
+                  ) : (
+                    <div className="space-y-3">
+                      {weeks.map(([w, list]) => {
+                        const unitNames = Array.from(new Set(list.map(i => i.unit_name).filter(Boolean))) as string[];
+                        const unitHeader = unitNames.length === 1
+                          ? unitNames[0]
+                          : unitNames.length > 1
+                            ? unitNames.join(' / ')
+                            : '(단원명 미설정)';
+
+                        const byCat = new Map<string, LessonItem[]>();
+                        list.forEach(i => {
+                          const c = i.category || 'unknown';
+                          if (!byCat.has(c)) byCat.set(c, []);
+                          byCat.get(c)!.push(i);
+                        });
+                        const cats = Array.from(byCat.entries())
+                          .sort(([a], [b]) => {
+                            const ai = categoryOrder.indexOf(a);
+                            const bi = categoryOrder.indexOf(b);
+                            return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+                          });
+
                         return (
-                          <div key={cat} className="p-4">
-                            <div className="mb-3">
-                              <span className={`inline-block text-[11px] tracking-wider uppercase font-medium px-2 py-1 rounded-full border ${meta.color}`}>
-                                {meta.label}
-                              </span>
+                          <div key={w} className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
+                            <div className="px-5 py-3 bg-sand border-b border-border-cream flex items-baseline gap-3">
+                              <span className="text-[12px] tracking-wider uppercase text-stone font-medium">{w}주차</span>
+                              <h3 className="font-serif text-[16px] text-ink tracking-tight">{unitHeader}</h3>
                             </div>
-                            <div className="space-y-2">
-                              {group.map(i => (
-                                <Link
-                                  key={i.id}
-                                  href={`/admin/lessons/${i.id}`}
-                                  className="block px-3 py-2 rounded-lg bg-parchment border border-border-cream hover:bg-white hover:shadow-ring-warm transition-all"
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] tracking-wider uppercase text-stone w-12 shrink-0">
-                                      {i.session_number ? `${i.session_number}차시` : '-'}
-                                    </span>
-                                    {i.variant_label && (
-                                      <span className="text-[10px] uppercase bg-terracotta/15 text-terracotta px-1.5 py-0.5 rounded-full font-medium">
-                                        {i.variant_label}
+                            <div className={`grid gap-0 ${cats.length >= 2 ? 'sm:grid-cols-2' : 'grid-cols-1'} divide-y sm:divide-y-0 sm:divide-x divide-border-cream`}>
+                              {cats.map(([cat, group]) => {
+                                const meta = CATEGORY_META[cat] || { label: cat, color: 'bg-stone/10 text-stone border-stone/20' };
+                                return (
+                                  <div key={cat} className="p-4">
+                                    <div className="mb-3">
+                                      <span className={`inline-block text-[11px] tracking-wider uppercase font-medium px-2 py-1 rounded-full border ${meta.color}`}>
+                                        {meta.label}
                                       </span>
-                                    )}
-                                    <span className="flex-1 text-[13px] text-ink truncate">
-                                      {i.title || i.label || '(라벨 미설정)'}
-                                    </span>
-                                    <span className="text-[10px] text-stone shrink-0">
-                                      {countMap[i.id] || 0}명
-                                    </span>
+                                    </div>
+                                    <div className="space-y-2">
+                                      {group.map(i => {
+                                        const display = formatLessonLabel(i);
+                                        return (
+                                          <Link
+                                            key={i.id}
+                                            href={`/admin/lessons/${i.id}`}
+                                            className="block px-3 py-2 rounded-lg bg-parchment border border-border-cream hover:bg-white hover:shadow-ring-warm transition-all"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-[10px] tracking-wider uppercase text-stone w-12 shrink-0">
+                                                {i.session_number ? `${i.session_number}차시` : '-'}
+                                              </span>
+                                              {i.variant_label && (
+                                                <span className="text-[10px] uppercase bg-terracotta/15 text-terracotta px-1.5 py-0.5 rounded-full font-medium">
+                                                  {i.variant_label}
+                                                </span>
+                                              )}
+                                              <span className="flex-1 text-[13px] text-ink truncate">
+                                                {display}
+                                              </span>
+                                              <span className="text-[10px] text-stone shrink-0">
+                                                {countMap[i.id] || 0}명
+                                              </span>
+                                            </div>
+                                            {i.publish_date && (
+                                              <p className="text-[10px] text-stone mt-0.5 ml-14">📅 {i.publish_date}</p>
+                                            )}
+                                          </Link>
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                  {i.publish_date && (
-                                    <p className="text-[10px] text-stone mt-0.5 ml-14">📅 {i.publish_date}</p>
-                                  )}
-                                </Link>
-                              ))}
+                                );
+                              })}
                             </div>
                           </div>
                         );
                       })}
                     </div>
-                  </section>
-                );
-              })
-            )}
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
       </div>

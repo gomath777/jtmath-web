@@ -18,7 +18,13 @@ export default async function AdminLessonsPage() {
     process.env.SUPABASE_SERVICE_KEY!,
   );
 
-  // active 페이지가 1개 이상 있는 시즌만 카탈로그에 노출 (빈 시즌은 /admin/seasons 에서 관리)
+  // 모든 active 시즌 (빈 시즌도 과목 탭에 시즌 헤더로 표시)
+  const { data: seasons } = await sc
+    .from('curricula')
+    .select('id, title, subject_slug, start_date, description')
+    .is('archived_at', null)
+    .order('start_date', { ascending: true });
+
   const { data: items } = await sc
     .from('curriculum_items')
     .select(`
@@ -29,16 +35,6 @@ export default async function AdminLessonsPage() {
     .order('week_number', { ascending: true, nullsFirst: false })
     .order('session_number', { ascending: true, nullsFirst: false })
     .order('sort_order', { ascending: true, nullsFirst: true });
-
-  const activeSeasonIds = Array.from(new Set((items || []).map((i: { curriculum_id: string }) => i.curriculum_id)));
-
-  const { data: seasons } = activeSeasonIds.length > 0
-    ? await sc
-        .from('curricula')
-        .select('id, title, subject_slug, start_date')
-        .in('id', activeSeasonIds)
-        .order('start_date', { ascending: false })
-    : { data: [] as Array<{ id: string; title: string; subject_slug: string | null; start_date: string }> };
 
   const itemIds = (items || []).map((i: { id: string }) => i.id);
   const { data: counts } = itemIds.length > 0
