@@ -18,35 +18,17 @@ type Problem = {
   videoId: string | null;
 };
 
+// 해설강의 있는 문항만 (exam_videos DB 매칭 결과)
 const PROBLEMS: Problem[] = [
-  { num: 1,  source: '2019년 9월 고3 4번',        videoId: null },
-  { num: 2,  source: '2025년 9월 고1 26번',        videoId: null },
-  { num: 3,  source: null,                          videoId: null },
-  { num: 4,  source: '2021년 3월 고2 24번',        videoId: null },
-  { num: 5,  source: null,                          videoId: null },
-  { num: 6,  source: null,                          videoId: null },
-  { num: 7,  source: '2023년 10월 고1 25번',       videoId: null },
-  { num: 8,  source: '2023년 3월 고2 12번',        videoId: null },
-  { num: 9,  source: '2019년 3월 이과 10번',       videoId: null },
-  { num: 10, source: '2016년 3월 고3 17번',        videoId: null },
-  { num: 11, source: null,                          videoId: null },
-  { num: 12, source: null,                          videoId: null },
-  { num: 13, source: '2026년 3월 고2 16번',        videoId: null },
-  { num: 14, source: null,                          videoId: null },
-  { num: 15, source: '2026년 3월 고2 16번 변형',   videoId: null },
-  { num: 16, source: '2025년 3월 고2 16번',        videoId: null },
-  { num: 17, source: null,                          videoId: null },
-  { num: 18, source: '2025년 3월 고2 16번 변형',   videoId: null },
-  { num: 19, source: '2019년 3월 이과 8번',        videoId: null },
-  { num: 20, source: null,                          videoId: null },
-  { num: 21, source: '2017년 6월 고3 13번',        videoId: null },
-  { num: 22, source: '2020년 3월 고2 15번',        videoId: null },
-  { num: 23, source: null,                          videoId: null },
-  { num: 24, source: null,                          videoId: null },
-  { num: 25, source: '2017년 11월 고3 18번',       videoId: null },
-  { num: 26, source: '2017년 11월 고3 18번 변형',  videoId: null },
-  { num: 27, source: '2017년 7월 고3 26번',        videoId: null },
-  { num: 28, source: '2017년 7월 고3 26번 변형',   videoId: null },
+  { num: 2,  source: '2025년 9월 고1 26번',  videoId: 'af1afa2b-080a-4b1a-83be-c4f5121e0440' },
+  { num: 8,  source: '2023년 3월 고2 12번',  videoId: 'e46cdf7a-1703-4030-95d4-97225b30a092' },
+  { num: 10, source: '2016년 3월 고3 17번',  videoId: 'fd2123c0-666d-4c32-8e80-0892d625fb0e' },
+  { num: 13, source: '2026년 3월 고2 16번',  videoId: 'ce34bfab-3eed-481b-95a2-d815d507ff71' },
+  { num: 16, source: '2025년 3월 고2 16번',  videoId: 'c807cd90-b888-427d-8455-f0a114ad84f2' },
+  { num: 21, source: '2017년 6월 고3 13번',  videoId: '87fce330-5198-40ee-820e-48cdd3fa7be2' },
+  { num: 22, source: '2020년 3월 고2 15번',  videoId: '72a09332-d460-4f51-a3db-00a13c149637' },
+  { num: 25, source: '2017년 11월 고3 18번', videoId: '0c5d61f5-07ea-42c5-b6ef-0573175f41c5' },
+  { num: 27, source: '2017년 7월 고3 26번',  videoId: '09d5efda-c5f3-4a82-93f2-4e1adf70c760' },
 ];
 
 export default function Gs1PermCombLv3Page() {
@@ -63,7 +45,7 @@ export default function Gs1PermCombLv3Page() {
             경우의 수 · 레벨3
           </h1>
           <p className="text-[11px] text-stone font-mono mt-1">
-            고1 25년 10월 ~ 고3 14년 3월 · 28문항
+            고1 25년 10월 ~ 고3 14년 3월 · 28문항 · 해설강의 9개
           </p>
           <p className="text-[13px] text-olive mt-2">
             학습지 먼저 받고, 문제 번호 맞춰서 해설강의 보세요.
@@ -109,22 +91,18 @@ export default function Gs1PermCombLv3Page() {
                 </span>
 
                 {/* 출처 */}
-                <p className="flex-1 text-[13px] text-stone min-w-0">
-                  {p.source ?? <span className="text-stone/50 italic text-[12px]">창작</span>}
-                </p>
+                <p className="flex-1 text-[13px] text-stone min-w-0">{p.source}</p>
 
-                {/* 영상 버튼 (있을 때만) */}
-                {p.videoId && (
-                  <a
-                    href={EMBED(p.videoId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-olive/10 hover:bg-olive/20 text-olive transition-colors text-[11px] font-medium shrink-0"
-                  >
-                    <Play className="w-3.5 h-3.5" fill="currentColor" />
-                    영상
-                  </a>
-                )}
+                {/* 영상 버튼 */}
+                <a
+                  href={EMBED(p.videoId!)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-olive/10 hover:bg-olive/20 text-olive transition-colors text-[11px] font-medium shrink-0"
+                >
+                  <Play className="w-3.5 h-3.5" fill="currentColor" />
+                  영상
+                </a>
               </div>
             ))}
           </div>
