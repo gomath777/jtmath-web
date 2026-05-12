@@ -19,6 +19,7 @@
     "admin:assign": "tsx scripts/admin/assign-lecture.ts",
     "admin:upload-ds2-pdfs": "tsx scripts/admin/upload-ds2-pdfs.ts",
     "admin:upload-ds2-videos": "tsx scripts/admin/upload-ds2-videos.ts",
+    "admin:rebuild": "tsx scripts/admin/rebuild-subject.ts",
     "odapji:watch": "tsx scripts/odapji-watcher.ts"
   },
   "dependencies": {
