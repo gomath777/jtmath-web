@@ -26,7 +26,7 @@ export default async function LessonLayout({
           </a>
           {student && (
             <a
-              href={`/st/${student.slug}`}
+              href={`/s/${student.slug}`}
               className="text-[12px] text-stone hover:text-terracotta tracking-tight transition-colors shrink-0"
             >
               내 대시보드 →

@@ -159,6 +159,9 @@ export default function LessonsClient({
                   : (i.category === 'concept')
               ));
 
+              // hide seasons with no items in this mode (prevents cross-tab noise)
+              if (seasonItems.length === 0) return null;
+
               const byWeek = new Map<number, LessonItem[]>();
               seasonItems.forEach(i => {
                 const w = i.week_number ?? 0;

@@ -44,6 +44,56 @@ function parseSlotLabel(label: string | null): { week_number: number; session_nu
   return { week_number: parseInt(m[1]), session_number: parseInt(m[2]) };
 }
 
+// ─── 신 학습 시스템 SLA (student_lesson_assignments) ─────────────────────────
+// 마이그레이션 진행 중. /s/{slug} 학생 캘린더에 구 entries 와 함께 표시.
+// 카드 클릭 시 lessonSlug 가 있으면 SessionCalendarView 가 /lesson/{slug} 로 라우팅.
+
+async function getSlaEntries(
+  sc: any,
+  profileId: string,
+): Promise<Array<{
+  id: string; subject_slug: string; subject_label: string;
+  week_number: number; session_number: number; label: string | null;
+  publishDate: string | null; is_released: boolean; lessonSlug: string;
+}>> {
+  const { data: slaRows } = await sc
+    .from('student_lesson_assignments')
+    .select(`
+      id, scheduled_date, status,
+      curriculum_item:curriculum_items!inner(
+        id, public_slug, title, category, session_number, variant_label,
+        curriculum:curricula!inner(subject_slug)
+      )
+    `)
+    .eq('profile_id', profileId)
+    .order('scheduled_date');
+
+  return (slaRows || []).map((row: {
+    id: string; scheduled_date: string | null; status: string;
+    curriculum_item: {
+      public_slug: string; title: string; category: string;
+      session_number: number | null; variant_label: string | null;
+      curriculum: { subject_slug: string };
+    };
+  }) => {
+    const ci = row.curriculum_item;
+    const subject = ci.curriculum.subject_slug;
+    const labelBase = ci.title || '(라벨 미설정)';
+    const label = ci.variant_label ? `${labelBase} (v${ci.variant_label})` : labelBase;
+    return {
+      id: row.id,
+      subject_slug: subject,
+      subject_label: SUBJECT_LABEL[subject] || subject,
+      week_number: 0,                        // 신 모델은 주차 라벨 미사용 (날짜로 셀 결정)
+      session_number: ci.session_number ?? 0,
+      label,
+      publishDate: row.scheduled_date,
+      is_released: row.status === 'released',
+      lessonSlug: ci.public_slug,            // SessionCalendarView 가 /lesson/{slug} 사용
+    };
+  });
+}
+
 // ─── NEW MODEL: block_assignments ─────────────────────────────────────────────
 
 async function getDashboardFromBlocks(
@@ -463,6 +513,12 @@ export async function GET(req: NextRequest) {
     ? await getDashboardFromBlocks(sc, student.profileId, todayKst)
     : await getDashboardFromLegacy(sc, student.profileId, todayKst);
 
+  // 신 학습 시스템 SLA 병합 — 구·신 모델 모두에 추가 (마이그레이션 기간 공존)
+  // SessionCalendarView 가 lessonSlug 있는 entry 는 /lesson/{slug} 로 라우팅하므로
+  // 같은 캘린더 화면에서 구 sessions 와 신 lessons 가 모두 클릭 가능.
+  const slaEntries = await getSlaEntries(sc, student.profileId);
+  const mergedCalendarSessions = [...dashData.calendarSessions, ...slaEntries];
+
   const newToken = await renewToken(student);
   const res = NextResponse.json({
     profile: {
@@ -475,7 +531,7 @@ export async function GET(req: NextRequest) {
     todayTasks: dashData.todayTasks,
     nextReleaseAt: computeNextReleaseAt(),
     isMaster: student.isMaster ?? false,
-    calendarSessions: dashData.calendarSessions,
+    calendarSessions: mergedCalendarSessions,
     calendarConceptItems: dashData.calendarConceptItems,
   });
   return setStudentCookie(res, newToken);

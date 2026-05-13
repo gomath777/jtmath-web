@@ -12,6 +12,10 @@
  */
 
 export const GS1_CONCEPT_CURRICULUM_ID = 'f5d615fd-8595-40aa-831e-145c0f8e9974';
+export const GS1_CONCEPT_SUBJECT_SLUG = 'gs1';
+export const GS1_CONCEPT_CURRICULUM_TITLE = '[공수1] 개념강의';
+export const GS1_CONCEPT_PDF_BASE = 'content/gs1_concept';
+export const GS1_CONCEPT_CDN_PREFIX = 'concept/gs1';
 
 export interface ConceptVideo {
   bunny_video_id: string;

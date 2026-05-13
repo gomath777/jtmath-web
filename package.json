@@ -21,6 +21,8 @@
     "admin:upload-ds2-videos": "tsx scripts/admin/upload-ds2-videos.ts",
     "admin:rebuild": "tsx scripts/admin/rebuild-subject.ts",
     "admin:release-lesson": "tsx scripts/admin/release-lesson.ts",
+    "admin:extract-notion": "tsx scripts/admin/tools/extract-notion-concept.ts",
+    "admin:migrate-sla": "tsx scripts/admin/migrate-sla.ts",
     "odapji:watch": "tsx scripts/odapji-watcher.ts"
   },
   "dependencies": {

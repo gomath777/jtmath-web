@@ -1,47 +1,17 @@
-import { createClient as createServiceClient } from '@supabase/supabase-js';
-import StudentDashboardClient from '@/app/s/[slug]/StudentDashboardClient';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function StPortalPage({
+/**
+ * /st/[slug] 는 2026-05-14 이후 /s/[slug] 와 통합됨.
+ * 이전 북마크·링크 호환을 위해 자동 redirect 만 수행.
+ *
+ * 신 시스템(SLA 기반 SessionCalendarView)은 이제 /s/[slug] 에서 직접 보임.
+ * 구 시스템(student_sessions 기반) 백업은 /sv2/[slug] 에 보존.
+ */
+export default async function StPortalRedirect({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const sc = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!,
-  );
-
-  const { data: token } = await sc
-    .from('student_tokens')
-    .select('id, slug, is_active')
-    .eq('slug', slug)
-    .eq('is_active', true)
-    .single();
-
-  if (!token) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-12 text-center max-w-sm">
-          <p className="font-serif text-[18px] text-ink tracking-tight">
-            유효하지 않은 학습 페이지입니다
-          </p>
-          <p className="text-[13px] text-olive mt-2">
-            링크를 다시 확인해주세요
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <StudentDashboardClient
-      slug={slug}
-      basePath="/st"
-      dashboardEndpoint="/api/public/student/st-dashboard"
-    />
-  );
+  redirect(`/s/${slug}`);
 }

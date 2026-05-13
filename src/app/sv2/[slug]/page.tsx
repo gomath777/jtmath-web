@@ -39,11 +39,5 @@ export default async function StudentPortalPage({
     );
   }
 
-  return (
-    <StudentDashboardClient
-      slug={slug}
-      basePath="/s"
-      dashboardEndpoint="/api/public/student/st-dashboard"
-    />
-  );
+  return <StudentDashboardClient slug={slug} basePath="/s" />;
 }

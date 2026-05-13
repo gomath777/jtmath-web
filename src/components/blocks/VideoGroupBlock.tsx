@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown, CheckCircle2, Play, Film } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
-import { SUBJECT_LABELS } from './types';
+import { formatVideoLabel } from '@/lib/video-label';
 import type { ProgressMap } from './types';
 
 interface VideoGroupBlockProps {
@@ -80,11 +80,7 @@ export default function VideoGroupBlock({
                       isDone ? 'text-stone' : 'text-charcoal'
                     } ${isActive ? 'font-medium text-ink' : ''}`}
                   >
-                    {video.raw_text
-                      ? `${video.problem_number}번 ${video.raw_text}`
-                      : video.title
-                        ? `${video.problem_number}번 [${video.title.replace(/\s*해설강의\([^)]*\)$/, '').trim()}](${SUBJECT_LABELS[subjectSlug] || subjectSlug})`
-                        : `${video.problem_number}번 해설강의`}
+                    {formatVideoLabel(video)}
                   </span>
                   {p && !isDone && (
                     <span className="text-[11px] text-stone shrink-0">{p.watch_percent}%</span>

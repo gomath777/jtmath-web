@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Download, FileText, Play, CheckCircle2, BookOpen, Lightbulb } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
 import { CONCEPT_LIBRARY_ID, EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { formatVideoLabel } from '@/lib/video-label';
 import type { ProgressMap } from './types';
 
 interface PdfItem {
@@ -164,7 +165,8 @@ function ConceptLayout({
               const p = progress[video.bunny_video_id];
               const isActive = activeVideo === idx;
               const isDone = p?.completed;
-              const videoLabel = video.title || `${video.problem_number}번 해설강의`;
+              // 학습지 문제 번호 + 출처. formatVideoLabel 사용 강제 (src/lib/video-label.ts 참조)
+              const videoLabel = formatVideoLabel(video);
 
               return (
                 <div key={idx}>
@@ -510,7 +512,8 @@ function GichulLayout({
               const p = progress[video.bunny_video_id];
               const isActive = activeVideo === idx;
               const isDone = p?.completed;
-              const videoLabel = video.title || `${video.problem_number}번 해설강의`;
+              // 학습지 문제 번호 + 출처. formatVideoLabel 사용 강제 (src/lib/video-label.ts 참조)
+              const videoLabel = formatVideoLabel(video);
 
               return (
                 <div key={idx}>

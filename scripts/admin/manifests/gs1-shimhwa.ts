@@ -148,27 +148,25 @@ export const GS1_SHIMHWA_UNITS: ShimhwaUnit[] = [
     },
   },
   {
-    // 단원 05 (경우의 수): 심화 콘텐츠 미정 — 파일명 placeholder
-    // TODO: 심화_PDF 폴더에 파일 추가 후 아래 채울 것
     session: 5,
     title: '경우의 수 심화',
     unit_name: '경우의 수',
-    unitFolder: '05_순열과 조합',
+    unitFolder: '05_경우의 수',
     shimhwaSubfolder: '심화_PDF',
     stage1: {
       label: '1단계',
-      file: '',  // 미정 — 파일 추가 후 업데이트
-      hintbookFile: null,
+      file: '경우의 수 1단계.pdf',
+      hintbookFile: '[힌트북] 경우의 수 1단계.pdf',
     },
     stage2: {
       label: '2단계',
-      file: '',
-      hintbookFile: null,
+      file: '경우의 수 2단계.pdf',
+      hintbookFile: '[힌트북] 경우의 수 2단계.pdf',
     },
     stage3: {
       side_a: {
-        file: '',
-        hintbookFile: null,
+        file: '경우의 수 3단계.pdf',
+        hintbookFile: '[힌트북] 경우의 수 3단계.pdf',
       },
       side_b: null,
     },

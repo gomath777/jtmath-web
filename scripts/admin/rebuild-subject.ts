@@ -25,44 +25,228 @@ import {
   findOrCreateCurriculum, findOrCreateCurriculumItem,
 } from './lib/concept-helpers.js';
 import { upsertBlocks } from './lib/upsert-block.js';
-import { GS1_CONCEPT_CURRICULUM_ID, GS1_CONCEPT_LECTURES } from './manifests/gs1-concept.js';
+import type { ConceptLecture } from './manifests/gs1-concept.js';
+import {
+  GS1_CONCEPT_CURRICULUM_ID, GS1_CONCEPT_LECTURES,
+  GS1_CONCEPT_SUBJECT_SLUG, GS1_CONCEPT_CURRICULUM_TITLE,
+  GS1_CONCEPT_PDF_BASE, GS1_CONCEPT_CDN_PREFIX,
+} from './manifests/gs1-concept.js';
+import {
+  DS2_CONCEPT_LECTURES, DS2_CONCEPT_SUBJECT_SLUG, DS2_CONCEPT_CURRICULUM_TITLE,
+  DS2_CONCEPT_PDF_BASE, DS2_CONCEPT_CDN_PREFIX,
+} from './manifests/ds2-concept.js';
+import {
+  GS2_CONCEPT_LECTURES, GS2_CONCEPT_SUBJECT_SLUG, GS2_CONCEPT_CURRICULUM_TITLE,
+  GS2_CONCEPT_PDF_BASE, GS2_CONCEPT_CDN_PREFIX,
+} from './manifests/gs2-concept.js';
+import type { GichulUnit } from './manifests/gs1-gichul.js';
 import { GS1_GICHUL_UNITS } from './manifests/gs1-gichul.js';
+import type { ShimhwaUnit } from './manifests/gs1-shimhwa.js';
 import { GS1_SHIMHWA_UNITS } from './manifests/gs1-shimhwa.js';
+import {
+  DS2_GICHUL_UNITS, DS2_GICHUL_SUBJECT_SLUG, DS2_GICHUL_CURRICULUM_TITLE,
+  DS2_GICHUL_DRIVE_BASE, DS2_GICHUL_CDN_PREFIX,
+} from './manifests/ds2-gichul.js';
+import {
+  GS2_GICHUL_UNITS, GS2_GICHUL_SUBJECT_SLUG, GS2_GICHUL_CURRICULUM_TITLE,
+  GS2_GICHUL_DRIVE_BASE, GS2_GICHUL_CDN_PREFIX,
+} from './manifests/gs2-gichul.js';
+import {
+  GS2_SHIMHWA_UNITS, GS2_SHIMHWA_SUBJECT_SLUG, GS2_SHIMHWA_CURRICULUM_TITLE,
+  GS2_SHIMHWA_DRIVE_BASE, GS2_SHIMHWA_CDN_PREFIX,
+} from './manifests/gs2-shimhwa.js';
+import {
+  DS2_SHIMHWA_UNITS, DS2_SHIMHWA_SUBJECT_SLUG, DS2_SHIMHWA_CURRICULUM_TITLE,
+  DS2_SHIMHWA_DRIVE_BASE, DS2_SHIMHWA_CDN_PREFIX,
+} from './manifests/ds2-shimhwa.js';
 import { parsePdfWithClaude } from '../../src/lib/parse-pdf.js';
 import { matchProblemsToVideos, toContentGroupVideos } from '../../src/lib/match-videos.js';
+
+// ─── Concept manifest 인터페이스 (subject 별 manifest 통합) ─────────────────
+
+interface ConceptManifest {
+  /** 이미 존재하는 curriculum_id (선택). 미지정 시 title+subject_slug 로 findOrCreate */
+  curriculumId?: string;
+  subjectSlug: string;
+  curriculumTitle: string;
+  pdfBaseFolder: string;   // resolveDrivePath 기준 (예: 'content/gs1_concept')
+  cdnPrefix: string;       // Bunny Storage 업로드 prefix (예: 'concept/gs1')
+  lectures: ConceptLecture[];
+}
+
+interface GichulManifest {
+  subjectSlug: string;
+  curriculumTitle: string;
+  driveBase: string;    // 예: 'gs1', 'ds2'
+  cdnPrefix: string;    // 예: 'gichul/gs1'
+  units: GichulUnit[];
+}
+
+interface ShimhwaManifest {
+  subjectSlug: string;
+  curriculumTitle: string;
+  driveBase: string;
+  cdnPrefix: string;
+  units: ShimhwaUnit[];
+}
+
+const GICHUL_MANIFESTS: Record<string, GichulManifest> = {
+  gs1: {
+    subjectSlug: 'gs1',
+    curriculumTitle: '[공수1] 기출',
+    driveBase: 'gs1',
+    cdnPrefix: 'gichul/gs1',
+    units: GS1_GICHUL_UNITS,
+  },
+  ds2: {
+    subjectSlug: DS2_GICHUL_SUBJECT_SLUG,
+    curriculumTitle: DS2_GICHUL_CURRICULUM_TITLE,
+    driveBase: DS2_GICHUL_DRIVE_BASE,
+    cdnPrefix: DS2_GICHUL_CDN_PREFIX,
+    units: DS2_GICHUL_UNITS,
+  },
+  gs2: {
+    subjectSlug: GS2_GICHUL_SUBJECT_SLUG,
+    curriculumTitle: GS2_GICHUL_CURRICULUM_TITLE,
+    driveBase: GS2_GICHUL_DRIVE_BASE,
+    cdnPrefix: GS2_GICHUL_CDN_PREFIX,
+    units: GS2_GICHUL_UNITS,
+  },
+};
+
+const SHIMHWA_MANIFESTS: Record<string, ShimhwaManifest> = {
+  gs1: {
+    subjectSlug: 'gs1',
+    curriculumTitle: '[공수1] 심화유형',
+    driveBase: 'gs1',
+    cdnPrefix: 'shimhwa/gs1',
+    units: GS1_SHIMHWA_UNITS,
+  },
+  gs2: {
+    subjectSlug: GS2_SHIMHWA_SUBJECT_SLUG,
+    curriculumTitle: GS2_SHIMHWA_CURRICULUM_TITLE,
+    driveBase: GS2_SHIMHWA_DRIVE_BASE,
+    cdnPrefix: GS2_SHIMHWA_CDN_PREFIX,
+    units: GS2_SHIMHWA_UNITS,
+  },
+  ds2: {
+    subjectSlug: DS2_SHIMHWA_SUBJECT_SLUG,
+    curriculumTitle: DS2_SHIMHWA_CURRICULUM_TITLE,
+    driveBase: DS2_SHIMHWA_DRIVE_BASE,
+    cdnPrefix: DS2_SHIMHWA_CDN_PREFIX,
+    units: DS2_SHIMHWA_UNITS,
+  },
+};
+
+const CONCEPT_MANIFESTS: Record<string, ConceptManifest> = {
+  gs1: {
+    curriculumId: GS1_CONCEPT_CURRICULUM_ID,
+    subjectSlug: GS1_CONCEPT_SUBJECT_SLUG,
+    curriculumTitle: GS1_CONCEPT_CURRICULUM_TITLE,
+    pdfBaseFolder: GS1_CONCEPT_PDF_BASE,
+    cdnPrefix: GS1_CONCEPT_CDN_PREFIX,
+    lectures: GS1_CONCEPT_LECTURES,
+  },
+  ds2: {
+    subjectSlug: DS2_CONCEPT_SUBJECT_SLUG,
+    curriculumTitle: DS2_CONCEPT_CURRICULUM_TITLE,
+    pdfBaseFolder: DS2_CONCEPT_PDF_BASE,
+    cdnPrefix: DS2_CONCEPT_CDN_PREFIX,
+    lectures: DS2_CONCEPT_LECTURES,
+  },
+  gs2: {
+    subjectSlug: GS2_CONCEPT_SUBJECT_SLUG,
+    curriculumTitle: GS2_CONCEPT_CURRICULUM_TITLE,
+    pdfBaseFolder: GS2_CONCEPT_PDF_BASE,
+    cdnPrefix: GS2_CONCEPT_CDN_PREFIX,
+    lectures: GS2_CONCEPT_LECTURES,
+  },
+};
 
 // ─────────────────────────────────────────────
 // Phase A: 개념강의 19 → 14차시 재구성
 // ─────────────────────────────────────────────
 
-async function runConcept(sc: ReturnType<typeof getServiceClient>, opts: {
+async function runConcept(sc: ReturnType<typeof getServiceClient>, manifest: ConceptManifest, opts: {
   isDryRun: boolean;
   force: boolean;
 }) {
-  log('📚', '개념강의 재구성 시작 (19 → 14차시)');
+  log('📚', `[${manifest.subjectSlug}] 개념강의 재구성 시작 (${manifest.lectures.length}차시)`);
   const { isDryRun, force } = opts;
 
-  // 1. 기존 active concept items 아카이브
-  log('🗂️', '기존 19차시 아카이브 중...');
-  const archiveResult = await archiveActiveItems(
-    sc, GS1_CONCEPT_CURRICULUM_ID, 'concept', { dryRun: isDryRun, force },
-  );
-  if (!isDryRun) success(`아카이브 완료: ${archiveResult.archivedCount}개`);
+  // 0. curriculum_id 해결 (manifest 에 있으면 사용, 없으면 findOrCreate)
+  let curriculumId: string;
+  if (manifest.curriculumId) {
+    curriculumId = manifest.curriculumId;
+    info(`Curriculum (기존 ID): ${curriculumId}`);
+  } else {
+    const result = await findOrCreateCurriculum(
+      sc, manifest.curriculumTitle, manifest.subjectSlug, '2026-01-01', isDryRun,
+    );
+    curriculumId = result.id;
+    info(`Curriculum ${result.created ? '신규 생성' : '기존'}: ${curriculumId} ("${manifest.curriculumTitle}")`);
+  }
 
-  // 2. 14차시 신규 생성
-  log('✨', '14차시 신규 생성 중...');
+  // 1. manifest 에 없는 세션 번호의 기존 items 만 아카이브 (멱등성 유지)
+  // 같은 세션 번호의 items 는 findOrCreateCurriculumItem 가 UPDATE 처리 → slug 보존
+  log('🗂️', `manifest 외 ${manifest.subjectSlug} concept items 정리 중...`);
+  if (curriculumId === '(dry-run)') {
+    info('[DRY RUN] 신규 curriculum 예정 (실 DB INSERT 안 됨) — 정리 단계 스킵');
+  } else {
+    const manifestSessions = new Set(manifest.lectures.map(l => l.session));
+    const { data: extantItems } = await sc
+      .from('curriculum_items')
+      .select('id, public_slug, title, session_number')
+      .eq('curriculum_id', curriculumId)
+      .eq('category', 'concept')
+      .is('archived_at', null);
+    const extras = (extantItems || []).filter(
+      (i: { session_number: number | null }) => i.session_number === null || !manifestSessions.has(i.session_number),
+    );
+    if (extras.length === 0) {
+      info(`정리 대상 없음 (모든 active item 이 manifest 에 포함됨)`);
+    } else {
+      info(`manifest 외 active item: ${extras.length}개`);
+      extras.forEach((i: { public_slug: string; session_number: number | null; title: string }) =>
+        info(`  - [${i.public_slug}] s${i.session_number} ${i.title}`),
+      );
+      // SLA 검증 — extras 에 SLA 있으면 force 없이는 중단
+      if (!force) {
+        const { count: slaCount } = await sc
+          .from('student_lesson_assignments')
+          .select('id', { count: 'exact', head: true })
+          .in('curriculum_item_id', extras.map((i: { id: string }) => i.id));
+        if (slaCount && slaCount > 0) {
+          error(`정리 대상 items 에 ${slaCount}개 SLA 존재. --force 필요`);
+        }
+      }
+      if (isDryRun) {
+        warn('DRY RUN: 실제 정리 스킵');
+      } else {
+        const { error: archErr } = await sc
+          .from('curriculum_items')
+          .update({ archived_at: new Date().toISOString() })
+          .in('id', extras.map((i: { id: string }) => i.id));
+        if (archErr) error(`정리 실패: ${archErr.message}`);
+        success(`정리 완료: ${extras.length}개 archived`);
+      }
+    }
+  }
+
+  // 2. 차시 신규 생성
+  log('✨', `${manifest.lectures.length}차시 신규 생성 중...`);
   let createdCount = 0;
   let skippedCount = 0;
   const warnings: string[] = [];
 
-  for (const lecture of GS1_CONCEPT_LECTURES) {
+  for (const lecture of manifest.lectures) {
     info(`\n[${lecture.session}차시] ${lecture.title}`);
 
     // PDF 업로드
     const pdfEntries: Array<{ url: string; original_name: string; file_size?: string }> = [];
     for (const pdfDef of lecture.pdfs) {
-      const localPath = resolveDrivePath(`content/gs1_concept/${pdfDef.relativePath}`);
-      const storagePath = `concept/gs1/${pdfDef.relativePath}`;
+      const localPath = resolveDrivePath(`${manifest.pdfBaseFolder}/${pdfDef.relativePath}`);
+      const storagePath = `${manifest.cdnPrefix}/${pdfDef.relativePath}`;
       const entry = await uploadAndMakePdf(localPath, storagePath, pdfDef.filename, isDryRun);
       if (entry) {
         pdfEntries.push(entry);
@@ -75,7 +259,7 @@ async function runConcept(sc: ReturnType<typeof getServiceClient>, opts: {
     const itemResult = await findOrCreateCurriculumItem(
       sc,
       {
-        curriculum_id: GS1_CONCEPT_CURRICULUM_ID,
+        curriculum_id: curriculumId,
         session_number: lecture.session,
         title: lecture.title,
         unit_name: lecture.title,
@@ -83,7 +267,7 @@ async function runConcept(sc: ReturnType<typeof getServiceClient>, opts: {
         variant_label: null,
         sort_order: lecture.session,
       },
-      'gs1',
+      manifest.subjectSlug,
       isDryRun,
     );
     itemResult.action === 'created' ? createdCount++ : skippedCount++;
@@ -117,29 +301,29 @@ async function runConcept(sc: ReturnType<typeof getServiceClient>, opts: {
     warn(`⚠️  누락 파일 ${warnings.length}개:`);
     warnings.forEach(w => warn(`   ${w}`));
   }
-  success(`개념강의 완료: 생성 ${createdCount}개, 기존 ${skippedCount}개`);
+  success(`[${manifest.subjectSlug}] 개념강의 완료: 생성 ${createdCount}개, 기존 ${skippedCount}개`);
 }
 
 // ─────────────────────────────────────────────
 // Phase B: 기출 6단원 생성
 // ─────────────────────────────────────────────
 
-async function runGichul(sc: ReturnType<typeof getServiceClient>, opts: {
+async function runGichul(sc: ReturnType<typeof getServiceClient>, manifest: GichulManifest, opts: {
   isDryRun: boolean;
   unitFilter?: string;
-  subject: string;
 }) {
-  log('📖', '기출 단원 생성 시작');
-  const { isDryRun, unitFilter, subject } = opts;
+  log('📖', `[${manifest.subjectSlug}] 기출 단원 생성 시작`);
+  const { isDryRun, unitFilter } = opts;
+  const subject = manifest.subjectSlug;
 
   const { id: curriculumId, created } = await findOrCreateCurriculum(
-    sc, '[공수1] 기출', 'gs1', '2026-01-01', isDryRun,
+    sc, manifest.curriculumTitle, subject, '2026-01-01', isDryRun,
   );
   info(`기출 시즌 ID: ${curriculumId} (${created ? '신규' : '기존'})`);
 
   const units = unitFilter
-    ? GS1_GICHUL_UNITS.filter(u => u.title.includes(unitFilter) || u.unit_name.includes(unitFilter))
-    : GS1_GICHUL_UNITS;
+    ? manifest.units.filter(u => u.title.includes(unitFilter) || u.unit_name.includes(unitFilter))
+    : manifest.units;
 
   if (units.length === 0) {
     error(`단원 필터 "${unitFilter}" 에 해당하는 단원이 없습니다`);
@@ -173,8 +357,12 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, opts: {
     const blocks: Parameters<typeof upsertBlocks>[1] = [];
     let orderIndex = 0;
 
-    for (const levelDef of unit.levels) {
-      const baseFolder = resolveDrivePath(`gs1/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}`);
+    // 기출 학습페이지에서 레벨5 제외 (별도 "레벨5 모음" 페이지에서 따로 다룸).
+    // manifest 의 레벨5 데이터는 그대로 보존 — 나중에 레벨5 모음 빌드 시 재사용.
+    const filteredLevels = unit.levels.filter(l => !/^레벨5/.test(l.label));
+
+    for (const levelDef of filteredLevels) {
+      const baseFolder = resolveDrivePath(`${manifest.driveBase}/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}`);
 
       // 파일 존재 확인
       const validFiles: Array<{ local: string; storagePath: string; name: string }> = [];
@@ -184,7 +372,7 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, opts: {
           warnings.push(`[단원${unit.session}/${levelDef.label}] 파일 없음: ${filename}`);
           continue;
         }
-        const storagePath = `gichul/gs1/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}/${filename}`;
+        const storagePath = `${manifest.cdnPrefix}/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}/${filename}`;
         validFiles.push({ local, storagePath, name: filename });
       }
 
@@ -206,7 +394,7 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, opts: {
         for (const hbFile of levelDef.hintbookFiles.filter(Boolean) as string[]) {
           const local = path.join(baseFolder, hbFile);
           if (fs.existsSync(local)) {
-            const storagePath = `gichul/gs1/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}/${hbFile}`;
+            const storagePath = `${manifest.cdnPrefix}/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}/${hbFile}`;
             const entry = await uploadAndMakePdf(local, storagePath, hbFile, isDryRun);
             if (entry) { hintbookEntry = { url: entry.url, original_name: entry.original_name }; break; }
           }
@@ -254,29 +442,29 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, opts: {
     warn(`⚠️  누락 파일 ${warnings.length}개:`);
     warnings.forEach(w => warn(`   ${w}`));
   }
-  success(`기출 완료: 생성 ${createdCount}개`);
+  success(`[${manifest.subjectSlug}] 기출 완료: 생성 ${createdCount}개`);
 }
 
 // ─────────────────────────────────────────────
 // Phase C: 심화유형 5단원 생성
 // ─────────────────────────────────────────────
 
-async function runShimhwa(sc: ReturnType<typeof getServiceClient>, opts: {
+async function runShimhwa(sc: ReturnType<typeof getServiceClient>, manifest: ShimhwaManifest, opts: {
   isDryRun: boolean;
   unitFilter?: string;
-  subject: string;
 }) {
-  log('🎯', '심화유형 단원 생성 시작');
-  const { isDryRun, unitFilter, subject } = opts;
+  log('🎯', `[${manifest.subjectSlug}] 심화유형 단원 생성 시작`);
+  const { isDryRun, unitFilter } = opts;
+  const subject = manifest.subjectSlug;
 
   const { id: curriculumId, created } = await findOrCreateCurriculum(
-    sc, '[공수1] 심화유형', 'gs1', '2026-01-01', isDryRun,
+    sc, manifest.curriculumTitle, subject, '2026-01-01', isDryRun,
   );
   info(`심화유형 시즌 ID: ${curriculumId} (${created ? '신규' : '기존'})`);
 
   const units = unitFilter
-    ? GS1_SHIMHWA_UNITS.filter(u => u.title.includes(unitFilter) || u.unit_name.includes(unitFilter))
-    : GS1_SHIMHWA_UNITS;
+    ? manifest.units.filter(u => u.title.includes(unitFilter) || u.unit_name.includes(unitFilter))
+    : manifest.units;
 
   let createdCount = 0;
   const warnings: string[] = [];
@@ -309,12 +497,12 @@ async function runShimhwa(sc: ReturnType<typeof getServiceClient>, opts: {
 
     if (isDryRun) continue;
 
-    const baseFolder = resolveDrivePath(`gs1/${unit.unitFolder}/${unit.shimhwaSubfolder}`);
+    const baseFolder = resolveDrivePath(`${manifest.driveBase}/${unit.unitFolder}/${unit.shimhwaSubfolder}`);
 
     async function uploadStageFile(filename: string, label: string) {
       if (!filename) return null;
       const local = path.join(baseFolder, filename);
-      const storagePath = `shimhwa/gs1/${unit.unitFolder}/${unit.shimhwaSubfolder}/${filename}`;
+      const storagePath = `${manifest.cdnPrefix}/${unit.unitFolder}/${unit.shimhwaSubfolder}/${filename}`;
       const entry = await uploadAndMakePdf(local, storagePath, filename, isDryRun);
       if (!entry) warnings.push(`[단원${unit.session}/${label}] 파일 없음: ${filename}`);
       return entry;
@@ -415,7 +603,7 @@ async function runShimhwa(sc: ReturnType<typeof getServiceClient>, opts: {
     warn(`⚠️  누락 파일 ${warnings.length}개:`);
     warnings.forEach(w => warn(`   ${w}`));
   }
-  success(`심화유형 완료: 생성 ${createdCount}개`);
+  success(`[${manifest.subjectSlug}] 심화유형 완료: 생성 ${createdCount}개`);
 }
 
 // ─────────────────────────────────────────────
@@ -441,13 +629,29 @@ async function main() {
   const sc = getServiceClient();
 
   if (part === 'concept' || part === 'all') {
-    await runConcept(sc, { isDryRun, force });
+    const manifest = CONCEPT_MANIFESTS[subject];
+    if (!manifest) {
+      error(`--subject ${subject} 에 해당하는 concept manifest 없음 (gs1|ds2|gs2)`);
+    }
+    await runConcept(sc, manifest, { isDryRun, force });
   }
   if (part === 'gichul' || part === 'all') {
-    await runGichul(sc, { isDryRun, unitFilter, subject });
+    const gichulManifest = GICHUL_MANIFESTS[subject];
+    if (!gichulManifest) {
+      if (part === 'all') warn(`--subject ${subject} 에 해당하는 gichul manifest 없음 (스킵)`);
+      else error(`--subject ${subject} 에 해당하는 gichul manifest 없음 (gs1|ds2|gs2)`);
+    } else {
+      await runGichul(sc, gichulManifest, { isDryRun, unitFilter });
+    }
   }
   if (part === 'shimhwa' || part === 'all') {
-    await runShimhwa(sc, { isDryRun, unitFilter, subject });
+    const shimhwaManifest = SHIMHWA_MANIFESTS[subject];
+    if (!shimhwaManifest) {
+      if (part === 'all') warn(`--subject ${subject} 에 해당하는 shimhwa manifest 없음 (스킵)`);
+      else error(`--subject ${subject} 에 해당하는 shimhwa manifest 없음 (gs1|gs2|ds2)`);
+    } else {
+      await runShimhwa(sc, shimhwaManifest, { isDryRun, unitFilter });
+    }
   }
   if (!['concept', 'gichul', 'shimhwa', 'all'].includes(part)) {
     error(`알 수 없는 --part 값: ${part} (concept|gichul|shimhwa|all 중 하나)`);
