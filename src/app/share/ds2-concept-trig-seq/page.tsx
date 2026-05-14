@@ -23,8 +23,7 @@ const SECTIONS: Array<{
       { url: 'https://mathgo-pdfs.b-cdn.net/pdfs/ds2/ds2_2_1_2_%EC%82%BC%EA%B0%81%ED%95%A8%EC%88%98.pdf', name: '삼각함수' },
     ],
     videos: [
-      { id: 'a1d24968-9d0d-4d39-bd8d-83305cc05d47', label: '일반각과 호도법' },
-      { id: '56fe4f06-9fb9-4378-965c-10ce506e2ef3', label: '일반각과 호도법 문풀' },
+      { id: 'a1d24968-9d0d-4d39-bd8d-83305cc05d47', label: '9강 일반각과 호도법' },
       { id: '04c18f2b-8e8e-4d12-b12b-24cdcbf7deb8', label: '삼각함수' },
     ],
   },
