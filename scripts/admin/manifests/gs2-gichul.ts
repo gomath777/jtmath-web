@@ -68,4 +68,38 @@ export const GS2_GICHUL_UNITS: GichulUnit[] = [
       },
     ],
   },
+  {
+    session: 6,
+    title: '유리함수와 무리함수',
+    unit_name: '유리함수와 무리함수',
+    variant_label: null,
+    unitFolder: '06_유리함수_무리함수',
+    gichulSubfolder: '기출_PDF',
+    levels: [
+      {
+        label: '레벨1, 레벨2',
+        files: ['유리함수 무리함수 레벨1.pdf', '유리함수 무리함수 레벨2.pdf'],
+        hintbookFiles: [null, null],
+        expectsVideos: false,
+      },
+      {
+        label: '레벨3',
+        files: ['유리함수 무리함수 레벨3.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+      {
+        label: '레벨4-1',
+        files: ['유리함수 무리함수 레벨4-1.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+      {
+        label: '레벨4-2',
+        files: ['유리함수 무리함수 레벨4-2.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+    ],
+  },
 ];
