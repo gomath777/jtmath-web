@@ -52,17 +52,21 @@ type AnyItem =
   | (CalendarSessionEntry & { kind: 'session' })
   | (CalendarConceptItem & { kind: 'concept' });
 
-function getKstWeeks(): Date[][] {
+// 마스터 뷰: 전전주 일요일부터 6주 (전전주·지난주·이번주·다음3주) — 배정 현황 보며 다음 순서 계획용
+// 학생 뷰: 지난주 일요일부터 4주 (지난주 ~ 다음 2주)
+function getKstWeeks(mode: 'master' | 'student' = 'student'): Date[][] {
   const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
   const nowMs = Date.now() + KST_OFFSET_MS;
   const dayOfWeek = new Date(nowMs).getUTCDay();
-  const lastSundayMs = nowMs - (dayOfWeek + 7) * 86400000;
+  const weeksBack = mode === 'master' ? 14 : 7;
+  const totalWeeks = mode === 'master' ? 6 : 4;
+  const startSundayMs = nowMs - (dayOfWeek + weeksBack) * 86400000;
 
   const weeks: Date[][] = [];
-  for (let w = 0; w < 4; w++) {
+  for (let w = 0; w < totalWeeks; w++) {
     const week: Date[] = [];
     for (let d = 0; d < 7; d++) {
-      week.push(new Date(lastSundayMs + (w * 7 + d) * 86400000));
+      week.push(new Date(startSundayMs + (w * 7 + d) * 86400000));
     }
     weeks.push(week);
   }
@@ -247,7 +251,7 @@ export default function SessionCalendarView({
   basePath = '/s',
   previewBase,
 }: SessionCalendarViewProps) {
-  const weeks = getKstWeeks();
+  const weeks = getKstWeeks(mode);
   const todayYmd = todayKstYmd();
 
   const sessionsByDate = new Map<string, CalendarSessionEntry[]>();
@@ -360,7 +364,7 @@ export default function SessionCalendarView({
         <span>✅ 공개됨</span>
         <span>🔒 {mode === 'master' ? '미릴리즈' : '예정'}</span>
         <span>📚 개념강의</span>
-        <span className="ml-auto text-[10px] opacity-60">지난주 ~ 다음 2주</span>
+        <span className="ml-auto text-[10px] opacity-60">{mode === 'master' ? '전전주 ~ 다음 3주 (6주)' : '지난주 ~ 다음 2주'}</span>
       </div>
     </div>
   );
