@@ -19,16 +19,12 @@ type Problem = {
 };
 
 const PROBLEMS: Problem[] = [
-  { num: 1,  source: '25년 10월 고2 17번',          videoId: 'f317a41a-69bd-49d8-985f-91faa31803a2' },
-  { num: 2,  source: '25년 10월 고2 17번 변형',       videoId: 'f317a41a-69bd-49d8-985f-91faa31803a2' },
-  { num: 4,  source: '24년 10월 고2 28번',           videoId: '405d62bd-d93a-41cf-8759-415ce4809b26' },
-  { num: 5,  source: '24년 10월 고2 28번 변형',       videoId: '405d62bd-d93a-41cf-8759-415ce4809b26' },
-  { num: 7,  source: '17년 9월 고2 이과 14번',        videoId: 'a7617efd-2846-4392-8020-69db87a57247' },
-  { num: 8,  source: '17년 9월 고2 이과 14번 변형',   videoId: 'a7617efd-2846-4392-8020-69db87a57247' },
-  { num: 10, source: '17년 6월 고2 문과 29번',        videoId: 'e19fa029-538b-4f90-ab84-1ca353215f62' },
-  { num: 11, source: '17년 6월 고2 문과 29번 변형',   videoId: 'e19fa029-538b-4f90-ab84-1ca353215f62' },
-  { num: 12, source: '15년 9월 고2 문과 14번',        videoId: '6cf4a868-207f-4367-8808-0df4532b18dd' },
-  { num: 14, source: '15년 3월 고2 이과 28번',        videoId: '137716b8-6c9f-4712-a150-4f050697c556' },
+  { num: 1,  source: '25년 10월 고2 17번',  videoId: 'f317a41a-69bd-49d8-985f-91faa31803a2' },
+  { num: 4,  source: '24년 10월 고2 28번',  videoId: '405d62bd-d93a-41cf-8759-415ce4809b26' },
+  { num: 7,  source: '17년 9월 고2 이과 14번', videoId: 'a7617efd-2846-4392-8020-69db87a57247' },
+  { num: 10, source: '17년 6월 고2 문과 29번', videoId: 'e19fa029-538b-4f90-ab84-1ca353215f62' },
+  { num: 12, source: '15년 9월 고2 문과 14번', videoId: '6cf4a868-207f-4367-8808-0df4532b18dd' },
+  { num: 14, source: '15년 3월 고2 이과 28번', videoId: '137716b8-6c9f-4712-a150-4f050697c556' },
 ];
 
 export default function Ds2ArithSeqLv4Page() {
@@ -45,7 +41,7 @@ export default function Ds2ArithSeqLv4Page() {
             등차수열 · 레벨4
           </h1>
           <p className="text-[11px] text-stone font-mono mt-1">
-            해설강의 10개
+            해설강의 6개
           </p>
           <p className="text-[13px] text-olive mt-2">
             학습지 받고, 막힌 번호 해설강의 확인하세요.
