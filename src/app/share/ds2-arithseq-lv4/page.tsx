@@ -15,18 +15,16 @@ const PDF_URL =
 type Problem = {
   num: number;
   source: string;
-  videoId: string | null;
+  videoId: string;
 };
 
 const PROBLEMS: Problem[] = [
-  { num: 1,  source: '25년 10월 고2 17번',      videoId: 'f317a41a-69bd-49d8-985f-91faa31803a2' },
-  { num: 3,  source: '20년 3월 고3 문과 17번',   videoId: null },
-  { num: 5,  source: '24년 10월 고2 28번',      videoId: '405d62bd-d93a-41cf-8759-415ce4809b26' },
-  { num: 7,  source: '17년 9월 고2 이과 14번',   videoId: 'a7617efd-2846-4392-8020-69db87a57247' },
-  { num: 9,  source: '15년 9월 고2 문과 14번',   videoId: '6cf4a868-207f-4367-8808-0df4532b18dd' },
-  { num: 11, source: '17년 6월 고2 문과 29번',   videoId: 'e19fa029-538b-4f90-ab84-1ca353215f62' },
-  { num: 13, source: '13년 3월 고3 이과 29번',   videoId: null },
-  { num: 15, source: '15년 3월 고2 이과 28번',   videoId: '137716b8-6c9f-4712-a150-4f050697c556' },
+  { num: 1,  source: '25년 10월 고2 17번',    videoId: 'f317a41a-69bd-49d8-985f-91faa31803a2' },
+  { num: 5,  source: '24년 10월 고2 28번',    videoId: '405d62bd-d93a-41cf-8759-415ce4809b26' },
+  { num: 7,  source: '17년 9월 고2 이과 14번', videoId: 'a7617efd-2846-4392-8020-69db87a57247' },
+  { num: 9,  source: '15년 9월 고2 문과 14번', videoId: '6cf4a868-207f-4367-8808-0df4532b18dd' },
+  { num: 11, source: '17년 6월 고2 문과 29번', videoId: 'e19fa029-538b-4f90-ab84-1ca353215f62' },
+  { num: 15, source: '15년 3월 고2 이과 28번', videoId: '137716b8-6c9f-4712-a150-4f050697c556' },
 ];
 
 export default function Ds2ArithSeqLv4Page() {
@@ -43,10 +41,10 @@ export default function Ds2ArithSeqLv4Page() {
             등차수열 · 레벨4
           </h1>
           <p className="text-[11px] text-stone font-mono mt-1">
-            홀수번 8문항 · 해설강의 6개
+            해설강의 6개
           </p>
           <p className="text-[13px] text-olive mt-2">
-            학습지 받고, 홀수번 번호 맞춰서 해설강의 보세요.
+            학습지 받고, 막힌 번호 해설강의 확인하세요.
           </p>
         </div>
 
@@ -75,7 +73,7 @@ export default function Ds2ArithSeqLv4Page() {
         {/* 해설강의 */}
         <section>
           <p className="text-[11px] tracking-[0.12em] uppercase text-stone font-medium mb-2.5">
-            해설강의 (홀수번만)
+            해설강의
           </p>
           <div className="space-y-1.5">
             {PROBLEMS.map((p) => (
@@ -87,21 +85,15 @@ export default function Ds2ArithSeqLv4Page() {
                   {p.num}번
                 </span>
                 <p className="flex-1 text-[13px] text-stone min-w-0">{p.source}</p>
-                {p.videoId ? (
-                  <a
-                    href={EMBED(p.videoId)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-olive/10 hover:bg-olive/20 text-olive transition-colors text-[11px] font-medium shrink-0"
-                  >
-                    <Play className="w-3.5 h-3.5" fill="currentColor" />
-                    영상
-                  </a>
-                ) : (
-                  <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-stone/10 text-stone/50 text-[11px] font-medium shrink-0">
-                    준비중
-                  </span>
-                )}
+                <a
+                  href={EMBED(p.videoId)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-olive/10 hover:bg-olive/20 text-olive transition-colors text-[11px] font-medium shrink-0"
+                >
+                  <Play className="w-3.5 h-3.5" fill="currentColor" />
+                  영상
+                </a>
               </div>
             ))}
           </div>
