@@ -39,4 +39,52 @@ export const DS2_SHIMHWA_UNITS: ShimhwaUnit[] = [
       side_b: null,
     },
   },
+  {
+    session: 5,
+    title: '등차수열 심화',
+    unit_name: '등차수열',
+    unitFolder: '05_등차수열',
+    shimhwaSubfolder: '심화_PDF',
+    stage1: {
+      label: '1단계',
+      file: '등차수열 1단계.pdf',
+      hintbookFile: '[힌트북] 등차수열 1단계.pdf',
+    },
+    stage2: {
+      label: '2단계',
+      file: '등차수열 2단계.pdf',
+      hintbookFile: '[힌트북] 등차수열 2단계.pdf',
+    },
+    stage3: {
+      side_a: {
+        file: '등차수열 3단계.pdf',
+        hintbookFile: '[힌트북] 등차수열 3단계.pdf',
+      },
+      side_b: null,
+    },
+  },
+  {
+    session: 6,
+    title: '등비수열 심화',
+    unit_name: '등비수열',
+    unitFolder: '06_등비수열',
+    shimhwaSubfolder: '심화_PDF',
+    stage1: {
+      label: '1단계',
+      file: '등비수열 1단계.pdf',
+      hintbookFile: '[힌트북] 등비수열 1단계.pdf',
+    },
+    stage2: {
+      label: '2단계',
+      file: '등비수열 2단계.pdf',
+      hintbookFile: '[힌트북] 등비수열 2단계.pdf',
+    },
+    stage3: {
+      side_a: {
+        file: '등비수열 3단계.pdf',
+        hintbookFile: '[힌트북] 등비수열 3단계.pdf',
+      },
+      side_b: null,
+    },
+  },
 ];
