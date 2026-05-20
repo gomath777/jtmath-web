@@ -171,4 +171,76 @@ export const GS1_SHIMHWA_UNITS: ShimhwaUnit[] = [
       side_b: null,
     },
   },
+  {
+    session: 6,
+    title: '행렬 심화',
+    unit_name: '행렬',
+    unitFolder: '06_행렬',
+    shimhwaSubfolder: '심화_PDF',
+    stage1: {
+      label: '1단계',
+      file: '행렬 1단계.pdf',
+      hintbookFile: '[힌트북] 행렬 1단계.pdf',
+    },
+    stage2: {
+      label: '2단계',
+      file: '행렬 2단계.pdf',
+      hintbookFile: '[힌트북] 행렬 2단계.pdf',
+    },
+    stage3: {
+      side_a: {
+        file: '행렬 3단계.pdf',
+        hintbookFile: '[힌트북] 행렬 3단계.pdf',
+      },
+      side_b: null,
+    },
+  },
+  {
+    session: 7,
+    title: '삼차사차 방정식의 풀이 심화',
+    unit_name: '여러가지 방정식과 부등식',
+    unitFolder: '04_여러가지_방정식_부등식',
+    shimhwaSubfolder: '심화_PDF (1)',
+    stage1: {
+      label: '1단계',
+      file: '삼차사차 방정식의 풀이 1단계.pdf',
+      hintbookFile: '[힌트북] 삼차사차 방정식의 풀이 1단계.pdf',
+    },
+    stage2: {
+      label: '2단계',
+      file: '삼차사차 방정식의 풀이 2단계.pdf',
+      hintbookFile: '[힌트북] 삼차사차 방정식의 풀이 2단계.pdf',
+    },
+    stage3: {
+      side_a: {
+        file: '삼차사차 방정식의 풀이 3단계.pdf',
+        hintbookFile: '[힌트북] 삼차사차 방정식의 풀이 3단계.pdf',
+      },
+      side_b: null,
+    },
+  },
+  {
+    session: 8,
+    title: '연립 방정식과 부등식 심화',
+    unit_name: '여러가지 방정식과 부등식',
+    unitFolder: '04_여러가지_방정식_부등식',
+    shimhwaSubfolder: '심화_PDF (2)',
+    stage1: {
+      label: '1단계',
+      file: '연립 방정식과 부등식 1단계.pdf',
+      hintbookFile: '[힌트북] 연립 방정식과 부등식 1단계.pdf',
+    },
+    stage2: {
+      label: '2단계',
+      file: '연립 방정식과 부등식 2단계.pdf',
+      hintbookFile: '[힌트북] 연립 방정식과 부등식 2단계.pdf',
+    },
+    stage3: {
+      side_a: {
+        file: '연립 방정식과 부등식 3단계.pdf',
+        hintbookFile: '[힌트북] 연립 방정식과 부등식 3단계.pdf',
+      },
+      side_b: null,
+    },
+  },
 ];

@@ -56,7 +56,8 @@ export default async function AdminCalendarsNewPage() {
   const tokensRes = await sc
     .from('student_tokens')
     .select('slug, profile_id, profiles!inner(id, name, school, grade)')
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .eq('show_in_calendar', true); // 퇴원 학생은 캘린더에서 숨김 (포탈은 portal_expires_at 까지 유지)
   const tokens = (tokensRes.data || []) as unknown as TokenRow[];
 
   // 2. 전 학생 SLA + curriculum_item + curricula 한 번에

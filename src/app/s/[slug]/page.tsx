@@ -19,12 +19,16 @@ export default async function StudentPortalPage({
   // (SQL 마이그레이션은 /c 페이지 작동에만 필요. /s 는 항상 그대로 작동.)
   const { data: token } = await sc
     .from('student_tokens')
-    .select('id, slug, is_active')
+    .select('id, slug, is_active, portal_expires_at')
     .eq('slug', slug)
     .eq('is_active', true)
     .single();
 
-  if (!token) {
+  // 퇴원 학생: portal_expires_at 이 지나면 포탈 접근 차단 (그 전까지는 정상 접근)
+  const expired =
+    !!token?.portal_expires_at && new Date(token.portal_expires_at).getTime() <= Date.now();
+
+  if (!token || expired) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-12 text-center max-w-sm">
