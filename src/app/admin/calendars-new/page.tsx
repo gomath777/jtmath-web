@@ -27,6 +27,12 @@ export interface CalendarSlaEntry {
   is_released: boolean;         // status === 'released'
 }
 
+export interface CalendarPhase {
+  label: string;
+  startYmd: string;
+  endYmd: string | null;
+}
+
 interface StudentCard {
   slug: string;
   profileId: string;
@@ -34,7 +40,11 @@ interface StudentCard {
   school: string;
   grade: number | null;
   sla: CalendarSlaEntry[];
+  phase: CalendarPhase | null;
 }
+
+// 기말 마무리 단계 배너 라벨 (st-dashboard 응답과 동일하게 유지)
+const REVIEW_PHASE_LABEL = '전체 오답 반복 · 취약유형 보충 · 모의내신';
 
 export default async function AdminCalendarsNewPage() {
   const supabase = await createClient();
@@ -51,11 +61,14 @@ export default async function AdminCalendarsNewPage() {
   type TokenRow = {
     slug: string;
     profile_id: string;
-    profiles: { id: string; name: string; school: string | null; grade: number | null };
+    profiles: {
+      id: string; name: string; school: string | null; grade: number | null;
+      review_phase_start: string | null; exam_date_final: string | null;
+    };
   };
   const tokensRes = await sc
     .from('student_tokens')
-    .select('slug, profile_id, profiles!inner(id, name, school, grade)')
+    .select('slug, profile_id, profiles!inner(id, name, school, grade, review_phase_start, exam_date_final)')
     .eq('is_active', true)
     .eq('show_in_calendar', true); // 퇴원 학생은 캘린더에서 숨김 (포탈은 portal_expires_at 까지 유지)
   const tokens = (tokensRes.data || []) as unknown as TokenRow[];
@@ -125,6 +138,13 @@ export default async function AdminCalendarsNewPage() {
       school: t.profiles?.school || '',
       grade: t.profiles?.grade ?? null,
       sla: slaByProfile.get(t.profile_id) || [],
+      phase: t.profiles?.review_phase_start
+        ? {
+            label: REVIEW_PHASE_LABEL,
+            startYmd: t.profiles.review_phase_start,
+            endYmd: t.profiles.exam_date_final ?? null,
+          }
+        : null,
     }))
     .sort((a, b) => {
       const ga = a.grade ?? 99;

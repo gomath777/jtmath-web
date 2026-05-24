@@ -12,6 +12,7 @@ interface Student {
   school: string;
   grade: number | null;
   sla: CalendarSlaEntry[];
+  phase: { label: string; startYmd: string; endYmd: string | null } | null;
 }
 
 function gradeLabel(g: number | null): string {
@@ -124,7 +125,7 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                       </Link>
                     </div>
 
-                    {s.sla.length === 0 ? (
+                    {s.sla.length === 0 && !s.phase ? (
                       <p className="text-sm text-slate-400 py-4 text-center">
                         신 시스템 SLA 미배정 (마이그레이션 보류 또는 신규 학생)
                       </p>
@@ -133,6 +134,7 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                         mode={mode}
                         sessions={sessions}
                         conceptItems={[]}
+                        phase={s.phase}
                         slug={s.slug}
                         basePath="/s"
                       />
