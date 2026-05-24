@@ -143,31 +143,33 @@ export async function uploadPdfFromPath(
 ): Promise<{ cdnUrl: string; storagePath: string; skipped: boolean }> {
   // Dynamic import to avoid bundling fs in client code
   const fs = await import('fs');
+  const crypto = await import('crypto');
 
   if (!fs.existsSync(localPath)) {
     throw new Error(`Local file not found: ${localPath}`);
   }
 
+  const buffer = fs.readFileSync(localPath);
+  // 콘텐츠 해시 기반 버전 — 파일 내용이 바뀌면 URL(?v=)이 바뀌어 브라우저가 재요청.
+  // (Pull Zone 은 "Ignore Query Strings" 라 엣지 캐시 키엔 영향 없음 → 엣지는 정상 서빙)
+  const version = crypto.createHash('md5').update(buffer).digest('hex').slice(0, 10);
+  const versionedUrl = `${getPublicUrl(storagePath)}?v=${version}`;
+
   // Check if already uploaded (skip unless force)
   if (!options.force && await existsInStorage(storagePath)) {
-    return {
-      cdnUrl: getPublicUrl(storagePath),
-      storagePath,
-      skipped: true,
-    };
+    return { cdnUrl: versionedUrl, storagePath, skipped: true };
   }
 
-  const buffer = fs.readFileSync(localPath);
   // Convert to ArrayBuffer for uploadPdf compatibility
   const arrayBuffer = buffer.buffer.slice(
     buffer.byteOffset,
     buffer.byteOffset + buffer.byteLength,
   ) as ArrayBuffer;
 
-  const { cdnUrl } = await uploadPdf(arrayBuffer, storagePath);
-  // 덮어쓰기(force)로 기존 경로를 갱신한 경우 엣지 캐시를 비워 신버전이 바로 보이게 함.
+  await uploadPdf(arrayBuffer, storagePath);
+  // 덮어쓰기(force)로 기존 경로를 갱신한 경우 엣지 캐시도 비움 (쿼리 무시 존이라 base 경로로 퍼지).
   if (options.force) {
-    await purgeCdnUrl(cdnUrl);
+    await purgeCdnUrl(getPublicUrl(storagePath));
   }
-  return { cdnUrl, storagePath, skipped: false };
+  return { cdnUrl: versionedUrl, storagePath, skipped: false };
 }
