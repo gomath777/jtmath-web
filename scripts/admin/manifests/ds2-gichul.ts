@@ -177,7 +177,21 @@ export const DS2_GICHUL_UNITS: GichulUnit[] = [
         hintbookFiles: [null],
         expectsVideos: true,
       },
-      // 레벨4-1 / 레벨4-2 는 내일 영상 완성 후 추가 (PDF 는 폴더에 이미 있음)
+      {
+        // PDF 만 먼저 게시, 해설강의는 추후 업로드 (expectsVideos: false)
+        label: '레벨4-1',
+        files: ['수학적 귀납법 레벨4-1.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: false,
+        description: '해설강의는 추후 업로드 예정입니다.',
+      },
+      {
+        label: '레벨4-2',
+        files: ['수학적 귀납법 레벨4-2.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: false,
+        description: '해설강의는 추후 업로드 예정입니다.',
+      },
     ],
   },
 ];

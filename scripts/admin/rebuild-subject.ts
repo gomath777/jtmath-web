@@ -421,6 +421,7 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, manifest: Gich
 
       const content: Record<string, unknown> = {
         label: levelDef.label,
+        ...(levelDef.description ? { description: levelDef.description } : {}),
         ...(pdfEntries.length === 1 ? { pdf: pdfEntries[0] } : { pdfs: pdfEntries }),
         ...(hintbookEntry ? { hintbook: hintbookEntry } : {}),
         ...(videos.length > 0 ? { videos } : {}),

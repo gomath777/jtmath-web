@@ -24,6 +24,8 @@ export interface GichulLevelBlock {
   expectsVideos: boolean;
   /** 레벨5처럼 별도 폴더에 있으면 그 폴더명 지정 */
   subfolder?: string;
+  /** 블록 설명 문구 (예: "해설강의 추후 업로드 예정"). content.description 으로 렌더 */
+  description?: string;
 }
 
 export interface GichulUnit {
@@ -268,6 +270,40 @@ export const GS1_GICHUL_UNITS: GichulUnit[] = [
       {
         label: '레벨4-2',
         files: ['경우의 수 레벨4-2.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+    ],
+  },
+  {
+    session: 7,
+    title: '행렬',
+    unit_name: '행렬',
+    variant_label: null,
+    unitFolder: '06_행렬',
+    gichulSubfolder: '기출_PDF',
+    levels: [
+      {
+        label: '레벨1, 레벨2',
+        files: ['행렬 레벨1.pdf', '행렬 레벨2.pdf'],
+        hintbookFiles: [null, null],
+        expectsVideos: false,
+      },
+      {
+        label: '레벨3',
+        files: ['행렬 레벨3.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+      {
+        label: '레벨4-1',
+        files: ['행렬 레벨4-1.pdf'],
+        hintbookFiles: [null],
+        expectsVideos: true,
+      },
+      {
+        label: '레벨4-2',
+        files: ['행렬 레벨4-2.pdf'],
         hintbookFiles: [null],
         expectsVideos: true,
       },
