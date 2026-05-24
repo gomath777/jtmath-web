@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
     for (const a of ovr || []) overrideBookBySet.set(a.set_id, (a as any).textbook_id ?? null);
   }
 
-  // 5-1) 교재 복습 해상도: assignment override → 학생 주교재(과목별) → (교재×차시) 쪽수
+  // 5-1) 교재 복습 해상도: assignment override → 학생 주교재(과목별) → 과목 기본교재 → (교재×차시) 쪽수
   const { data: studentBooks } = await sc
     .from('student_textbooks')
     .select('subject_slug, textbook_id')
@@ -102,10 +102,25 @@ export async function GET(req: NextRequest) {
   const bookBySubject = new Map<string, string>();
   for (const b of studentBooks || []) bookBySubject.set(b.subject_slug, b.textbook_id);
 
+  // 과목 기본교재 (명시 지정 없으면 폴백) — 내성 조회(컬럼 없으면 빈 맵)
+  const defaultBySubject = new Map<string, string>();
+  {
+    const subjects = Array.from(new Set((sets || []).map(s => s.subject_slug || '').filter(Boolean)));
+    if (subjects.length > 0) {
+      const { data: defaults } = await sc
+        .from('textbooks')
+        .select('subject_slug, id')
+        .in('subject_slug', subjects)
+        .eq('is_default', true);
+      for (const d of defaults || []) defaultBySubject.set(d.subject_slug, d.id);
+    }
+  }
+
   // 각 set에 적용할 교재 결정
   const bookBySet = new Map<string, string>();
   for (const s of sets || []) {
-    const tb = overrideBookBySet.get(s.id) || bookBySubject.get(s.subject_slug || '');
+    const subj = s.subject_slug || '';
+    const tb = overrideBookBySet.get(s.id) || bookBySubject.get(subj) || defaultBySubject.get(subj);
     if (tb) bookBySet.set(s.id, tb);
   }
 
