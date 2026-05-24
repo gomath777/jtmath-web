@@ -7,6 +7,26 @@ const STORAGE_API_KEY = process.env.BUNNY_STORAGE_API_KEY || '';
 const STORAGE_ZONE_NAME = process.env.BUNNY_STORAGE_ZONE_NAME || 'mathgo-pdfs';
 const CDN_HOSTNAME = process.env.BUNNY_CDN_HOSTNAME_PDF || '';
 const STORAGE_REGION = process.env.BUNNY_STORAGE_REGION || 'sg'; // Singapore (closest to Korea)
+const ACCOUNT_API_KEY = process.env.BUNNY_ACCOUNT_API_KEY || ''; // 계정 키 (CDN 퍼지용)
+
+/**
+ * Pull Zone 엣지 캐시에서 특정 CDN URL을 퍼지.
+ * 동일 경로에 파일을 덮어써도 엣지 캐시(max-age)가 구버전을 계속 서빙하는 문제 방지.
+ * best-effort — 계정 키 없거나 실패해도 throw 하지 않음(업로드 자체는 성공 처리).
+ */
+export async function purgeCdnUrl(cdnUrl: string): Promise<boolean> {
+  if (!ACCOUNT_API_KEY) return false;
+  try {
+    const target = encodeURI(cdnUrl); // 공백/한글 경로 → %xx
+    const res = await fetch(
+      `https://api.bunny.net/purge?url=${encodeURIComponent(target)}&async=false`,
+      { method: 'POST', headers: { AccessKey: ACCOUNT_API_KEY } },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 function getStorageBaseUrl(): string {
   // Bunny Storage API endpoint by region
@@ -145,5 +165,9 @@ export async function uploadPdfFromPath(
   ) as ArrayBuffer;
 
   const { cdnUrl } = await uploadPdf(arrayBuffer, storagePath);
+  // 덮어쓰기(force)로 기존 경로를 갱신한 경우 엣지 캐시를 비워 신버전이 바로 보이게 함.
+  if (options.force) {
+    await purgeCdnUrl(cdnUrl);
+  }
   return { cdnUrl, storagePath, skipped: false };
 }
