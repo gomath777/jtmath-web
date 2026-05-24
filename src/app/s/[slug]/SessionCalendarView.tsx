@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 
 interface CalendarSessionEntry {
@@ -71,6 +72,31 @@ function getKstWeeks(mode: 'master' | 'student' = 'student'): Date[][] {
     weeks.push(week);
   }
   return weeks;
+}
+
+// 배정된 항목 전체 기간(min~max)을 일요일 정렬 주 단위로 반환 (관리자 '전체 펼치기'용)
+function getWeeksForRange(startYmd: string, endYmd: string): Date[][] {
+  const dayMs = 86400000;
+  const startMs = new Date(startYmd + 'T00:00:00Z').getTime();
+  const endMs = new Date(endYmd + 'T00:00:00Z').getTime();
+  const startDow = new Date(startMs).getUTCDay();
+  const firstSundayMs = startMs - startDow * dayMs;
+  const weeks: Date[][] = [];
+  for (let w = 0; firstSundayMs + w * 7 * dayMs <= endMs; w++) {
+    const week: Date[] = [];
+    for (let d = 0; d < 7; d++) week.push(new Date(firstSundayMs + (w * 7 + d) * dayMs));
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+// "5/25~7/9" 형태의 짧은 기간 라벨
+function weeksRangeLabel(startYmd: string, endYmd: string): string {
+  const fmt = (ymd: string) => {
+    const [, m, d] = ymd.split('-');
+    return `${Number(m)}/${Number(d)}`;
+  };
+  return `${fmt(startYmd)}~${fmt(endYmd)}`;
 }
 
 function toYmd(d: Date): string {
@@ -251,8 +277,20 @@ export default function SessionCalendarView({
   basePath = '/s',
   previewBase,
 }: SessionCalendarViewProps) {
-  const weeks = getKstWeeks(mode);
+  const [expandedAll, setExpandedAll] = useState(false);
   const todayYmd = todayKstYmd();
+
+  // 배정된 모든 항목의 날짜 (전체 펼치기 범위 계산용)
+  const allYmds: string[] = [];
+  for (const s of sessions) if (s.publishDate) allYmds.push(s.publishDate.slice(0, 10));
+  for (const c of conceptItems) if (c.publishDate) allYmds.push(c.publishDate.slice(0, 10));
+  allYmds.sort();
+  const canExpand = mode === 'master' && allYmds.length > 0;
+  const showAll = canExpand && expandedAll;
+
+  const weeks = showAll
+    ? getWeeksForRange(allYmds[0], allYmds[allYmds.length - 1])
+    : getKstWeeks(mode);
 
   const sessionsByDate = new Map<string, CalendarSessionEntry[]>();
   for (const s of sessions) {
@@ -283,6 +321,20 @@ export default function SessionCalendarView({
 
   return (
     <div>
+      {canExpand && (
+        <div className="mb-2 flex items-center justify-end">
+          <button
+            onClick={() => setExpandedAll(v => !v)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium bg-sand text-charcoal hover:bg-terracotta hover:text-ivory transition-colors"
+            aria-expanded={showAll}
+          >
+            {showAll
+              ? '기본 보기로 접기'
+              : `전체 일정 펼치기 (${weeksRangeLabel(allYmds[0], allYmds[allYmds.length - 1])})`}
+          </button>
+        </div>
+      )}
+
       {/* 헤더: 일·월·화·수·목·금·토 7개 개별 라벨 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
         {DOW_LABELS.map((label, i) => (
