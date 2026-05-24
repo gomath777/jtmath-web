@@ -61,6 +61,7 @@ export async function uploadAndMakePdf(
   storagePath: string,
   originalName: string,
   dryRun = false,
+  force = false,
 ): Promise<PdfEntry | null> {
   if (!fs.existsSync(localPath)) {
     warn(`PDF 파일 없음 (스킵): ${localPath}`);
@@ -68,13 +69,13 @@ export async function uploadAndMakePdf(
   }
   if (dryRun) {
     const sizeMB = fs.statSync(localPath).size / 1024 / 1024;
-    info(`  [DRY] ${originalName} (${sizeMB.toFixed(1)}MB) → ${storagePath}`);
+    info(`  [DRY] ${originalName} (${sizeMB.toFixed(1)}MB) → ${storagePath}${force ? ' (force)' : ''}`);
     return makePdfEntry(storagePath, originalName, sizeMB);
   }
   try {
-    const { cdnUrl, skipped } = await uploadPdfFromPath(localPath, storagePath);
+    const { cdnUrl, skipped } = await uploadPdfFromPath(localPath, storagePath, { force });
     const sizeMB = fs.statSync(localPath).size / 1024 / 1024;
-    info(`  ${skipped ? '⏭️  (기존)' : '✅ 업로드'} ${originalName}`);
+    info(`  ${skipped ? '⏭️  (기존)' : force ? '✅ 업로드 (force)' : '✅ 업로드'} ${originalName}`);
     return makePdfEntry(cdnUrl, originalName, sizeMB);
   } catch (err) {
     warn(`업로드 실패 (스킵): ${originalName} — ${(err as Error).message}`);

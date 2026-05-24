@@ -9,9 +9,10 @@
  *   npm run admin:rebuild -- --subject gs1 --part all [--dry-run]
  *   npm run admin:rebuild -- --subject gs1 --part concept --force  # SLA 있어도 아카이브
  *
- * --dry-run : DB 변경 없이 예정 작업 출력
- * --force   : SLA 배정 학생 있어도 아카이브 진행
- * --unit    : gichul/shimhwa 의 단원 이름 필터 (부분 일치)
+ * --dry-run      : DB 변경 없이 예정 작업 출력
+ * --force        : SLA 배정 학생 있어도 아카이브 진행
+ * --force-upload : 동일 경로 PDF가 이미 있어도 덮어쓰기 (수정된 PDF 재반영, gichul)
+ * --unit         : gichul/shimhwa 의 단원 이름 필터 (부분 일치)
  */
 
 import * as fs from 'fs';
@@ -311,9 +312,10 @@ async function runConcept(sc: ReturnType<typeof getServiceClient>, manifest: Con
 async function runGichul(sc: ReturnType<typeof getServiceClient>, manifest: GichulManifest, opts: {
   isDryRun: boolean;
   unitFilter?: string;
+  forceUpload?: boolean;
 }) {
   log('📖', `[${manifest.subjectSlug}] 기출 단원 생성 시작`);
-  const { isDryRun, unitFilter } = opts;
+  const { isDryRun, unitFilter, forceUpload = false } = opts;
   const subject = manifest.subjectSlug;
 
   const { id: curriculumId, created } = await findOrCreateCurriculum(
@@ -384,7 +386,7 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, manifest: Gich
       // PDF 업로드
       const pdfEntries: Array<{ url: string; original_name: string; file_size?: string }> = [];
       for (const f of validFiles) {
-        const entry = await uploadAndMakePdf(f.local, f.storagePath, f.name, isDryRun);
+        const entry = await uploadAndMakePdf(f.local, f.storagePath, f.name, isDryRun, forceUpload);
         if (entry) pdfEntries.push(entry);
       }
 
@@ -395,7 +397,7 @@ async function runGichul(sc: ReturnType<typeof getServiceClient>, manifest: Gich
           const local = path.join(baseFolder, hbFile);
           if (fs.existsSync(local)) {
             const storagePath = `${manifest.cdnPrefix}/${unit.unitFolder}/${levelDef.subfolder ?? unit.gichulSubfolder}/${hbFile}`;
-            const entry = await uploadAndMakePdf(local, storagePath, hbFile, isDryRun);
+            const entry = await uploadAndMakePdf(local, storagePath, hbFile, isDryRun, forceUpload);
             if (entry) { hintbookEntry = { url: entry.url, original_name: entry.original_name }; break; }
           }
         }
@@ -616,6 +618,7 @@ async function main() {
   const part = args.options.part;
   const isDryRun = args.flags.has('dry-run');
   const force = args.flags.has('force');
+  const forceUpload = args.flags.has('force-upload');
   const unitFilter = args.options.unit;
 
   if (!part) {
@@ -641,7 +644,7 @@ async function main() {
       if (part === 'all') warn(`--subject ${subject} 에 해당하는 gichul manifest 없음 (스킵)`);
       else error(`--subject ${subject} 에 해당하는 gichul manifest 없음 (gs1|ds2|gs2)`);
     } else {
-      await runGichul(sc, gichulManifest, { isDryRun, unitFilter });
+      await runGichul(sc, gichulManifest, { isDryRun, unitFilter, forceUpload });
     }
   }
   if (part === 'shimhwa' || part === 'all') {
