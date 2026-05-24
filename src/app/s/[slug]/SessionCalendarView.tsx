@@ -177,14 +177,18 @@ function ItemCard({
   d.setUTCDate(d.getUTCDate() + 1);
   const tomorrowYmd = d.toISOString().slice(0, 10);
   const studentLocked = mode === 'student' && !!c.publishDate && c.publishDate.slice(0, 10) > tomorrowYmd;
+  // 총정리/모의 중간·기말고사 차시는 별도 색(앰버) + 📝 아이콘으로 일반 개념강의와 구분
+  const isReview = /총정리|모의/.test(c.title || '');
   const colorClass = studentLocked
     ? `${LOCKED_STYLE.bg} ${LOCKED_STYLE.text}`
+    : isReview
+    ? 'bg-amber-100 text-amber-800'
     : 'bg-green-50 text-green-700';
 
   const inner = (
     <>
       <div className="flex items-center gap-0.5 mb-0.5">
-        <span className="text-[9px]">{studentLocked ? '🔒' : '📚'}</span>
+        <span className="text-[9px]">{studentLocked ? '🔒' : isReview ? '📝' : '📚'}</span>
         <span className="font-medium truncate text-[9px] sm:text-[10px]">{c.subject_label || '개념강의'}</span>
       </div>
       <div className="truncate opacity-80 text-[9px] sm:text-[10px]">{c.title}</div>
@@ -416,7 +420,12 @@ export default function SessionCalendarView({
         <span>✅ 공개됨</span>
         <span>🔒 {mode === 'master' ? '미릴리즈' : '예정'}</span>
         <span>📚 개념강의</span>
-        <span className="ml-auto text-[10px] opacity-60">{mode === 'master' ? '전전전주 ~ 다음 2주 (6주)' : '지난주 ~ 다음 2주'}</span>
+        <span>📝 총정리·모의고사</span>
+        <span className="ml-auto text-[10px] opacity-60">
+          {showAll
+            ? `전체 일정 (${weeksRangeLabel(allYmds[0], allYmds[allYmds.length - 1])}, ${weeks.length}주)`
+            : mode === 'master' ? '전전전주 ~ 다음 2주 (6주)' : '지난주 ~ 다음 2주'}
+        </span>
       </div>
     </div>
   );
