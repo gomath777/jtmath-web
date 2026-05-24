@@ -81,10 +81,71 @@ export async function GET(req: NextRequest) {
     if (a.set_id) publishedAtBySet.set(a.set_id, a.published_at as string | null);
   }
 
+  // 차시별 교재 override (assignments.textbook_id) — 마이그레이션 전엔 컬럼이 없어 에러날 수 있으므로
+  // 별도·내성 조회: 실패하면 빈 맵으로 폴백(주교재만 적용).
+  const overrideBookBySet = new Map<string, string | null>();
+  {
+    const { data: ovr } = await sc
+      .from('assignments')
+      .select('set_id, textbook_id')
+      .eq('user_id', student.profileId)
+      .not('set_id', 'is', null)
+      .not('textbook_id', 'is', null);
+    for (const a of ovr || []) overrideBookBySet.set(a.set_id, (a as any).textbook_id ?? null);
+  }
+
+  // 5-1) 교재 복습 해상도: assignment override → 학생 주교재(과목별) → (교재×차시) 쪽수
+  const { data: studentBooks } = await sc
+    .from('student_textbooks')
+    .select('subject_slug, textbook_id')
+    .eq('profile_id', student.profileId);
+  const bookBySubject = new Map<string, string>();
+  for (const b of studentBooks || []) bookBySubject.set(b.subject_slug, b.textbook_id);
+
+  // 각 set에 적용할 교재 결정
+  const bookBySet = new Map<string, string>();
+  for (const s of sets || []) {
+    const tb = overrideBookBySet.get(s.id) || bookBySubject.get(s.subject_slug || '');
+    if (tb) bookBySet.set(s.id, tb);
+  }
+
+  const usedBookIds = Array.from(new Set(Array.from(bookBySet.values())));
+  const bookName = new Map<string, string>();
+  const pagesByKey = new Map<string, { page_start: number | null; page_end: number | null; note: string | null }>();
+  if (usedBookIds.length > 0) {
+    const { data: books } = await sc.from('textbooks').select('id, name').in('id', usedBookIds);
+    for (const b of books || []) bookName.set(b.id, b.name);
+    const { data: pages } = await sc
+      .from('textbook_chapter_pages')
+      .select('textbook_id, learning_set_id, page_start, page_end, note')
+      .in('textbook_id', usedBookIds)
+      .in('learning_set_id', validSetIds);
+    for (const p of pages || []) {
+      pagesByKey.set(`${p.textbook_id}:${p.learning_set_id}`, {
+        page_start: p.page_start, page_end: p.page_end, note: p.note,
+      });
+    }
+  }
+
+  function buildReview(setId: string) {
+    const tb = bookBySet.get(setId);
+    if (!tb) return null; // 교재 미지정 → 컴포넌트가 description 폴백
+    const name = bookName.get(tb) || null;
+    const pg = pagesByKey.get(`${tb}:${setId}`);
+    if (pg && pg.page_start != null && pg.page_end != null) {
+      let label = `${name ? name + ' ' : ''}p.${pg.page_start}~${pg.page_end}`;
+      if (pg.note) label += ` · ${pg.note}`;
+      return { textbookName: name, pageStart: pg.page_start, pageEnd: pg.page_end, note: pg.note, label };
+    }
+    // 교재만 있고 쪽수 미빌드 → 단원 안내 폴백
+    return { textbookName: name, pageStart: null, pageEnd: null, note: pg?.note ?? null, label: `${name ? name + ' ' : ''}해당 단원 풀이` };
+  }
+
   const result = (sets || []).map(s => ({
     id: s.id,
     title: s.title,
     description: s.description,
+    review: buildReview(s.id),
     subject_slug: s.subject_slug,
     chapter_order: s.chapter_order,
     published_at: publishedAtBySet.get(s.id) || null,

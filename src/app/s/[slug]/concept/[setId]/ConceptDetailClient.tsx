@@ -25,10 +25,19 @@ interface ConceptVideo {
   progress: { watch_percent: number; completed: boolean } | null;
 }
 
+interface ConceptReview {
+  textbookName: string | null;
+  pageStart: number | null;
+  pageEnd: number | null;
+  note: string | null;
+  label: string;
+}
+
 interface ConceptSet {
   id: string;
   title: string;
   description: string | null;
+  review: ConceptReview | null;
   subject_slug: string;
   chapter_order: number | null;
   pdfs: PdfItem[];
@@ -293,15 +302,15 @@ export default function ConceptDetailClient({ setId, backHref }: Props) {
                 </section>
               )}
 
-              {/* STEP 3: 개념서 (마지막 — Tail 없음) */}
-              {set.description && (
+              {/* STEP 3: 교재 복습 (마지막 — Tail 없음) */}
+              {(set.review || set.description) && (
                 <section className="relative pl-12">
                   <Marker num={3} done={step3Done} active={activeIdx === 2} />
                   <h2 className="font-serif font-medium text-[20px] text-ink tracking-tight pt-1">
-                    개념서 복습
+                    교재 복습
                   </h2>
                   <p className="text-[13px] text-olive mt-1.5 mb-5">
-                    영상 시청 후, 개념서를 풀며 배운 내용을 정리하세요
+                    영상 시청 후, 교재를 풀며 배운 내용을 정리하세요
                   </p>
 
                   {/* 메인: 풀이 범위 */}
@@ -318,7 +327,7 @@ export default function ConceptDetailClient({ setId, backHref }: Props) {
                       }`}
                     />
                     <p className="font-serif font-medium text-[22px] text-ink tracking-tight leading-snug">
-                      {set.description}
+                      {set.review?.label || set.description}
                     </p>
                     <p className="text-[14px] text-charcoal mt-2 font-medium">풀이하기</p>
                     {!allVideosDone && totalVideos > 0 && (
@@ -336,7 +345,7 @@ export default function ConceptDetailClient({ setId, backHref }: Props) {
                     <ol className="space-y-3 text-[13px] text-charcoal">
                       <li className="flex gap-3">
                         <span className="w-5 h-5 rounded-full bg-terracotta/10 text-terracotta font-medium text-[11px] flex items-center justify-center shrink-0 mt-0.5">1</span>
-                        <span className="leading-relaxed">개념서 답안을 <span className="font-medium text-ink">매쓰플랫 앱</span>에 제출</span>
+                        <span className="leading-relaxed">교재 답안을 <span className="font-medium text-ink">매쓰플랫 앱</span>에 제출</span>
                       </li>
                       <li className="flex gap-3">
                         <span className="w-5 h-5 rounded-full bg-terracotta/10 text-terracotta font-medium text-[11px] flex items-center justify-center shrink-0 mt-0.5">2</span>
