@@ -74,6 +74,7 @@ interface TodayTask {
   subject_label: string;
   meta: string;
   lessonSlug?: string | null;
+  concept_set_id?: string;
   isOverdue?: boolean;
   isToday?: boolean;
   publishDate?: string | null;
@@ -182,6 +183,69 @@ export async function GET(req: NextRequest) {
 
   const curriculaWithSessions = Array.from(subjectGroups.values());
 
+  // 개념강의(assignments → learning_sets)를 달력 항목으로 변환.
+  // SLA(기출)와 별개 트랙이지만, 학생 포탈 달력에는 함께 노출 (레거시 dashboard 라우트와 동일 로직).
+  const conceptTasks: TodayTask[] = [];
+  const calendarConceptItems: Array<{ id: string; title: string; subject_slug: string; subject_label: string; publishDate: string | null }> = [];
+
+  const { data: conceptAssigns } = await sc
+    .from('assignments')
+    .select('set_id, published_at')
+    .eq('user_id', student.profileId)
+    .not('set_id', 'is', null)
+    .not('published_at', 'is', null)
+    .order('published_at', { ascending: false });
+
+  const conceptSetIds = (conceptAssigns || []).map((a: any) => a.set_id).filter(Boolean);
+
+  if (conceptSetIds.length > 0) {
+    const { data: conceptSets } = await sc
+      .from('learning_sets')
+      .select('id, title, subject_slug, chapter_order')
+      .in('id', conceptSetIds)
+      .eq('kind', 'concept');
+    const setMap = new Map((conceptSets || []).map((s: any) => [s.id, s]));
+    const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+    const ymdKst = (iso: string) => new Date(new Date(iso).getTime() + KST_OFFSET_MS).toISOString().slice(0, 10);
+    const addDaysKst = (iso: string, days: number) =>
+      new Date(new Date(iso).getTime() + days * 24 * 60 * 60 * 1000 + KST_OFFSET_MS).toISOString().slice(0, 10);
+
+    // 동일 published_at 에 여러 set이 묶이면 월·화 / 목·금 슬롯으로 자동 분배.
+    const byWeek = new Map<string, Array<{ setId: string; chapter_order: number | null }>>();
+    for (const a of conceptAssigns || []) {
+      const set = setMap.get((a as any).set_id);
+      if (!set) continue;
+      const key = (a as any).published_at as string;
+      if (!byWeek.has(key)) byWeek.set(key, []);
+      byWeek.get(key)!.push({ setId: (a as any).set_id, chapter_order: (set as any).chapter_order });
+    }
+
+    for (const [publishedAt, items] of Array.from(byWeek.entries())) {
+      items.sort((a, b) => (a.chapter_order ?? 999) - (b.chapter_order ?? 999));
+      const kstYmd = ymdKst(publishedAt);
+      const dowKst = new Date(kstYmd + 'T00:00:00Z').getUTCDay();
+      const weekOffsets = dowKst === 1 ? [0, 0, 3, 3] : dowKst === 4 ? [0, 0] : [0];
+      items.forEach((item, idx) => {
+        const set = setMap.get(item.setId);
+        if (!set) return;
+        const slot = idx % weekOffsets.length;
+        const extraWeek = Math.floor(idx / weekOffsets.length);
+        const publishDate = addDaysKst(publishedAt, extraWeek * 7 + weekOffsets[slot]);
+        const s2 = set as any;
+        const entry = {
+          id: s2.id, title: s2.title,
+          subject_slug: s2.subject_slug || '',
+          subject_label: SUBJECT_LABEL[s2.subject_slug || ''] || s2.subject_slug || '',
+          publishDate,
+        };
+        calendarConceptItems.push(entry);
+        conceptTasks.push({ kind: 'concept', ...entry, meta: '개념강의', concept_set_id: s2.id });
+      });
+    }
+  }
+
+  const dueConcepts = conceptTasks.filter(t => !t.publishDate || t.publishDate <= todayKst);
+
   // 오늘 할 일
   const sessionTasks: TodayTask[] = [];
   for (const c of curriculaWithSessions) {
@@ -220,6 +284,7 @@ export async function GET(req: NextRequest) {
 
   if (overdueSessionTasks[0]) markPush(overdueSessionTasks[0]);
   for (const t of todaySessionTasks) { if (prioritized.length >= 3) break; markPush(t); }
+  if (dueConcepts[0] && prioritized.length < 3) markPush(dueConcepts[0]);
   for (const t of otherSessionTasks) { if (prioritized.length >= 3) break; markPush(t); }
 
   const newToken = await renewToken(student);
@@ -235,7 +300,7 @@ export async function GET(req: NextRequest) {
     nextReleaseAt: computeNextReleaseAt(),
     isMaster: student.isMaster ?? false,
     calendarSessions,
-    calendarConceptItems: [],
+    calendarConceptItems,
   });
   return setStudentCookie(res, newToken);
 }
