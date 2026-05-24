@@ -431,7 +431,7 @@ export default function SessionCalendarView({
             : null;
 
           const weekGrid = (
-            <div className="grid grid-cols-7 gap-1 relative" style={{ height: rowHeight }}>
+            <div key={wi} className="grid grid-cols-7 gap-1 relative" style={{ height: rowHeight }}>
               {/* 배경: 7개 개별 셀 (월·화·목·금은 날짜만) */}
               <DayCell day={sun} ymd={sunYmd} items={sunItems} isSun {...common} />
               <DayCell day={mon} ymd={monYmd} items={[]} hideContent {...common} />
@@ -461,16 +461,12 @@ export default function SessionCalendarView({
                 </div>
                 <div />
               </div>
-            </div>
-          );
 
-          return (
-            <div key={wi} className="space-y-1">
+              {/* 기말 마무리 단계 배너: 새 행이 아니라 월~금(2~6열) 셀 위에 겹쳐서 표시 */}
               {phaseSeg && (
-                // 월~금(7열 중 2~6열) 위에 정렬해서 주마다 쭉 이어지는 띠로 표시
-                <div className="grid grid-cols-7 gap-1">
+                <div className="absolute inset-0 grid grid-cols-7 gap-1 pointer-events-none z-20">
                   <div />
-                  <div className="col-span-5">
+                  <div className="col-span-5 pt-6 sm:pt-7">
                     <PhaseBanner
                       label={phase!.label}
                       isFirst={phaseSeg.isFirst}
@@ -481,9 +477,10 @@ export default function SessionCalendarView({
                   <div />
                 </div>
               )}
-              {weekGrid}
             </div>
           );
+
+          return weekGrid;
         })}
       </div>
 
