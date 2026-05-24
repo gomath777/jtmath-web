@@ -186,11 +186,11 @@ export const DS2_GICHUL_UNITS: GichulUnit[] = [
         description: '해설강의는 추후 업로드 예정입니다.',
       },
       {
+        // 레벨4-2 는 해설강의 미제공 — 안내 문구 없음
         label: '레벨4-2',
         files: ['수학적 귀납법 레벨4-2.pdf'],
         hintbookFiles: [null],
         expectsVideos: false,
-        description: '해설강의는 추후 업로드 예정입니다.',
       },
     ],
   },
