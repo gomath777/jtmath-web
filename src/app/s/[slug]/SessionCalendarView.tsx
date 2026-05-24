@@ -467,12 +467,19 @@ export default function SessionCalendarView({
           return (
             <div key={wi} className="space-y-1">
               {phaseSeg && (
-                <PhaseBanner
-                  label={phase!.label}
-                  isFirst={phaseSeg.isFirst}
-                  isLast={phaseSeg.isLast}
-                  endYmd={phase!.endYmd}
-                />
+                // 월~금(7열 중 2~6열) 위에 정렬해서 주마다 쭉 이어지는 띠로 표시
+                <div className="grid grid-cols-7 gap-1">
+                  <div />
+                  <div className="col-span-5">
+                    <PhaseBanner
+                      label={phase!.label}
+                      isFirst={phaseSeg.isFirst}
+                      isLast={phaseSeg.isLast}
+                      endYmd={phase!.endYmd}
+                    />
+                  </div>
+                  <div />
+                </div>
               )}
               {weekGrid}
             </div>
