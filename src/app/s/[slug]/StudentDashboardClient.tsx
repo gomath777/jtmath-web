@@ -95,6 +95,11 @@ interface DashboardData {
   isMaster?: boolean;
   calendarSessions?: CalendarSessionEntry[];
   calendarConceptItems?: CalendarConceptItem[];
+  calendarPhase?: {
+    label: string;
+    startYmd: string;
+    endYmd: string | null;
+  } | null;
 }
 
 interface ExamCountdown {
@@ -375,6 +380,7 @@ export default function StudentDashboardClient({
           mode="master"
           sessions={data.calendarSessions || []}
           conceptItems={data.calendarConceptItems}
+          phase={data.calendarPhase}
           slug={slug}
           basePath={basePath}
         />
@@ -453,6 +459,7 @@ export default function StudentDashboardClient({
           mode="student"
           sessions={data.calendarSessions || []}
           conceptItems={data.calendarConceptItems}
+          phase={data.calendarPhase}
           slug={slug}
           basePath={basePath}
         />

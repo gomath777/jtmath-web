@@ -94,7 +94,7 @@ export async function GET(req: NextRequest) {
 
   const { data: profile } = await sc
     .from('profiles')
-    .select('id, name, school, exam_date_midterm, exam_date_final')
+    .select('id, name, school, exam_date_midterm, exam_date_final, review_phase_start')
     .eq('id', student.profileId)
     .single();
 
@@ -294,6 +294,15 @@ export async function GET(req: NextRequest) {
       exam_date_midterm: profile.exam_date_midterm as string | null,
       exam_date_final: profile.exam_date_final as string | null,
     },
+    // 기말 마무리 단계 배너 (review_phase_start 세팅된 학생만). 종료일은 기말 시험일,
+    // 미정(null)이면 캘린더에서 오픈엔드로 렌더.
+    calendarPhase: (profile.review_phase_start as string | null)
+      ? {
+          label: '전체 오답 반복 · 취약유형 보충 · 모의내신',
+          startYmd: profile.review_phase_start as string,
+          endYmd: (profile.exam_date_final as string | null) ?? null,
+        }
+      : null,
     curricula: curriculaWithSessions,
     odapjiCount: odapjiCount || 0,
     todayTasks: prioritized.slice(0, 3),

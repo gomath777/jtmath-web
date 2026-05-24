@@ -24,10 +24,18 @@ interface CalendarConceptItem {
   publishDate: string | null;
 }
 
+interface CalendarPhase {
+  label: string;
+  startYmd: string;
+  endYmd: string | null; // null = 오픈엔드 (기말 시험일 미정)
+}
+
 interface SessionCalendarViewProps {
   mode: 'master' | 'student';
   sessions: CalendarSessionEntry[];
   conceptItems?: CalendarConceptItem[];
+  /** 기말 마무리 단계 배너 (시작일~종료일 연속 표시). null/미지정이면 표시 안 함. */
+  phase?: CalendarPhase | null;
   slug: string;
   basePath?: string;
   previewBase?: string; // admin only: /api/admin/preview?slug=...&to=...
@@ -97,6 +105,39 @@ function weeksRangeLabel(startYmd: string, endYmd: string): string {
     return `${Number(m)}/${Number(d)}`;
   };
   return `${fmt(startYmd)}~${fmt(endYmd)}`;
+}
+
+function mdLabel(ymd: string): string {
+  const [, m, d] = ymd.split('-');
+  return `${Number(m)}/${Number(d)}`;
+}
+
+// 기말 마무리 단계 배너 (한 주 행 위에 풀폭으로 표시). 여러 주에 걸치면 주마다 띠가 쌓여
+// "쭉 이어진다"는 인상을 준다. 첫 주엔 라벨 전체, 이후 주엔 연속 띠.
+function PhaseBanner({
+  label,
+  isFirst,
+  isLast,
+  endYmd,
+}: {
+  label: string;
+  isFirst: boolean;
+  isLast: boolean;
+  endYmd: string | null;
+}) {
+  const endText = endYmd ? `${mdLabel(endYmd)} 기말까지` : '기말까지';
+  return (
+    <div className="rounded-lg bg-amber-100 text-amber-800 px-2 py-1 text-[10px] sm:text-[11px] font-medium flex items-center gap-1 leading-tight">
+      <span className="text-[10px]">📝</span>
+      {isFirst ? (
+        <span className="truncate">{label} — {endText}</span>
+      ) : (
+        <span className="opacity-70 truncate">
+          기말 마무리 단계 진행 중{isLast ? ` · ${endText}` : ' …'}
+        </span>
+      )}
+    </div>
+  );
 }
 
 function toYmd(d: Date): string {
@@ -277,6 +318,7 @@ export default function SessionCalendarView({
   mode,
   sessions,
   conceptItems = [],
+  phase = null,
   slug,
   basePath = '/s',
   previewBase,
@@ -380,8 +422,16 @@ export default function SessionCalendarView({
           );
           const rowHeight = Math.max(80, HEAD_H + maxCount * ITEM_H + PAD);
 
-          return (
-            <div key={wi} className="grid grid-cols-7 gap-1 relative" style={{ height: rowHeight }}>
+          // 마무리 단계 배너: 이 주 구간 [sunYmd, satYmd]가 phase 구간과 겹치는지
+          const phaseSeg = phase && phase.startYmd <= satYmd && (phase.endYmd == null || phase.endYmd >= sunYmd)
+            ? {
+                isFirst: phase.startYmd >= sunYmd && phase.startYmd <= satYmd,
+                isLast: phase.endYmd != null && phase.endYmd >= sunYmd && phase.endYmd <= satYmd,
+              }
+            : null;
+
+          const weekGrid = (
+            <div className="grid grid-cols-7 gap-1 relative" style={{ height: rowHeight }}>
               {/* 배경: 7개 개별 셀 (월·화·목·금은 날짜만) */}
               <DayCell day={sun} ymd={sunYmd} items={sunItems} isSun {...common} />
               <DayCell day={mon} ymd={monYmd} items={[]} hideContent {...common} />
@@ -413,6 +463,20 @@ export default function SessionCalendarView({
               </div>
             </div>
           );
+
+          return (
+            <div key={wi} className="space-y-1">
+              {phaseSeg && (
+                <PhaseBanner
+                  label={phase!.label}
+                  isFirst={phaseSeg.isFirst}
+                  isLast={phaseSeg.isLast}
+                  endYmd={phase!.endYmd}
+                />
+              )}
+              {weekGrid}
+            </div>
+          );
         })}
       </div>
 
@@ -421,6 +485,7 @@ export default function SessionCalendarView({
         <span>🔒 {mode === 'master' ? '미릴리즈' : '예정'}</span>
         <span>📚 개념강의</span>
         <span>📝 총정리·모의고사</span>
+        {phase && <span className="text-amber-700">📝 기말 마무리 단계</span>}
         <span className="ml-auto text-[10px] opacity-60">
           {showAll
             ? `전체 일정 (${weeksRangeLabel(allYmds[0], allYmds[allYmds.length - 1])}, ${weeks.length}주)`
