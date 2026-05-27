@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { verifyToken } from '@/utils/student-auth';
@@ -6,6 +6,14 @@ import LessonContent from './LessonContent';
 import type { SessionBlock, ProgressMap } from '@/components/blocks/types';
 
 export const dynamic = 'force-dynamic';
+
+// 정적 share 페이지(/share/{slug})로 바로 보낼 lesson slug 목록.
+// 보강·외부 콘텐츠를 학생 달력(SLA)에 배포하면서, 클릭 시 share 페이지로 redirect.
+// 새 share 페이지를 lesson 시스템에 노출하려면 여기 추가 + curriculum_items에 row 1개 만들면 됨.
+const SHARE_REDIRECT_SLUGS = new Set<string>([
+  'gs1-review2-lv3',
+  'gs1-review2-lv4',
+]);
 
 const SUBJECT_LABEL: Record<string, string> = {
   gs1: '공통수학1', gs2: '공통수학2',
@@ -31,6 +39,11 @@ export default async function LessonPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  // share 페이지로 redirect (보강·외부 콘텐츠)
+  if (SHARE_REDIRECT_SLUGS.has(slug)) {
+    redirect(`/share/${slug}`);
+  }
 
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
