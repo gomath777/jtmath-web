@@ -37,3 +37,15 @@ next-env.d.ts
 
 # Student data (private)
 kakaotalk-data/
+
+# Claude Code 작업 산출물 (로컬 전용)
+.claude/
+.claire/
+
+# 일회용 조사/스크래치 (로컬 전용 — 삭제 아님, 추적만 제외)
+/tmp/
+/query*.ts
+/query.mjs
+/inspect_for_backfill.ts
+/migration_*.sql
+scripts/admin/_*
