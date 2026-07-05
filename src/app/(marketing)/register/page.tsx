@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import { ArrowRight, MessageCircle } from 'lucide-react';
 import PublicHeader from '../_shared/PublicHeader';
 import PublicFooter from '../_shared/PublicFooter';
@@ -96,19 +95,22 @@ export default function RegisterPage() {
               <MessageCircle className="w-4 h-4" />
               1:1 오픈카톡 입장
             </a>
+
+            <div className="mt-5 pt-5 border-t border-border-cream">
+              <p className="text-[13px] text-stone leading-relaxed break-keep">
+                오픈카톡이 안되는 경우
+              </p>
+              <p className="text-[15px] text-charcoal leading-relaxed break-keep mt-1">
+                <strong className="text-ink">010-2914-1156</strong> 연락처 등록 후
+                일반 카톡으로 등록완료 메세지를 보내주세요.
+              </p>
+            </div>
           </section>
         </div>
 
         {/* After */}
         <p className="text-[14px] text-stone leading-relaxed break-keep mt-10 text-center">
-          등록이 완료되면{' '}
-          <Link
-            href="/ot"
-            className="text-terracotta hover:text-terracotta-light underline underline-offset-4 decoration-border-warm hover:decoration-terracotta-light transition-colors"
-          >
-            OT 자료
-          </Link>
-          를 카톡으로 함께 안내해드립니다.
+          등록이 완료되면 OT 자료를 카톡으로 함께 안내해드립니다.
         </p>
       </main>
 

@@ -1,5 +1,9 @@
 import { Download, Play } from 'lucide-react';
+import { ConceptAccessPage } from '../_components/ConceptAccessPage';
+import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: '공통수학1 · 개념강의 후반부',
@@ -8,6 +12,13 @@ export const metadata = {
 
 const EMBED = (id: string) =>
   `https://iframe.mediadelivery.net/embed/${CONCEPT_LIBRARY_ID}/${id}?autoplay=true&preload=true&responsive=true`;
+
+const GATE_CONFIG: ConceptGateConfig = {
+  cookieName: 'gs1_concept_part2_unlocked',
+  path: '/share/gs1-concept-2',
+  tokenSeed: 'gs1-concept-part2:v1',
+  passcodeEnvKeys: ['GS1_CONCEPT_PART2_PASSCODE', 'GS1_CONCEPT_PASSCODE'],
+};
 
 type Lecture = {
   num: number;
@@ -104,9 +115,21 @@ const SECTIONS: Section[] = [
   },
 ];
 
-export default function Gs1ConceptPart2Page() {
+type PageProps = {
+  readonly searchParams?: {
+    readonly gate?: string | readonly string[];
+  };
+};
+
+export default function Gs1ConceptPart2Page({ searchParams }: PageProps) {
   return (
-    <div className="min-h-screen bg-parchment text-ink">
+    <ConceptAccessPage
+      config={GATE_CONFIG}
+      subjectLabel="공통수학1"
+      heading="10~19강 · 후반부"
+      gate={searchParams?.gate}
+    >
+      <div className="min-h-screen bg-parchment text-ink">
       <main className="max-w-2xl mx-auto px-5 py-10 md:py-14">
 
         {/* 타이틀 */}
@@ -171,5 +194,6 @@ export default function Gs1ConceptPart2Page() {
         </div>
       </main>
     </div>
+    </ConceptAccessPage>
   );
 }

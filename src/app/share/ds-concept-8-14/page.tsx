@@ -1,10 +1,21 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { Download, FileText, Play } from 'lucide-react';
+import { ConceptAccessPage } from '../_components/ConceptAccessPage';
+import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: '대수 개념 8~14차시 보충자료',
   robots: { index: false, follow: false },
+};
+
+const GATE_CONFIG: ConceptGateConfig = {
+  cookieName: 'ds_concept_8_14_unlocked',
+  path: '/share/ds-concept-8-14',
+  tokenSeed: 'ds-concept-8-14:v1',
+  passcodeEnvKeys: ['DS_CONCEPT_PART2_PASSCODE', 'DS_CONCEPT_PASSCODE'],
 };
 
 interface PdfItem {
@@ -32,6 +43,29 @@ interface ChapterSet {
   pdf_filename: string | null;
 }
 
+class MissingEnvError extends Error {
+  constructor(name: string) {
+    super(`Missing required environment variable: ${name}`);
+    this.name = 'MissingEnvError';
+  }
+}
+
+type ChapterWithVideos = ChapterSet & {
+  readonly videos: readonly VideoRow[];
+};
+
+type PageProps = {
+  readonly searchParams?: {
+    readonly gate?: string | readonly string[];
+  };
+};
+
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+  if (value) return value;
+  throw new MissingEnvError(name);
+}
+
 function fmtDuration(s: number | null): string | null {
   if (!s || s < 1) return null;
   const m = Math.floor(s / 60);
@@ -48,8 +82,8 @@ function cleanVideoTitle(t: string): string {
 
 async function loadChapters() {
   const sc = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!,
+    requiredEnv('NEXT_PUBLIC_SUPABASE_URL'),
+    requiredEnv('SUPABASE_SERVICE_KEY'),
   );
 
   const { data: sets } = await sc
@@ -59,9 +93,10 @@ async function loadChapters() {
     .eq('subject_slug', 'ds')
     .gte('chapter_order', 8)
     .lte('chapter_order', 14)
-    .order('chapter_order', { ascending: true });
+    .order('chapter_order', { ascending: true })
+    .returns<ChapterSet[]>();
 
-  const chapters: ChapterSet[] = (sets || []) as ChapterSet[];
+  const chapters = sets || [];
 
   const ids = chapters.map((c) => c.id);
   const { data: vids } = ids.length
@@ -70,27 +105,45 @@ async function loadChapters() {
         .select('set_id, bunny_video_id, title, problem_number, order_index, duration_seconds')
         .in('set_id', ids)
         .order('order_index', { ascending: true })
+        .returns<VideoRow[]>()
     : { data: [] };
 
   const videosBySet = new Map<string, VideoRow[]>();
-  for (const v of (vids || []) as VideoRow[]) {
+  for (const v of vids || []) {
     if (!v.bunny_video_id) continue;
-    if (!videosBySet.has(v.set_id)) videosBySet.set(v.set_id, []);
-    videosBySet.get(v.set_id)!.push(v);
+    const existing = videosBySet.get(v.set_id);
+    if (existing) {
+      existing.push(v);
+    } else {
+      videosBySet.set(v.set_id, [v]);
+    }
   }
 
-  return chapters.map((c) => ({
+  return chapters.map((c): ChapterWithVideos => ({
     ...c,
     pdfs: c.pdfs && c.pdfs.length
       ? c.pdfs
       : c.pdf_url
-        ? [{ url: c.pdf_url, original_name: c.pdf_filename || '학습지' } as PdfItem]
+        ? [{ url: c.pdf_url, original_name: c.pdf_filename || '학습지' }]
         : [],
     videos: videosBySet.get(c.id) || [],
   }));
 }
 
-export default async function DsConcept8to14SharePage() {
+export default function DsConcept8to14SharePage({ searchParams }: PageProps) {
+  return (
+    <ConceptAccessPage
+      config={GATE_CONFIG}
+      subjectLabel="대수"
+      heading="8차시 ~ 14차시"
+      gate={searchParams?.gate}
+    >
+      <DsConcept8to14Content />
+    </ConceptAccessPage>
+  );
+}
+
+async function DsConcept8to14Content() {
   const chapters = await loadChapters();
 
   return (

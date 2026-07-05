@@ -1,5 +1,9 @@
 import { Download, FileText, Play } from 'lucide-react';
+import { ConceptAccessPage } from '../_components/ConceptAccessPage';
+import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata = {
   title: '대수 개념강의 · 수열',
@@ -8,6 +12,13 @@ export const metadata = {
 
 const EMBED = (id: string) =>
   `https://iframe.mediadelivery.net/embed/${CONCEPT_LIBRARY_ID}/${id}?autoplay=true&preload=true&responsive=true`;
+
+const GATE_CONFIG: ConceptGateConfig = {
+  cookieName: 'ds_concept_sequence_unlocked',
+  path: '/share/ds-concept-16-17',
+  tokenSeed: 'ds-concept-sequence:v1',
+  passcodeEnvKeys: ['DS_CONCEPT_SEQUENCE_PASSCODE', 'DS_CONCEPT_PASSCODE'],
+};
 
 const SECTIONS = [
   {
@@ -71,9 +82,21 @@ const SECTIONS = [
   },
 ];
 
-export default function DsConceptSuyeolSharePage() {
+type PageProps = {
+  readonly searchParams?: {
+    readonly gate?: string | readonly string[];
+  };
+};
+
+export default function DsConceptSuyeolSharePage({ searchParams }: PageProps) {
   return (
-    <div className="min-h-screen bg-parchment text-ink">
+    <ConceptAccessPage
+      config={GATE_CONFIG}
+      subjectLabel="대수"
+      heading="16~20강 · 수열"
+      gate={searchParams?.gate}
+    >
+      <div className="min-h-screen bg-parchment text-ink">
       <main className="max-w-2xl mx-auto px-5 py-10 md:py-14">
 
         {/* 타이틀 */}
@@ -163,5 +186,6 @@ export default function DsConceptSuyeolSharePage() {
         </div>
       </main>
     </div>
+    </ConceptAccessPage>
   );
 }
