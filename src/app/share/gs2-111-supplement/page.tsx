@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { BookOpen, CheckCircle2, Download, Play, Route } from 'lucide-react';
+import { CheckCircle2, Download, Play, Route } from 'lucide-react';
 import { ConceptAccessPage } from '../_components/ConceptAccessPage';
 import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
@@ -39,13 +39,13 @@ const VIDEOS: readonly Video[] = [
   {
     step: '영상 1',
     title: '좌표평면의 거리',
-    subtitle: '두 점 사이의 거리 공식을 먼저 정리합니다.',
+    subtitle: '첫 번째 보강 영상입니다.',
     id: 'a9d3a234-bd1b-4b97-80b4-c80b4eef47d4',
   },
   {
     step: '영상 2',
     title: '선분의 내분점',
-    subtitle: '내분점 좌표를 공식이 아니라 비율 관점으로 연결합니다.',
+    subtitle: '두 번째 보강 영상입니다.',
     id: 'd8ac7347-08c2-4e18-889c-945912bb343c',
   },
 ];
@@ -74,8 +74,8 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
                   1.1.1 좌표평면의 거리와 선분의 내분점
                 </h1>
                 <p className="mt-3 max-w-2xl text-[14px] leading-6 text-olive">
-                  개념노트 1개와 보강 영상 2개로 구성했습니다. 노트를 먼저 열어 둔 뒤,
-                  거리 공식에서 내분점 좌표로 이어지는 흐름을 순서대로 확인하세요.
+                  개념노트 1개와 보강 영상 2개로 구성했습니다. 노트를 먼저 받은 뒤,
+                  영상 1과 영상 2를 순서대로 확인하세요.
                 </p>
               </div>
               <div className="rounded-2xl border border-border-cream bg-ivory p-4 shadow-whisper">
@@ -113,7 +113,7 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
                 선분의 내분과 내분점의 좌표
               </h2>
               <p className="mt-2 text-[13px] leading-5 text-olive">
-                문제 풀이 전 공식 유도와 예제를 손으로 정리합니다.
+                개념노트를 먼저 받고 풀이 공간에 직접 정리하세요.
               </p>
             </a>
 
@@ -145,18 +145,22 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
               </div>
               <div className="mt-4 space-y-3">
                 <div className="rounded-2xl border border-border-cream bg-ivory p-4">
-                  <p className="flex items-center gap-2 text-[13px] font-semibold text-ink">
-                    <BookOpen className="h-4 w-4 text-terracotta" />
-                    노트 체크포인트
-                  </p>
-                  <p className="mt-2 text-[13px] leading-5 text-olive">
-                    거리 공식, 중점, 내분점 공식이 한 흐름으로 이어지는지 표시하면서 보세요.
-                  </p>
+                  <p className="text-[13px] font-semibold text-ink">진행 순서</p>
+                  <ol className="mt-3 space-y-2 text-[13px] leading-5 text-olive">
+                    <li>1. 개념노트 받기</li>
+                    <li>2. 영상 1 보기</li>
+                    <li>3. 영상 2 보기</li>
+                  </ol>
                 </div>
                 <div className="rounded-2xl border border-border-cream bg-ivory p-4">
                   <p className="text-[13px] font-semibold text-ink">완료 기준</p>
-                  <p className="mt-2 text-[13px] leading-5 text-olive">
-                    노트 예제를 다시 풀 때, 공식 암기가 아니라 비율식으로 설명할 수 있으면 통과입니다.
+                  <ol className="mt-3 space-y-2 text-[13px] leading-5 text-olive">
+                    <li>1. 개념노트 다 풀기</li>
+                    <li>2. 영상 2개 다 보기</li>
+                    <li>3. 카톡으로 받은 복습 문제지 풀기</li>
+                  </ol>
+                  <p className="mt-3 text-[12px] leading-5 text-stone">
+                    복습 문제지 PDF는 카톡으로 따로 전달됩니다.
                   </p>
                 </div>
               </div>
