@@ -34,7 +34,7 @@ export function ConceptAccessGate({ subjectLabel, heading, status, action }: Pro
 
         <form action={action} className="bg-ivory border border-border-cream rounded-2xl p-5 shadow-whisper">
           <label htmlFor="passcode" className="block text-[13px] font-medium text-charcoal mb-2">
-            암호
+            암호 (생년월일 6자리)
           </label>
           <input
             id="passcode"
@@ -44,11 +44,12 @@ export function ConceptAccessGate({ subjectLabel, heading, status, action }: Pro
             pattern="\d{6}"
             maxLength={6}
             autoComplete="off"
-            className="w-full h-12 rounded-xl bg-parchment border border-border-warm px-4 text-[18px] tracking-[0.22em] font-mono text-ink outline-none focus:border-terracotta focus:shadow-ring-terracotta"
+            placeholder="예: 100101"
+            className="w-full h-12 rounded-xl bg-parchment border border-border-warm px-4 text-[18px] tracking-[0.22em] font-mono text-ink outline-none placeholder:text-stone/55 focus:border-terracotta focus:shadow-ring-terracotta"
             aria-describedby="passcode-help"
           />
           <p id="passcode-help" className="text-[12px] text-stone mt-2">
-            생년월일 6자리 숫자를 입력하세요.
+            예: 2010년 1월 1일생이면 100101
           </p>
           <button
             type="submit"
