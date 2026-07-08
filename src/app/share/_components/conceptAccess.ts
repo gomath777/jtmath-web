@@ -15,11 +15,17 @@ export type ConceptGateConfig = {
 
 const MASTER_PASSCODE = '260613';
 const PASSCODE_PATTERN = /^\d{6}$/;
+const PASSCODE_SEPARATOR_PATTERN = /[\s,;]+/;
+
+function envPasscodes(value: string | undefined): readonly string[] {
+  if (!value) return [];
+  return value.split(PASSCODE_SEPARATOR_PATTERN).map((passcode) => passcode.trim());
+}
 
 function validPasscodes(passcodeEnvKeys: readonly string[]): readonly string[] {
   const candidates = [
     MASTER_PASSCODE,
-    ...passcodeEnvKeys.map((key) => process.env[key] || ''),
+    ...passcodeEnvKeys.flatMap((key) => envPasscodes(process.env[key])),
   ];
   return Array.from(new Set(candidates.filter((passcode) => PASSCODE_PATTERN.test(passcode))));
 }
