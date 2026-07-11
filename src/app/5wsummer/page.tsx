@@ -19,8 +19,8 @@ type SummerEntryPageProps = {
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
-  format: '6자리 숫자 비밀번호로 입력해 주세요.',
-  invalid: '등록된 비밀번호가 아닙니다. 다시 확인해 주세요.',
+  format: '생년월일 6자리를 숫자로 입력해 주세요.',
+  invalid: '등록된 생년월일이 아닙니다. 다시 확인해 주세요.',
   config: '현재 접속 설정을 확인 중입니다. 잠시 후 다시 시도해 주세요.',
   rate_limited: '입력 횟수가 많습니다. 잠시 후 다시 시도해 주세요.',
 };
@@ -54,7 +54,7 @@ export default async function SummerEntryPage({ searchParams }: SummerEntryPageP
             5주 특강 학습 페이지
           </h1>
           <p className="mt-3 break-keep text-[14px] leading-relaxed text-olive">
-            안내받은 6자리 비밀번호를 입력하면 배정된 과목 달력으로 이동합니다.
+            학생 생년월일 6자리를 입력하면 배정된 과목 달력으로 이동합니다.
           </p>
         </div>
 

@@ -25,7 +25,7 @@ export function SummerLoginForm({ action, error }: SummerLoginFormProps) {
   return (
     <form action={action} className="mt-8 space-y-4">
       <label className="block">
-        <span className="mb-2 block text-[13px] font-semibold text-olive">비밀번호 6자리</span>
+        <span className="mb-2 block text-[13px] font-semibold text-olive">생년월일 6자리</span>
         <input
           name="pin"
           inputMode="numeric"
