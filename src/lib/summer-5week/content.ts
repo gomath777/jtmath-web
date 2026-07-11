@@ -109,8 +109,19 @@ function dsLessonForDay(learningNumber: number): ConceptLesson | undefined {
   return DS_LESSONS[learningNumber - 2];
 }
 
+function mj1LessonForDay(learningNumber: number): ConceptLesson | undefined {
+  if (learningNumber <= 9) return MJ1_LESSONS[learningNumber - 1];
+  if (learningNumber === 10) {
+    const graphLesson = MJ1_LESSONS[8];
+    if (!graphLesson) return undefined;
+    return { ...graphLesson, title: '함수의 그래프 정리' };
+  }
+  return MJ1_LESSONS[learningNumber - 2];
+}
+
 function lessonForDay(subject: SummerSubject, learningNumber: number): ConceptLesson | undefined {
   if (subject === 'ds') return dsLessonForDay(learningNumber);
+  if (subject === 'mj1') return mj1LessonForDay(learningNumber);
   return SUBJECT_LESSONS[subject]?.[learningNumber - 1];
 }
 

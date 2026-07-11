@@ -23,6 +23,7 @@ function requestedCases(): readonly string[] {
         'all-subjects',
         'subject-specific-midterm',
         'ds-midterm-boundary',
+        'mj1-midterm-boundary',
         'release-windows',
         'pending-assets',
         'ready-subjects-no-pending',
@@ -68,6 +69,13 @@ function runCase(name: string): string {
       assertOk(day8.kind === 'learning' && day8.title === '삼각함수 그래프 정리', 'ds day 8 should stay in trig graph range');
       assertOk(day9.kind === 'learning' && day9.title === '사인법칙과 코사인법칙', 'ds final range should start with sine/cosine law');
       return 'ds-midterm-boundary: ok graph-before-midterm sine-law-after';
+    }
+    case 'mj1-midterm-boundary': {
+      const day10 = contentForDay('mj1', mustDay('mj1', '2026-07-28'));
+      const day11 = contentForDay('mj1', mustDay('mj1', '2026-07-31'));
+      assertOk(day10.kind === 'learning' && day10.title === '함수의 그래프 정리', 'mj1 day 10 should stay in graph range');
+      assertOk(day11.kind === 'learning' && day11.title === '방정식 부등식 활용, 속도와 가속도', 'mj1 final range should start with equations and inequalities');
+      return 'mj1-midterm-boundary: ok graph-before-midterm equations-after';
     }
     case 'release-windows': {
       const monday = releaseStateFor('2026-07-13', new Date('2026-07-12T00:00:00+09:00'), false);
