@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'fs/promises';
 import { dirname } from 'path';
 import { contentForDay } from '../../src/lib/summer-5week/content';
 import { releaseStateFor, summerCalendar } from '../../src/lib/summer-5week/schedule';
-import { SUMMER_SUBJECTS } from '../../src/lib/summer-5week/subjects';
+import { SUMMER_SUBJECTS, type SummerSubject } from '../../src/lib/summer-5week/subjects';
 
 const EVIDENCE_PATH = '.omo/evidence/summer-5week-assigned-subjects/task-5-schedule.txt';
 
@@ -19,15 +19,25 @@ function requestedCases(): readonly string[] {
   }
   return cases.length > 0
     ? cases
-    : ['all-subjects', 'release-windows', 'pending-assets', 'ready-subjects-no-pending', 'early-release', 'missing-resource-url', 'fake-pending-link'];
+    : [
+        'all-subjects',
+        'subject-specific-midterm',
+        'ds-midterm-boundary',
+        'release-windows',
+        'pending-assets',
+        'ready-subjects-no-pending',
+        'early-release',
+        'missing-resource-url',
+        'fake-pending-link',
+      ];
 }
 
 function assertOk(condition: boolean, message: string): void {
   if (!condition) throw new Error(message);
 }
 
-function mustDay(date: string) {
-  const day = summerCalendar().find((candidate) => candidate.date === date);
+function mustDay(subject: SummerSubject, date: string) {
+  const day = summerCalendar(subject).find((candidate) => candidate.date === date);
   if (!day) throw new Error(`missing day ${date}`);
   return day;
 }
@@ -38,9 +48,26 @@ function runCase(name: string): string {
       const days = summerCalendar();
       const learningDays = days.filter((day) => day.role === 'learning').length;
       assertOk(SUMMER_SUBJECTS.length === 5, 'expected five subjects');
-      assertOk(days.length === 34, 'expected 2026-07-13 through 2026-08-15');
-      assertOk(learningDays === 17, 'expected 17 learning days');
-      return `all-subjects: ok subjects=5 days=${days.length} learning=${learningDays}`;
+      assertOk(days.length === 34, 'expected mj1 2026-07-13 through 2026-08-15');
+      assertOk(learningDays === 17, 'expected mj1 17 learning days');
+      assertOk(summerCalendar('ds').filter((day) => day.role === 'learning').length === 16, 'expected default subjects to have 16 learning days');
+      return `all-subjects: ok subjects=5 mj1Days=${days.length} mj1Learning=${learningDays}`;
+    }
+    case 'subject-specific-midterm': {
+      assertOk(mustDay('mj1', '2026-07-29').role === 'review', 'mj1 should review on 7/29');
+      assertOk(mustDay('mj1', '2026-07-30').role === 'mock', 'mj1 should mock on 7/30');
+      assertOk(mustDay('ds', '2026-07-27').role === 'review', 'default subjects should review on 7/27');
+      assertOk(mustDay('ds', '2026-07-28').role === 'review', 'default subjects should review on 7/28');
+      assertOk(mustDay('ds', '2026-07-29').role === 'mock', 'default subjects should mock on 7/29');
+      assertOk(mustDay('ds', '2026-07-30').learningNumber === 9, 'default subjects should resume learning on 7/30');
+      return 'subject-specific-midterm: ok mj1 exception only';
+    }
+    case 'ds-midterm-boundary': {
+      const day8 = contentForDay('ds', mustDay('ds', '2026-07-24'));
+      const day9 = contentForDay('ds', mustDay('ds', '2026-07-30'));
+      assertOk(day8.kind === 'learning' && day8.title === '삼각함수 그래프 정리', 'ds day 8 should stay in trig graph range');
+      assertOk(day9.kind === 'learning' && day9.title === '사인법칙과 코사인법칙', 'ds final range should start with sine/cosine law');
+      return 'ds-midterm-boundary: ok graph-before-midterm sine-law-after';
     }
     case 'release-windows': {
       const monday = releaseStateFor('2026-07-13', new Date('2026-07-12T00:00:00+09:00'), false);
@@ -52,15 +79,15 @@ function runCase(name: string): string {
       return 'release-windows: ok sunday-and-wednesday';
     }
     case 'pending-assets': {
-      const gs2 = contentForDay('gs2', mustDay('2026-07-13'));
-      const gh = contentForDay('gh', mustDay('2026-07-13'));
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 should be pending without links');
       assertOk(gh.kind === 'learning' && gh.pending && gh.resources.length === 0, 'gh should be pending without links');
       return 'pending-assets: ok gs2=준비중 gh=준비중';
     }
     case 'ready-subjects-no-pending': {
-      const learningDays = summerCalendar().filter((day) => day.role === 'learning');
       for (const subject of ['gs1', 'ds', 'mj1'] as const) {
+        const learningDays = summerCalendar(subject).filter((day) => day.role === 'learning');
         for (const day of learningDays) {
           const content = contentForDay(subject, day);
           assertOk(content.kind === 'learning' && !content.pending, `${subject} ${day.date} should not be pending`);
@@ -74,12 +101,12 @@ function runCase(name: string): string {
       return 'early-release: ok locked';
     }
     case 'missing-resource-url': {
-      const content = contentForDay('mj1', mustDay('2026-07-13'));
+      const content = contentForDay('mj1', mustDay('mj1', '2026-07-13'));
       assertOk(content.kind === 'learning' && content.resources.every((resource) => resource.href.startsWith('https://')), 'resource URLs must be absolute');
       return 'missing-resource-url: ok';
     }
     case 'fake-pending-link': {
-      const content = contentForDay('gs2', mustDay('2026-07-20'));
+      const content = contentForDay('gs2', mustDay('gs2', '2026-07-20'));
       assertOk(content.kind === 'learning' && content.pending && content.resources.length === 0, 'pending content must not include links');
       return 'fake-pending-link: ok';
     }

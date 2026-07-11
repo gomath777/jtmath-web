@@ -39,8 +39,8 @@ function contentVisibleToStudent(subject: SummerSubject, day: ReturnType<typeof 
 
 function buildDashboardDays(subject: SummerSubject, master: boolean): readonly SummerDashboardDay[] {
   const now = nowForSummerRelease();
-  return summerCalendar().map((day) => {
-    const release = releaseStateFor(day.date, now, master);
+  return summerCalendar(subject).map((day) => {
+    const release = releaseStateFor(day.date, now, master, subject);
     return {
       ...day,
       release,

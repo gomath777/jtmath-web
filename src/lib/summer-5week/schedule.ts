@@ -20,7 +20,26 @@ const COURSE_START = '2026-07-13';
 const COURSE_END = '2026-08-15';
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
-const LEARNING_DATES = [
+const DEFAULT_LEARNING_DATES = [
+  '2026-07-13',
+  '2026-07-14',
+  '2026-07-16',
+  '2026-07-17',
+  '2026-07-20',
+  '2026-07-21',
+  '2026-07-23',
+  '2026-07-24',
+  '2026-07-30',
+  '2026-07-31',
+  '2026-08-03',
+  '2026-08-04',
+  '2026-08-06',
+  '2026-08-07',
+  '2026-08-10',
+  '2026-08-11',
+] as const;
+
+const MJ1_LEARNING_DATES = [
   '2026-07-13',
   '2026-07-14',
   '2026-07-16',
@@ -40,9 +59,28 @@ const LEARNING_DATES = [
   '2026-08-11',
 ] as const;
 
-const REVIEW_DATES = new Set(['2026-07-29', '2026-08-13', '2026-08-14']);
-const MOCK_DATES = new Set(['2026-07-30', '2026-08-15']);
-const LEARNING_DATE_SET = new Set<string>(LEARNING_DATES);
+const DEFAULT_REVIEW_DATES = new Set(['2026-07-27', '2026-07-28', '2026-08-13', '2026-08-14']);
+const DEFAULT_MOCK_DATES = new Set(['2026-07-29', '2026-08-15']);
+const MJ1_REVIEW_DATES = new Set(['2026-07-29', '2026-08-13', '2026-08-14']);
+const MJ1_MOCK_DATES = new Set(['2026-07-30', '2026-08-15']);
+const DEFAULT_LEARNING_DATE_SET = new Set<string>(DEFAULT_LEARNING_DATES);
+const MJ1_LEARNING_DATE_SET = new Set<string>(MJ1_LEARNING_DATES);
+
+function learningDatesFor(subject: SummerSubject): readonly string[] {
+  return subject === 'mj1' ? MJ1_LEARNING_DATES : DEFAULT_LEARNING_DATES;
+}
+
+function learningDateSetFor(subject: SummerSubject): ReadonlySet<string> {
+  return subject === 'mj1' ? MJ1_LEARNING_DATE_SET : DEFAULT_LEARNING_DATE_SET;
+}
+
+function reviewDatesFor(subject: SummerSubject): ReadonlySet<string> {
+  return subject === 'mj1' ? MJ1_REVIEW_DATES : DEFAULT_REVIEW_DATES;
+}
+
+function mockDatesFor(subject: SummerSubject): ReadonlySet<string> {
+  return subject === 'mj1' ? MJ1_MOCK_DATES : DEFAULT_MOCK_DATES;
+}
 
 function dateUtcMs(date: string): number {
   return Date.parse(`${date}T00:00:00Z`);
@@ -60,10 +98,10 @@ function dayOfWeek(date: string): number {
   return new Date(dateUtcMs(date)).getUTCDay();
 }
 
-function roleForDate(date: string): CalendarRole {
-  if (LEARNING_DATE_SET.has(date)) return 'learning';
-  if (REVIEW_DATES.has(date)) return 'review';
-  if (MOCK_DATES.has(date)) return 'mock';
+function roleForDate(subject: SummerSubject, date: string): CalendarRole {
+  if (learningDateSetFor(subject).has(date)) return 'learning';
+  if (reviewDatesFor(subject).has(date)) return 'review';
+  if (mockDatesFor(subject).has(date)) return 'mock';
   return dayOfWeek(date) === 0 ? 'rest' : 'supplement';
 }
 
@@ -84,12 +122,13 @@ function titleForRole(role: CalendarRole): string {
   }
 }
 
-export function summerCalendar(): readonly SummerDay[] {
+export function summerCalendar(subject: SummerSubject = 'mj1'): readonly SummerDay[] {
   const days: SummerDay[] = [];
   let cursor = COURSE_START;
+  const learningDates = learningDatesFor(subject);
   while (cursor <= COURSE_END) {
-    const role = roleForDate(cursor);
-    const learningIndex = LEARNING_DATES.findIndex((date) => date === cursor);
+    const role = roleForDate(subject, cursor);
+    const learningIndex = learningDates.findIndex((date) => date === cursor);
     const day = dayOfWeek(cursor);
     days.push({
       date: cursor,
@@ -112,9 +151,9 @@ export function releaseWindowFor(date: string): string {
   return `${date}T00:00:00+09:00`;
 }
 
-export function releaseStateFor(date: string, now: Date, master: boolean): ReleaseState {
+export function releaseStateFor(date: string, now: Date, master: boolean, subject: SummerSubject = 'mj1'): ReleaseState {
   if (master) return { kind: 'open' };
-  const role = roleForDate(date);
+  const role = roleForDate(subject, date);
   if (role !== 'learning') return { kind: 'open' };
 
   const releaseWindow = releaseWindowFor(date);

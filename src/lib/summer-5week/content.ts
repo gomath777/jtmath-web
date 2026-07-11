@@ -66,10 +66,13 @@ const GS1_LESSONS: readonly ConceptLesson[] = [
   },
 ];
 
+const DS_LESSONS = [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2];
+const MJ1_LESSONS = [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2];
+
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {
   gs1: GS1_LESSONS,
-  ds: [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2],
-  mj1: [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2],
+  ds: DS_LESSONS,
+  mj1: MJ1_LESSONS,
 };
 
 function lessonResources(lesson: ConceptLesson): readonly DayResource[] {
@@ -96,10 +99,25 @@ function labelContent(day: SummerDay): DayContent {
   return { kind: 'label', title: '보충 / 질문', body: '수업 보충, 질문, 과제 점검을 위한 날입니다.' };
 }
 
+function dsLessonForDay(learningNumber: number): ConceptLesson | undefined {
+  if (learningNumber <= 7) return DS_LESSONS[learningNumber - 1];
+  if (learningNumber === 8) {
+    const graphLesson = DS_LESSONS[6];
+    if (!graphLesson) return undefined;
+    return { ...graphLesson, title: '삼각함수 그래프 정리' };
+  }
+  return DS_LESSONS[learningNumber - 2];
+}
+
+function lessonForDay(subject: SummerSubject, learningNumber: number): ConceptLesson | undefined {
+  if (subject === 'ds') return dsLessonForDay(learningNumber);
+  return SUBJECT_LESSONS[subject]?.[learningNumber - 1];
+}
+
 export function contentForDay(subject: SummerSubject, day: SummerDay): DayContent {
   if (day.role !== 'learning' || day.learningNumber === null) return labelContent(day);
 
-  const lesson = SUBJECT_LESSONS[subject]?.[day.learningNumber - 1];
+  const lesson = lessonForDay(subject, day.learningNumber);
   if (!lesson) {
     if (!subjectCanHavePendingResources(subject)) {
       return {
