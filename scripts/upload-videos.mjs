@@ -58,7 +58,7 @@ const createVideoObject = async (title) => {
       headers: {
         'AccessKey': API_KEY,
         'Content-Type': 'application/json',
-        'Content-Length': data.length
+        'Content-Length': Buffer.byteLength(data)
       }
     };
 

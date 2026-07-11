@@ -86,4 +86,12 @@ if (gs2First.kind === 'learning') {
   assert.equal(gs2First.pending, true, 'gs2 is allowed to show pending resources');
 }
 
+const ghFirst = contentForDay('gh', day1);
+assert.equal(ghFirst.kind, 'learning', 'gh content resolves as learning');
+if (ghFirst.kind === 'learning') {
+  assert.equal(ghFirst.pending, false, 'gh first day is ready');
+  assert.ok(ghFirst.resources.some((resource) => resource.kind === 'pdf'), 'gh first day has note');
+  assert.ok(ghFirst.resources.some((resource) => resource.kind === 'video'), 'gh first day has video');
+}
+
 console.log('summer-5week qa checks passed');

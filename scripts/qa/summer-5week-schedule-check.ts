@@ -26,6 +26,7 @@ function requestedCases(): readonly string[] {
         'mj1-midterm-boundary',
         'release-windows',
         'pending-assets',
+        'gh-first-lesson-ready',
         'ready-subjects-no-pending',
         'early-release',
         'missing-resource-url',
@@ -88,10 +89,16 @@ function runCase(name: string): string {
     }
     case 'pending-assets': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
-      const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 should be pending without links');
-      assertOk(gh.kind === 'learning' && gh.pending && gh.resources.length === 0, 'gh should be pending without links');
-      return 'pending-assets: ok gs2=준비중 gh=준비중';
+      return 'pending-assets: ok gs2=준비중';
+    }
+    case 'gh-first-lesson-ready': {
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));
+      assertOk(gh.kind === 'learning' && !gh.pending, 'gh first lesson should be ready');
+      assertOk(gh.kind === 'learning' && gh.title === '포물선의 방정식', 'gh first lesson title should match');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.kind === 'pdf'), 'gh first lesson should have note');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.kind === 'video'), 'gh first lesson should have video');
+      return 'gh-first-lesson-ready: ok note-and-video';
     }
     case 'ready-subjects-no-pending': {
       for (const subject of ['gs1', 'ds', 'mj1'] as const) {

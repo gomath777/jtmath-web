@@ -68,11 +68,25 @@ const GS1_LESSONS: readonly ConceptLesson[] = [
 
 const DS_LESSONS = [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2];
 const MJ1_LESSONS = [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2];
+const GH_LESSONS: readonly ConceptLesson[] = [
+  {
+    order: 1,
+    title: '포물선의 방정식',
+    pdfs: [
+      {
+        name: '포물선 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/01_%ED%8F%AC%EB%AC%BC%EC%84%A0/1_1_1_%20%ED%8F%AC%EB%AC%BC%EC%84%A0.pdf',
+      },
+    ],
+    videos: [{ num: 1, title: '포물선의 방정식', id: '8ff0facc-145e-4852-81ac-183dbbd668de' }],
+  },
+];
 
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {
   gs1: GS1_LESSONS,
   ds: DS_LESSONS,
   mj1: MJ1_LESSONS,
+  gh: GH_LESSONS,
 };
 
 function lessonResources(lesson: ConceptLesson): readonly DayResource[] {
