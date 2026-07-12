@@ -53,10 +53,9 @@ export default function OTPage() {
                 <p>
                   등록 완료 후 학생 본인{' '}
                   <span className="text-terracotta font-medium">
-                    &apos;핸드폰번호&apos;만 입력
-                  </span>
-                  하면 자동 로그인 됩니다.{' '}
-                  <span className="text-stone">(기본 비번 123456)</span>
+                    &apos;핸드폰 번호&apos; 입력
+                  </span>{' '}
+                  <span className="text-stone">(기본 비번 123456)</span> 후 로그인해 주세요.
                 </p>
               </div>
 
