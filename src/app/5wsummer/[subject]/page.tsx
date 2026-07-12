@@ -41,10 +41,12 @@ function buildDashboardDays(subject: SummerSubject, master: boolean): readonly S
   const now = nowForSummerRelease();
   return summerCalendar(subject).map((day) => {
     const release = releaseStateFor(day.date, now, master, subject);
+    const dayContent = contentForDay(subject, day);
     return {
       ...day,
       release,
-      content: master ? contentForDay(subject, day) : contentVisibleToStudent(subject, day, release),
+      previewTitle: dayContent.title,
+      content: master ? dayContent : contentVisibleToStudent(subject, day, release),
     };
   });
 }

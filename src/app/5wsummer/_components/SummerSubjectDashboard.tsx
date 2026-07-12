@@ -38,6 +38,7 @@ export type SummerDashboardDay = {
   readonly dayOfWeek: number;
   readonly role: CalendarRole;
   readonly title: string;
+  readonly previewTitle: string;
   readonly learningNumber: number | null;
   readonly release: ReleaseState;
   readonly content: DayContent;
@@ -55,8 +56,14 @@ const roleClass: Record<CalendarRole, string> = {
   learning: 'border-border-cream bg-ivory hover:border-terracotta/40',
   supplement: 'border-border-cream bg-stone/10',
   review: 'border-yellow-500/30 bg-yellow-100/70',
-  mock: 'border-terracotta/35 bg-terracotta/10',
+  mock: 'border-red-500/45 bg-red-100/80',
   rest: 'border-border-cream bg-transparent',
+};
+
+const badgeClass: Record<Extract<CalendarRole, 'supplement' | 'review' | 'mock'>, string> = {
+  supplement: 'bg-yellow-400/70 text-ink',
+  review: 'bg-yellow-400/70 text-ink',
+  mock: 'bg-red-500 text-white',
 };
 
 function formatMd(date: string) {
@@ -78,6 +85,50 @@ function isOpen(day: SummerDashboardDay) {
 function initialDate(days: readonly SummerDashboardDay[]) {
   const firstOpenLearning = days.find((day) => day.role === 'learning' && isOpen(day));
   return firstOpenLearning?.date ?? days.find((day) => day.dayOfWeek !== 0)?.date ?? days[0]?.date ?? '';
+}
+
+const compactLearningTitle: Record<string, string> = {
+  '다항식의 연산': '다항식 연산',
+  나머지정리: '나머지정리',
+  인수분해: '인수분해',
+  '좌표평면의 거리와 선분의 내분점': '좌표·내분점',
+  '직선의 방정식과 점과 직선 사이의 거리': '직선·거리',
+  '원의 방정식과 그래프': '원의 방정식',
+  '원과 직선의 위치관계': '원·직선 관계',
+  '평행이동과 대칭이동': '평행·대칭이동',
+  '집합의 개념과 표현': '집합의 표현',
+  '두 집합 사이의 포함관계': '집합 포함관계',
+  '집합의 연산과 벤 다이어그램': '집합 연산',
+  '중간범위 누적 정리': '중간범위 정리',
+  '명제와 조건': '명제와 조건',
+  '명제의 증명과 절대부등식': '명제·절대부등식',
+  '함수의 뜻과 그래프': '함수와 그래프',
+  '합성함수와 역함수': '합성·역함수',
+  유리함수: '유리함수',
+  무리함수: '무리함수',
+  '유리함수와 무리함수 활용': '유리·무리 활용',
+  지수: '지수',
+  로그: '로그',
+  '지수함수, 로그함수': '지수·로그함수',
+  '지수함수, 로그함수 활용': '지수·로그 활용',
+  '함수의 극한': '함수의 극한',
+  '극한의 성질 및 중단원 마무리': '극한 성질',
+  '함수의 연속': '함수의 연속',
+  '연속함수의 성질': '연속함수 성질',
+  '포물선의 방정식': '포물선',
+};
+
+function calendarSubtitle(day: SummerDashboardDay): string {
+  if (day.role === 'learning') return compactLearningTitle[day.previewTitle] ?? day.previewTitle;
+  return '';
+}
+
+function calendarMeta(day: SummerDashboardDay): string {
+  if (day.learningNumber) return `${day.learningNumber}일차`;
+  if (day.role === 'supplement') return '보충';
+  if (day.role === 'review') return '오답';
+  if (day.role === 'mock') return day.title.replace('모의', '모의 ');
+  return day.title;
 }
 
 export function SummerSubjectDashboard({ subjectLabel, shortLabel, days, master, showSubjectChooser }: SummerSubjectDashboardProps) {
@@ -132,27 +183,30 @@ export function SummerSubjectDashboard({ subjectLabel, shortLabel, days, master,
                       type="button"
                       onClick={() => setSelectedDate(day.date)}
                       className={[
-                        'min-h-[112px] border-b border-r p-3 text-left transition last:border-r-0 focus:outline-none focus:ring-2 focus:ring-terracotta/30 md:min-h-[124px]',
+                        'min-h-[112px] border-b border-r p-2.5 text-left transition last:border-r-0 focus:outline-none focus:ring-2 focus:ring-terracotta/30 md:min-h-[124px] md:p-3',
                         roleClass[day.role],
                         selectedDay ? 'ring-2 ring-inset ring-terracotta' : '',
                       ].join(' ')}
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="text-[22px] font-black leading-none tracking-normal md:text-[24px]">{formatMd(day.date)}</p>
-                          <p className="mt-1 text-[12px] font-bold text-ink">
-                            {day.learningNumber ? `${day.learningNumber}일차` : day.title}
-                          </p>
-                        </div>
+                        <p className="min-w-0 whitespace-nowrap text-[11px] font-bold leading-none tracking-normal text-stone/70 md:text-[12px]">
+                          <span>{formatMd(day.date)}</span>
+                          <span className="ml-1 text-stone">{calendarMeta(day)}</span>
+                        </p>
                         {locked ? <Lock className="h-3.5 w-3.5 text-stone" /> : null}
                       </div>
+                      {calendarSubtitle(day) ? (
+                        <p className="mt-3 max-h-[3em] overflow-hidden break-keep text-[13px] font-black leading-snug text-ink md:text-[14px]">
+                          {calendarSubtitle(day)}
+                        </p>
+                      ) : null}
                       {day.role === 'review' || day.role === 'mock' || day.role === 'supplement' ? (
-                        <span className="mt-3 inline-flex rounded bg-yellow-400/70 px-1.5 py-0.5 text-[11px] font-bold text-ink">
+                        <span className={['mt-2 inline-flex rounded px-1.5 py-0.5 text-[11px] font-bold', badgeClass[day.role]].join(' ')}>
                           {day.title}
                         </span>
                       ) : null}
                       {day.role === 'learning' && locked ? (
-                        <p className="mt-3 text-[11px] font-medium leading-snug text-stone">
+                        <p className="mt-1.5 text-[10px] font-medium leading-snug text-stone md:text-[11px]">
                           {formatOpenAt(day.release.opensAt)}
                         </p>
                       ) : null}
@@ -190,6 +244,7 @@ export function SummerSubjectDashboard({ subjectLabel, shortLabel, days, master,
               <div className="mt-5 border-t border-border-cream pt-5">
                 {selected.release.kind === 'locked' ? (
                   <div className="rounded-lg bg-stone/10 px-4 py-4">
+                    {selected.role === 'learning' ? <p className="mb-2 break-keep text-[15px] font-bold leading-snug text-ink">{selected.previewTitle}</p> : null}
                     <p className="text-[14px] font-bold text-ink">아직 공개 전입니다.</p>
                     <p className="mt-1 break-keep text-[13px] leading-relaxed text-stone">
                       {formatOpenAt(selected.release.opensAt)} 이후 자료 링크가 열립니다.

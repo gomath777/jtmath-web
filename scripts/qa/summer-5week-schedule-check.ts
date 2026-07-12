@@ -23,9 +23,14 @@ function requestedCases(): readonly string[] {
         'all-subjects',
         'subject-specific-midterm',
         'ds-midterm-boundary',
+        'gs2-midterm-boundary',
+        'gs2-final-range-titles',
         'mj1-midterm-boundary',
+        'mock-labels',
         'release-windows',
         'pending-assets',
+        'gs2-first-lesson-ready',
+        'gs2-second-lesson-ready',
         'gh-first-lesson-ready',
         'ready-subjects-no-pending',
         'early-release',
@@ -53,16 +58,48 @@ function runCase(name: string): string {
       assertOk(days.length === 34, 'expected mj1 2026-07-13 through 2026-08-15');
       assertOk(learningDays === 17, 'expected mj1 17 learning days');
       assertOk(summerCalendar('ds').filter((day) => day.role === 'learning').length === 16, 'expected default subjects to have 16 learning days');
+      assertOk(summerCalendar('gs2').filter((day) => day.role === 'learning').length === 16, 'expected gs2 to keep 16 learning days');
       return `all-subjects: ok subjects=5 mj1Days=${days.length} mj1Learning=${learningDays}`;
     }
     case 'subject-specific-midterm': {
       assertOk(mustDay('mj1', '2026-07-29').role === 'review', 'mj1 should review on 7/29');
       assertOk(mustDay('mj1', '2026-07-30').role === 'mock', 'mj1 should mock on 7/30');
+      assertOk(mustDay('gs2', '2026-07-27').learningNumber === 9, 'gs2 should use 7/27 as day 9 learning');
+      assertOk(mustDay('gs2', '2026-07-28').role === 'review', 'gs2 should review on 7/28 only');
+      assertOk(mustDay('gs2', '2026-07-29').role === 'mock', 'gs2 should mock on 7/29');
+      assertOk(mustDay('gs2', '2026-08-10').learningNumber === 16, 'gs2 should finish 16 learning days on 8/10');
+      assertOk(mustDay('gs2', '2026-08-11').role === 'supplement', 'gs2 8/11 should become supplement after keeping 16 days');
       assertOk(mustDay('ds', '2026-07-27').role === 'review', 'default subjects should review on 7/27');
       assertOk(mustDay('ds', '2026-07-28').role === 'review', 'default subjects should review on 7/28');
       assertOk(mustDay('ds', '2026-07-29').role === 'mock', 'default subjects should mock on 7/29');
       assertOk(mustDay('ds', '2026-07-30').learningNumber === 9, 'default subjects should resume learning on 7/30');
-      return 'subject-specific-midterm: ok mj1 exception only';
+      return 'subject-specific-midterm: ok gs2-and-mj1-exceptions';
+    }
+    case 'gs2-midterm-boundary': {
+      const day3 = contentForDay('gs2', mustDay('gs2', '2026-07-16'));
+      const day5 = contentForDay('gs2', mustDay('gs2', '2026-07-20'));
+      const day9 = contentForDay('gs2', mustDay('gs2', '2026-07-27'));
+      assertOk(day3.kind === 'learning' && day3.title === '원의 방정식과 그래프', 'gs2 day 3 should show circle equation title');
+      assertOk(day5.kind === 'learning' && day5.title === '평행이동과 대칭이동', 'gs2 day 5 should combine transformations');
+      assertOk(day9.kind === 'learning' && day9.title === '중간범위 누적 정리', 'gs2 day 9 should close midterm range before review');
+      return 'gs2-midterm-boundary: ok one-review-midterm-plan';
+    }
+    case 'gs2-final-range-titles': {
+      const expected = [
+        ['2026-07-30', '명제와 조건'],
+        ['2026-07-31', '명제의 증명과 절대부등식'],
+        ['2026-08-03', '함수의 뜻과 그래프'],
+        ['2026-08-04', '합성함수와 역함수'],
+        ['2026-08-06', '유리함수'],
+        ['2026-08-07', '무리함수'],
+        ['2026-08-10', '유리함수와 무리함수 활용'],
+      ] as const;
+      for (const [date, title] of expected) {
+        const content = contentForDay('gs2', mustDay('gs2', date));
+        assertOk(content.kind === 'learning' && content.title === title, `gs2 ${date} should show ${title}`);
+        assertOk(content.kind === 'learning' && content.pending, `gs2 ${date} should remain pending until assets are uploaded`);
+      }
+      return 'gs2-final-range-titles: ok proposition-function-rational-irrational';
     }
     case 'ds-midterm-boundary': {
       const day8 = contentForDay('ds', mustDay('ds', '2026-07-24'));
@@ -78,19 +115,49 @@ function runCase(name: string): string {
       assertOk(day11.kind === 'learning' && day11.title === '방정식 부등식 활용, 속도와 가속도', 'mj1 final range should start with equations and inequalities');
       return 'mj1-midterm-boundary: ok graph-before-midterm equations-after';
     }
+    case 'mock-labels': {
+      const defaultMidterm = mustDay('ds', '2026-07-29');
+      const mj1Midterm = mustDay('mj1', '2026-07-30');
+      const defaultFinal = mustDay('ds', '2026-08-15');
+      assertOk(defaultMidterm.role === 'mock' && defaultMidterm.title === '모의중간', 'default subjects should label July mock as midterm');
+      assertOk(mj1Midterm.role === 'mock' && mj1Midterm.title === '모의중간', 'mj1 should label July mock as midterm');
+      assertOk(defaultFinal.role === 'mock' && defaultFinal.title === '모의기말', 'August mock should label as final');
+      return 'mock-labels: ok midterm-and-final';
+    }
     case 'release-windows': {
       const monday = releaseStateFor('2026-07-13', new Date('2026-07-12T00:00:00+09:00'), false);
       const tuesday = releaseStateFor('2026-07-14', new Date('2026-07-12T00:00:00+09:00'), false);
+      const ghTuesday = releaseStateFor('2026-07-14', new Date('2026-07-12T00:00:00+09:00'), false, 'gh');
+      const ghTuesdayOpen = releaseStateFor('2026-07-14', new Date('2026-07-13T21:00:00+09:00'), false, 'gh');
       const thursdayEarly = releaseStateFor('2026-07-16', new Date('2026-07-15T20:59:00+09:00'), false);
       const thursdayOpen = releaseStateFor('2026-07-16', new Date('2026-07-15T21:00:00+09:00'), false);
       assertOk(monday.kind === 'open' && tuesday.kind === 'open', 'Sunday should open Mon/Tue');
+      assertOk(ghTuesday.kind === 'locked' && ghTuesday.opensAt === '2026-07-13T21:00:00+09:00', 'gh Tuesday should stay locked until Monday night');
+      assertOk(ghTuesdayOpen.kind === 'open', 'gh Tuesday should open Monday night');
       assertOk(thursdayEarly.kind === 'locked' && thursdayOpen.kind === 'open', 'Wednesday night should open Thu/Fri');
       return 'release-windows: ok sunday-and-wednesday';
     }
     case 'pending-assets': {
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-16'));
+      assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 later lessons should be pending without links');
+      assertOk(gs2.kind === 'learning' && gs2.title === '원의 방정식과 그래프', 'gs2 pending lessons should keep planned unit title');
+      return 'pending-assets: ok gs2-later=planned-title';
+    }
+    case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
-      assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 should be pending without links');
-      return 'pending-assets: ok gs2=준비중';
+      assertOk(gs2.kind === 'learning' && !gs2.pending, 'gs2 first lesson should be ready');
+      assertOk(gs2.kind === 'learning' && gs2.title === '좌표평면의 거리와 선분의 내분점', 'gs2 first lesson title should match');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.kind === 'pdf'), 'gs2 first lesson should have note');
+      assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'video').length === 2, 'gs2 first lesson should have two videos');
+      return 'gs2-first-lesson-ready: ok note-and-two-videos';
+    }
+    case 'gs2-second-lesson-ready': {
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-14'));
+      assertOk(gs2.kind === 'learning' && !gs2.pending, 'gs2 second lesson should be ready');
+      assertOk(gs2.kind === 'learning' && gs2.title === '직선의 방정식과 점과 직선 사이의 거리', 'gs2 second lesson title should match');
+      assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'pdf').length === 2, 'gs2 second lesson should have two notes');
+      assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'video').length === 3, 'gs2 second lesson should have three videos');
+      return 'gs2-second-lesson-ready: ok two-notes-and-three-videos';
     }
     case 'gh-first-lesson-ready': {
       const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));
@@ -123,6 +190,7 @@ function runCase(name: string): string {
     case 'fake-pending-link': {
       const content = contentForDay('gs2', mustDay('gs2', '2026-07-20'));
       assertOk(content.kind === 'learning' && content.pending && content.resources.length === 0, 'pending content must not include links');
+      assertOk(content.kind === 'learning' && content.title !== '자료 준비중', 'pending content must still show a planned title');
       return 'fake-pending-link: ok';
     }
     default:

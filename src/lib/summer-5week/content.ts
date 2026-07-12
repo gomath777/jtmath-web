@@ -68,6 +68,125 @@ const GS1_LESSONS: readonly ConceptLesson[] = [
 
 const DS_LESSONS = [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2];
 const MJ1_LESSONS = [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2];
+const GS2_LESSONS: readonly ConceptLesson[] = [
+  {
+    order: 1,
+    title: '좌표평면의 거리와 선분의 내분점',
+    pdfs: [
+      {
+        name: '선분의 내분, 내분점의 좌표 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/01_%EB%8F%84%ED%98%95%EC%9D%98%EB%B0%A9%EC%A0%95%EC%8B%9D/1_1_1_%20%E1%84%89%E1%85%A5%E1%86%AB%E1%84%87%E1%85%AE%E1%86%AB%E1%84%8B%E1%85%B4%20%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE%E1%86%AB_%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%B7%E1%84%8B%E1%85%B4%20%E1%84%8C%E1%85%AA%E1%84%91%E1%85%AD.pdf?v=dd28d0ba5c',
+      },
+    ],
+    videos: [
+      { num: 1, title: '좌표평면의 거리', id: 'a9d3a234-bd1b-4b97-80b4-c80b4eef47d4' },
+      { num: 2, title: '선분의 내분점', id: 'd8ac7347-08c2-4e18-889c-945912bb343c' },
+    ],
+  },
+  {
+    order: 2,
+    title: '직선의 방정식과 점과 직선 사이의 거리',
+    pdfs: [
+      {
+        name: '두 직선의 평행 조건과 수직 조건 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/01_%EB%8F%84%ED%98%95%EC%9D%98%EB%B0%A9%EC%A0%95%EC%8B%9D/1_2_1_%20%E1%84%83%E1%85%AE%20%E1%84%8C%E1%85%B5%E1%86%A8%E1%84%89%E1%85%A5%E1%86%AB%E1%84%8B%E1%85%B4%20%E1%84%91%E1%85%A7%E1%86%BC%E1%84%92%E1%85%A2%E1%86%BC%20%E1%84%8C%E1%85%A9%E1%84%80%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AA%20%E1%84%89%E1%85%AE%E1%84%8C%E1%85%B5%E1%86%A8%20%E1%84%8C%E1%85%A9%E1%84%80%E1%85%A5%E1%86%AB.pdf?v=123598d795',
+      },
+      {
+        name: '점과 직선 사이의 거리 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/01_%EB%8F%84%ED%98%95%EC%9D%98%EB%B0%A9%EC%A0%95%EC%8B%9D/1_2_2_%20%E1%84%8C%E1%85%A5%E1%86%B7%E1%84%80%E1%85%AA%20%E1%84%8C%E1%85%B5%E1%86%A8%E1%84%89%E1%85%A5%E1%86%AB%20%E1%84%89%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%B4%20%E1%84%80%E1%85%A5%E1%84%85%E1%85%B5.pdf?v=374cf8f3c0',
+      },
+    ],
+    videos: [
+      { num: 3, title: '직선의 방정식', id: '088e36a4-926e-4876-849b-cea45e5b62c6' },
+      { num: 4, title: '두 직선의 위치관계', id: '522649b4-452f-45d4-bc4c-bb1c12b637e4' },
+      { num: 5, title: '점과 직선 사이의 거리', id: '9b63b85f-18de-4ea4-a6ee-c26b916e1daa' },
+    ],
+  },
+  {
+    order: 3,
+    title: '원의 방정식과 그래프',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 4,
+    title: '원과 직선의 위치관계',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 5,
+    title: '평행이동과 대칭이동',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 6,
+    title: '집합의 개념과 표현',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 7,
+    title: '두 집합 사이의 포함관계',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 8,
+    title: '집합의 연산과 벤 다이어그램',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 9,
+    title: '중간범위 누적 정리',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 10,
+    title: '명제와 조건',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 11,
+    title: '명제의 증명과 절대부등식',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 12,
+    title: '함수의 뜻과 그래프',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 13,
+    title: '합성함수와 역함수',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 14,
+    title: '유리함수',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 15,
+    title: '무리함수',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 16,
+    title: '유리함수와 무리함수 활용',
+    pdfs: [],
+    videos: [],
+  },
+];
 const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 1,
@@ -84,6 +203,7 @@ const GH_LESSONS: readonly ConceptLesson[] = [
 
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {
   gs1: GS1_LESSONS,
+  gs2: GS2_LESSONS,
   ds: DS_LESSONS,
   mj1: MJ1_LESSONS,
   gh: GH_LESSONS,
@@ -105,7 +225,7 @@ function labelContent(day: SummerDay): DayContent {
     return { kind: 'label', title: '오답 총정리', body: '별도 학습 페이지 없이 수업 중 오답과 질문을 정리합니다.' };
   }
   if (day.role === 'mock') {
-    return { kind: 'label', title: '모의시험', body: '시험 운영일입니다. 자료 링크는 따로 공개하지 않습니다.' };
+    return { kind: 'label', title: day.title, body: '시험 운영일입니다. 자료 링크는 따로 공개하지 않습니다.' };
   }
   if (day.role === 'rest') {
     return { kind: 'label', title: '휴식', body: '오늘은 정규 학습 자료 공개가 없습니다.' };
@@ -157,7 +277,7 @@ export function contentForDay(subject: SummerSubject, day: SummerDay): DayConten
 
     return {
       kind: 'learning',
-      title: '자료 준비중',
+      title: `${day.learningNumber}일차 학습 예정`,
       resources: [],
       conceptBookTask: '개념노트와 영상이 준비되는 대로 공개됩니다.',
       typeBookTask: '수업 안내에 따라 공통 과제를 진행하세요.',
@@ -165,12 +285,16 @@ export function contentForDay(subject: SummerSubject, day: SummerDay): DayConten
     };
   }
 
+  const resources = lessonResources(lesson);
+  const pending = subjectCanHavePendingResources(subject) && resources.length === 0;
   return {
     kind: 'learning',
     title: lesson.title,
-    resources: lessonResources(lesson),
-    conceptBookTask: `${lesson.title} 개념노트를 먼저 풀고 영상으로 확인하세요.`,
+    resources,
+    conceptBookTask: pending
+      ? `${lesson.title} 범위로 수업 예정입니다. 개념노트와 영상은 업로드 후 연결됩니다.`
+      : `${lesson.title} 개념노트를 먼저 풀고 영상으로 확인하세요.`,
     typeBookTask: '유형서는 수업에서 안내한 공통 범위를 진행하고 질문을 표시해 오세요.',
-    pending: false,
+    pending,
   };
 }

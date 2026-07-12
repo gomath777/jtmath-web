@@ -59,22 +59,46 @@ const MJ1_LEARNING_DATES = [
   '2026-08-11',
 ] as const;
 
+const GS2_LEARNING_DATES = [
+  '2026-07-13',
+  '2026-07-14',
+  '2026-07-16',
+  '2026-07-17',
+  '2026-07-20',
+  '2026-07-21',
+  '2026-07-23',
+  '2026-07-24',
+  '2026-07-27',
+  '2026-07-30',
+  '2026-07-31',
+  '2026-08-03',
+  '2026-08-04',
+  '2026-08-06',
+  '2026-08-07',
+  '2026-08-10',
+] as const;
+
 const DEFAULT_REVIEW_DATES = new Set(['2026-07-27', '2026-07-28', '2026-08-13', '2026-08-14']);
 const DEFAULT_MOCK_DATES = new Set(['2026-07-29', '2026-08-15']);
+const GS2_REVIEW_DATES = new Set(['2026-07-28', '2026-08-13', '2026-08-14']);
 const MJ1_REVIEW_DATES = new Set(['2026-07-29', '2026-08-13', '2026-08-14']);
 const MJ1_MOCK_DATES = new Set(['2026-07-30', '2026-08-15']);
 const DEFAULT_LEARNING_DATE_SET = new Set<string>(DEFAULT_LEARNING_DATES);
+const GS2_LEARNING_DATE_SET = new Set<string>(GS2_LEARNING_DATES);
 const MJ1_LEARNING_DATE_SET = new Set<string>(MJ1_LEARNING_DATES);
 
 function learningDatesFor(subject: SummerSubject): readonly string[] {
+  if (subject === 'gs2') return GS2_LEARNING_DATES;
   return subject === 'mj1' ? MJ1_LEARNING_DATES : DEFAULT_LEARNING_DATES;
 }
 
 function learningDateSetFor(subject: SummerSubject): ReadonlySet<string> {
+  if (subject === 'gs2') return GS2_LEARNING_DATE_SET;
   return subject === 'mj1' ? MJ1_LEARNING_DATE_SET : DEFAULT_LEARNING_DATE_SET;
 }
 
 function reviewDatesFor(subject: SummerSubject): ReadonlySet<string> {
+  if (subject === 'gs2') return GS2_REVIEW_DATES;
   return subject === 'mj1' ? MJ1_REVIEW_DATES : DEFAULT_REVIEW_DATES;
 }
 
@@ -105,7 +129,7 @@ function roleForDate(subject: SummerSubject, date: string): CalendarRole {
   return dayOfWeek(date) === 0 ? 'rest' : 'supplement';
 }
 
-function titleForRole(role: CalendarRole): string {
+function titleForRole(role: CalendarRole, date: string): string {
   switch (role) {
     case 'learning':
       return '학습일';
@@ -114,7 +138,7 @@ function titleForRole(role: CalendarRole): string {
     case 'review':
       return '오답 총정리';
     case 'mock':
-      return '모의시험';
+      return date.startsWith('2026-07') ? '모의중간' : '모의기말';
     case 'rest':
       return '휴식';
     default:
@@ -136,7 +160,7 @@ export function summerCalendar(subject: SummerSubject = 'mj1'): readonly SummerD
       week: Math.floor((dateUtcMs(cursor) - dateUtcMs(COURSE_START)) / (7 * 86_400_000)) + 1,
       dayOfWeek: day,
       role,
-      title: titleForRole(role),
+      title: titleForRole(role, cursor),
       learningNumber: learningIndex >= 0 ? learningIndex + 1 : null,
     });
     cursor = addDays(cursor, 1);
@@ -144,7 +168,8 @@ export function summerCalendar(subject: SummerSubject = 'mj1'): readonly SummerD
   return days;
 }
 
-export function releaseWindowFor(date: string): string {
+export function releaseWindowFor(date: string, subject: SummerSubject = 'mj1'): string {
+  if (subject === 'gh' && date === '2026-07-14') return '2026-07-13T21:00:00+09:00';
   const day = dayOfWeek(date);
   if (day === 1 || day === 2) return addDays(date, day === 1 ? -1 : -2);
   if (day === 4 || day === 5) return `${addDays(date, day === 4 ? -1 : -2)}T21:00:00+09:00`;
@@ -156,7 +181,7 @@ export function releaseStateFor(date: string, now: Date, master: boolean, subjec
   const role = roleForDate(subject, date);
   if (role !== 'learning') return { kind: 'open' };
 
-  const releaseWindow = releaseWindowFor(date);
+  const releaseWindow = releaseWindowFor(date, subject);
   const releaseMs = releaseWindow.includes('T')
     ? Date.parse(releaseWindow)
     : kstMs(releaseWindow, 0);

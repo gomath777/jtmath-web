@@ -83,7 +83,51 @@ if (mj1First.kind === 'learning') {
 const gs2First = contentForDay('gs2', day1);
 assert.equal(gs2First.kind, 'learning', 'gs2 content resolves as learning');
 if (gs2First.kind === 'learning') {
-  assert.equal(gs2First.pending, true, 'gs2 is allowed to show pending resources');
+  assert.equal(gs2First.pending, false, 'gs2 first day is ready');
+  assert.ok(gs2First.resources.some((resource) => resource.kind === 'pdf'), 'gs2 first day has note');
+  assert.equal(gs2First.resources.filter((resource) => resource.kind === 'video').length, 2, 'gs2 first day has two videos');
+}
+
+const gs2SecondDay = learningDay(2);
+const gs2Second = contentForDay('gs2', gs2SecondDay);
+assert.equal(gs2Second.kind, 'learning', 'gs2 second day resolves as learning');
+if (gs2Second.kind === 'learning') {
+  assert.equal(gs2Second.pending, false, 'gs2 second day is ready');
+  assert.equal(gs2Second.resources.filter((resource) => resource.kind === 'pdf').length, 2, 'gs2 second day has two notes');
+  assert.equal(gs2Second.resources.filter((resource) => resource.kind === 'video').length, 3, 'gs2 second day has three videos');
+}
+
+const gs2ThirdDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-16');
+assert.ok(gs2ThirdDay, 'gs2 third day exists');
+const gs2Third = contentForDay('gs2', gs2ThirdDay);
+assert.equal(gs2Third.kind, 'learning', 'gs2 third day resolves as learning');
+if (gs2Third.kind === 'learning') {
+  assert.equal(gs2Third.title, '원의 방정식과 그래프', 'gs2 third day uses planned unit title');
+  assert.equal(gs2Third.pending, true, 'gs2 planned-but-not-uploaded day remains pending');
+  assert.equal(gs2Third.resources.length, 0, 'gs2 planned-but-not-uploaded day has no fake links');
+}
+
+const gs2ReviewDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-28');
+assert.ok(gs2ReviewDay, 'gs2 review day exists');
+assert.equal(gs2ReviewDay.role, 'review', 'gs2 uses one midterm review day');
+assert.equal(summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-29')?.title, '모의중간', 'gs2 mock midterm follows review day');
+
+const gs2TenthDay = summerCalendar('gs2').find((candidate) => candidate.learningNumber === 10);
+assert.ok(gs2TenthDay, 'gs2 tenth learning day exists');
+const gs2Tenth = contentForDay('gs2', gs2TenthDay);
+assert.equal(gs2Tenth.kind, 'learning', 'gs2 tenth day resolves as learning');
+if (gs2Tenth.kind === 'learning') {
+  assert.equal(gs2Tenth.title, '명제와 조건', 'gs2 final range starts with proposition');
+  assert.equal(gs2Tenth.pending, true, 'gs2 final range stays pending until assets are uploaded');
+}
+
+const gs2SixteenthDay = summerCalendar('gs2').find((candidate) => candidate.learningNumber === 16);
+assert.ok(gs2SixteenthDay, 'gs2 sixteenth learning day exists');
+const gs2Sixteenth = contentForDay('gs2', gs2SixteenthDay);
+assert.equal(gs2Sixteenth.kind, 'learning', 'gs2 sixteenth day resolves as learning');
+if (gs2Sixteenth.kind === 'learning') {
+  assert.equal(gs2Sixteenth.title, '유리함수와 무리함수 활용', 'gs2 final range closes with rational and irrational functions');
+  assert.equal(gs2Sixteenth.pending, true, 'gs2 final range close stays pending until assets are uploaded');
 }
 
 const ghFirst = contentForDay('gh', day1);
