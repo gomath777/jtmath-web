@@ -196,6 +196,17 @@ const GH_LESSONS: readonly ConceptLesson[] = [
     ],
     videos: [{ num: 1, title: '포물선의 방정식', id: '8ff0facc-145e-4852-81ac-183dbbd668de' }],
   },
+  {
+    order: 2,
+    title: '타원의 방정식',
+    pdfs: [
+      {
+        name: '타원 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/02_%ED%83%80%EC%9B%90/1_1_2_%20%ED%83%80%EC%9B%90_v2.pdf',
+      },
+    ],
+    videos: [{ num: 2, title: '타원의 방정식', id: '9b04fbd3-018d-44b7-af35-7a2bd3d6f2c3' }],
+  },
 ];
 
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {

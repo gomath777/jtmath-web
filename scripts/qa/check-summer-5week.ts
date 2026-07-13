@@ -142,4 +142,14 @@ if (ghFirst.kind === 'learning') {
   assert.ok(ghFirst.resources.some((resource) => resource.kind === 'video'), 'gh first day has video');
 }
 
+const ghSecondDay = learningDay(2);
+const ghSecond = contentForDay('gh', ghSecondDay);
+assert.equal(ghSecond.kind, 'learning', 'gh second day resolves as learning');
+if (ghSecond.kind === 'learning') {
+  assert.equal(ghSecond.pending, false, 'gh second day is ready');
+  assert.equal(ghSecond.title, '타원의 방정식', 'gh second day uses ellipse lesson title');
+  assert.ok(ghSecond.resources.some((resource) => resource.label === '타원 개념노트'), 'gh second day has ellipse note');
+  assert.ok(ghSecond.resources.some((resource) => resource.label === '2강 타원의 방정식'), 'gh second day has ellipse video');
+}
+
 console.log('summer-5week qa checks passed');

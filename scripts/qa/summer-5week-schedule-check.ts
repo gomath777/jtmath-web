@@ -32,6 +32,7 @@ function requestedCases(): readonly string[] {
         'gs2-first-lesson-ready',
         'gs2-second-lesson-ready',
         'gh-first-lesson-ready',
+        'gh-second-lesson-ready',
         'ready-subjects-no-pending',
         'early-release',
         'missing-resource-url',
@@ -169,6 +170,14 @@ function runCase(name: string): string {
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.kind === 'pdf'), 'gh first lesson should have note');
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.kind === 'video'), 'gh first lesson should have video');
       return 'gh-first-lesson-ready: ok note-and-video';
+    }
+    case 'gh-second-lesson-ready': {
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-14'));
+      assertOk(gh.kind === 'learning' && !gh.pending, 'gh second lesson should be ready');
+      assertOk(gh.kind === 'learning' && gh.title === '타원의 방정식', 'gh second lesson title should match');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '타원 개념노트'), 'gh second lesson should use ellipse v2 note');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '2강 타원의 방정식'), 'gh second lesson should have lecture 2 video');
+      return 'gh-second-lesson-ready: ok note-and-video';
     }
     case 'ready-subjects-no-pending': {
       for (const subject of ['gs1', 'ds', 'mj1'] as const) {
