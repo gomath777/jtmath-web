@@ -146,10 +146,11 @@ function runCase(name: string): string {
     case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
       assertOk(gs2.kind === 'learning' && !gs2.pending, 'gs2 first lesson should be ready');
-      assertOk(gs2.kind === 'learning' && gs2.title === '좌표평면의 거리와 선분의 내분점', 'gs2 first lesson title should match');
+      assertOk(gs2.kind === 'learning' && gs2.title === '선분의 내분점', 'gs2 first lesson title should match');
       assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.kind === 'pdf'), 'gs2 first lesson should have note');
-      assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'video').length === 2, 'gs2 first lesson should have two videos');
-      return 'gs2-first-lesson-ready: ok note-and-two-videos';
+      assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'video').length === 1, 'gs2 first lesson should have one video');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '1강 선분의 내분점'), 'gs2 first lesson should use renumbered first video');
+      return 'gs2-first-lesson-ready: ok note-and-one-video';
     }
     case 'gs2-second-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-14'));
@@ -157,7 +158,9 @@ function runCase(name: string): string {
       assertOk(gs2.kind === 'learning' && gs2.title === '직선의 방정식과 점과 직선 사이의 거리', 'gs2 second lesson title should match');
       assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'pdf').length === 2, 'gs2 second lesson should have two notes');
       assertOk(gs2.kind === 'learning' && gs2.resources.filter((resource) => resource.kind === 'video').length === 3, 'gs2 second lesson should have three videos');
-      return 'gs2-second-lesson-ready: ok two-notes-and-three-videos';
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '2강 직선의 방정식'), 'gs2 second lesson should start at lecture 2');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '4강 점과 직선 사이의 거리'), 'gs2 second lesson should end at lecture 4');
+      return 'gs2-second-lesson-ready: ok two-notes-and-renumbered-three-videos';
     }
     case 'gh-first-lesson-ready': {
       const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));

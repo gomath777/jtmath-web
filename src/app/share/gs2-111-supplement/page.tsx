@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '공통수학2 · 1.1.1 보강자료',
-  description: '공통수학2 1.1.1 좌표평면의 거리와 선분의 내분점 보충 학습 자료',
+  description: '공통수학2 1.1.1 선분의 내분점 보충 학습 자료',
   robots: { index: false, follow: false },
 };
 
@@ -38,14 +38,8 @@ type PageProps = {
 const VIDEOS: readonly Video[] = [
   {
     step: '영상 1',
-    title: '좌표평면의 거리',
-    subtitle: '첫 번째 보강 영상입니다.',
-    id: 'a9d3a234-bd1b-4b97-80b4-c80b4eef47d4',
-  },
-  {
-    step: '영상 2',
     title: '선분의 내분점',
-    subtitle: '두 번째 보강 영상입니다.',
+    subtitle: '보강 영상입니다.',
     id: 'd8ac7347-08c2-4e18-889c-945912bb343c',
   },
 ];
@@ -71,11 +65,11 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
             <div className="mt-3 grid gap-5 md:grid-cols-[1fr_280px] md:items-end">
               <div>
                 <h1 className="font-serif text-[28px] leading-tight tracking-tight md:text-[34px]">
-                  1.1.1 좌표평면의 거리와 선분의 내분점
+                  1.1.1 선분의 내분점
                 </h1>
                 <p className="mt-3 max-w-2xl text-[14px] leading-6 text-olive">
-                  개념노트 1개와 보강 영상 2개로 구성했습니다. 노트를 먼저 받은 뒤,
-                  영상 1과 영상 2를 순서대로 확인하세요.
+                  개념노트 1개와 보강 영상 1개로 구성했습니다. 노트를 먼저 받은 뒤,
+                  영상을 확인하세요.
                 </p>
               </div>
               <div className="rounded-2xl border border-border-cream bg-ivory p-4 shadow-whisper">
@@ -87,11 +81,7 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
                   </li>
                   <li className="flex items-center gap-2">
                     <CheckCircle2 className="h-4 w-4 text-terracotta" />
-                    거리 공식 영상 보기
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-terracotta" />
-                    내분점 영상으로 마무리
+                    내분점 영상 보기
                   </li>
                 </ol>
               </div>
@@ -149,14 +139,13 @@ export default function Gs2Supplement111Page({ searchParams }: PageProps) {
                   <ol className="mt-3 space-y-2 text-[13px] leading-5 text-olive">
                     <li>1. 개념노트 받기</li>
                     <li>2. 영상 1 보기</li>
-                    <li>3. 영상 2 보기</li>
                   </ol>
                 </div>
                 <div className="rounded-2xl border border-border-cream bg-ivory p-4">
                   <p className="text-[13px] font-semibold text-ink">완료 기준</p>
                   <ol className="mt-3 space-y-2 text-[13px] leading-5 text-olive">
                     <li>1. 개념노트 다 풀기</li>
-                    <li>2. 영상 2개 다 보기</li>
+                    <li>2. 영상 1개 다 보기</li>
                     <li>3. 카톡으로 받은 복습 문제지 풀기</li>
                   </ol>
                   <p className="mt-3 text-[12px] leading-5 text-stone">

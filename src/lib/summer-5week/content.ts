@@ -71,17 +71,14 @@ const MJ1_LESSONS = [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2];
 const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 1,
-    title: '좌표평면의 거리와 선분의 내분점',
+    title: '선분의 내분점',
     pdfs: [
       {
         name: '선분의 내분, 내분점의 좌표 개념노트',
         url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/01_%EB%8F%84%ED%98%95%EC%9D%98%EB%B0%A9%EC%A0%95%EC%8B%9D/1_1_1_%20%E1%84%89%E1%85%A5%E1%86%AB%E1%84%87%E1%85%AE%E1%86%AB%E1%84%8B%E1%85%B4%20%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE%E1%86%AB_%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%B7%E1%84%8B%E1%85%B4%20%E1%84%8C%E1%85%AA%E1%84%91%E1%85%AD.pdf?v=dd28d0ba5c',
       },
     ],
-    videos: [
-      { num: 1, title: '좌표평면의 거리', id: 'a9d3a234-bd1b-4b97-80b4-c80b4eef47d4' },
-      { num: 2, title: '선분의 내분점', id: 'd8ac7347-08c2-4e18-889c-945912bb343c' },
-    ],
+    videos: [{ num: 1, title: '선분의 내분점', id: 'd8ac7347-08c2-4e18-889c-945912bb343c' }],
   },
   {
     order: 2,
@@ -97,9 +94,9 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
       },
     ],
     videos: [
-      { num: 3, title: '직선의 방정식', id: '088e36a4-926e-4876-849b-cea45e5b62c6' },
-      { num: 4, title: '두 직선의 위치관계', id: '522649b4-452f-45d4-bc4c-bb1c12b637e4' },
-      { num: 5, title: '점과 직선 사이의 거리', id: '9b63b85f-18de-4ea4-a6ee-c26b916e1daa' },
+      { num: 2, title: '직선의 방정식', id: '088e36a4-926e-4876-849b-cea45e5b62c6' },
+      { num: 3, title: '두 직선의 위치관계', id: '522649b4-452f-45d4-bc4c-bb1c12b637e4' },
+      { num: 4, title: '점과 직선 사이의 거리', id: '9b63b85f-18de-4ea4-a6ee-c26b916e1daa' },
     ],
   },
   {

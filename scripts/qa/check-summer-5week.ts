@@ -84,8 +84,10 @@ const gs2First = contentForDay('gs2', day1);
 assert.equal(gs2First.kind, 'learning', 'gs2 content resolves as learning');
 if (gs2First.kind === 'learning') {
   assert.equal(gs2First.pending, false, 'gs2 first day is ready');
+  assert.equal(gs2First.title, '선분의 내분점', 'gs2 first day uses renumbered lesson title');
   assert.ok(gs2First.resources.some((resource) => resource.kind === 'pdf'), 'gs2 first day has note');
-  assert.equal(gs2First.resources.filter((resource) => resource.kind === 'video').length, 2, 'gs2 first day has two videos');
+  assert.equal(gs2First.resources.filter((resource) => resource.kind === 'video').length, 1, 'gs2 first day has one video');
+  assert.ok(gs2First.resources.some((resource) => resource.label === '1강 선분의 내분점'), 'gs2 first day has renumbered lecture 1');
 }
 
 const gs2SecondDay = learningDay(2);
@@ -95,6 +97,8 @@ if (gs2Second.kind === 'learning') {
   assert.equal(gs2Second.pending, false, 'gs2 second day is ready');
   assert.equal(gs2Second.resources.filter((resource) => resource.kind === 'pdf').length, 2, 'gs2 second day has two notes');
   assert.equal(gs2Second.resources.filter((resource) => resource.kind === 'video').length, 3, 'gs2 second day has three videos');
+  assert.ok(gs2Second.resources.some((resource) => resource.label === '2강 직선의 방정식'), 'gs2 second day starts at lecture 2');
+  assert.ok(gs2Second.resources.some((resource) => resource.label === '4강 점과 직선 사이의 거리'), 'gs2 second day ends at lecture 4');
 }
 
 const gs2ThirdDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-16');
