@@ -105,7 +105,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
     pdfs: [
       {
         name: '원의 방정식과 그래프 개념노트',
-        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/02_%EC%9B%90%EC%9D%98%EA%B8%B0%EC%B4%88/1.3.1.%20%EC%9B%90%EC%9D%98%20%EB%B0%A9%EC%A0%95%EC%8B%9D%EA%B3%BC%20%EA%B7%B8%EB%9E%98%ED%94%84.pdf',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/02_%EC%9B%90%EC%9D%98%EA%B8%B0%EC%B4%88/1_3_1_%20%EC%9B%90%EC%9D%98%20%EB%B0%A9%EC%A0%95%EC%8B%9D%EA%B3%BC%20%EA%B7%B8%EB%9E%98%ED%94%84.pdf?v=6f1d47bb3851',
       },
     ],
     videos: [{ num: 5, title: '원의 방정식과 그래프', id: '7f6b2c8d-f52d-42b7-8348-1d7b6769b3ff' }],
