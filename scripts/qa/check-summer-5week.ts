@@ -107,8 +107,9 @@ const gs2Third = contentForDay('gs2', gs2ThirdDay);
 assert.equal(gs2Third.kind, 'learning', 'gs2 third day resolves as learning');
 if (gs2Third.kind === 'learning') {
   assert.equal(gs2Third.title, '원의 방정식과 그래프', 'gs2 third day uses planned unit title');
-  assert.equal(gs2Third.pending, true, 'gs2 planned-but-not-uploaded day remains pending');
-  assert.equal(gs2Third.resources.length, 0, 'gs2 planned-but-not-uploaded day has no fake links');
+  assert.equal(gs2Third.pending, false, 'gs2 third day is ready after circle equation upload');
+  assert.ok(gs2Third.resources.some((resource) => resource.label === '원의 방정식과 그래프 개념노트'), 'gs2 third day has circle equation note');
+  assert.ok(gs2Third.resources.some((resource) => resource.label === '5강 원의 방정식과 그래프'), 'gs2 third day has new lecture 5 video');
 }
 
 const gs2ReviewDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-28');

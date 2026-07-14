@@ -140,10 +140,10 @@ function runCase(name: string): string {
       return 'release-windows: ok sunday-and-wednesday';
     }
     case 'pending-assets': {
-      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-16'));
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-17'));
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 later lessons should be pending without links');
-      assertOk(gs2.kind === 'learning' && gs2.title === '원의 방정식과 그래프', 'gs2 pending lessons should keep planned unit title');
-      return 'pending-assets: ok gs2-later=planned-title';
+      assertOk(gs2.kind === 'learning' && gs2.title === '원과 직선의 위치관계', 'gs2 pending lessons should keep planned unit title');
+      return 'pending-assets: ok gs2-day4=planned-title';
     }
     case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
