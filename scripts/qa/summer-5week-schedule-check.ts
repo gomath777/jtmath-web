@@ -33,6 +33,7 @@ function requestedCases(): readonly string[] {
         'gs2-second-lesson-ready',
         'gh-first-lesson-ready',
         'gh-second-lesson-ready',
+        'gh-planned-midterm-titles',
         'ready-subjects-no-pending',
         'early-release',
         'missing-resource-url',
@@ -178,6 +179,22 @@ function runCase(name: string): string {
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '타원 개념노트'), 'gh second lesson should use ellipse v2 note');
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '2강 타원의 방정식'), 'gh second lesson should have lecture 2 video');
       return 'gh-second-lesson-ready: ok note-and-video';
+    }
+    case 'gh-planned-midterm-titles': {
+      const expected = [
+        ['2026-07-16', '쌍곡선과 이차곡선'],
+        ['2026-07-17', '포물선의 접선과 타원의 접선'],
+        ['2026-07-20', '쌍곡선의 접선'],
+        ['2026-07-21', '직선과 평면의 위치 관계'],
+        ['2026-07-23', '삼수선 정리'],
+        ['2026-07-24', '정사영'],
+      ] as const;
+      for (const [date, title] of expected) {
+        const gh = contentForDay('gh', mustDay('gh', date));
+        assertOk(gh.kind === 'learning' && gh.title === title, `gh ${date} should show ${title}`);
+        assertOk(gh.kind === 'learning' && gh.pending, `gh ${date} should remain pending until assets are uploaded`);
+      }
+      return 'gh-planned-midterm-titles: ok conic-and-space-plan';
     }
     case 'ready-subjects-no-pending': {
       for (const subject of ['gs1', 'ds', 'mj1'] as const) {

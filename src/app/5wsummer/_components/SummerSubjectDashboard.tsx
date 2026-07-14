@@ -116,6 +116,13 @@ const compactLearningTitle: Record<string, string> = {
   '함수의 연속': '함수의 연속',
   '연속함수의 성질': '연속함수 성질',
   '포물선의 방정식': '포물선',
+  '타원의 방정식': '타원',
+  '쌍곡선과 이차곡선': '쌍곡선·이차곡선',
+  '포물선의 접선과 타원의 접선': '포물선·타원 접선',
+  '쌍곡선의 접선': '쌍곡선 접선',
+  '직선과 평면의 위치 관계': '직선·평면 관계',
+  '삼수선 정리': '삼수선 정리',
+  정사영: '정사영',
 };
 
 function calendarSubtitle(day: SummerDashboardDay): string {

@@ -207,6 +207,42 @@ const GH_LESSONS: readonly ConceptLesson[] = [
     ],
     videos: [{ num: 2, title: '타원의 방정식', id: '9b04fbd3-018d-44b7-af35-7a2bd3d6f2c3' }],
   },
+  {
+    order: 3,
+    title: '쌍곡선과 이차곡선',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 4,
+    title: '포물선의 접선과 타원의 접선',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 5,
+    title: '쌍곡선의 접선',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 6,
+    title: '직선과 평면의 위치 관계',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 7,
+    title: '삼수선 정리',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 8,
+    title: '정사영',
+    pdfs: [],
+    videos: [],
+  },
 ];
 
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {

@@ -152,4 +152,23 @@ if (ghSecond.kind === 'learning') {
   assert.ok(ghSecond.resources.some((resource) => resource.label === '2강 타원의 방정식'), 'gh second day has ellipse video');
 }
 
+const ghThirdDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 3);
+assert.ok(ghThirdDay, 'gh third day exists');
+const ghThird = contentForDay('gh', ghThirdDay);
+assert.equal(ghThird.kind, 'learning', 'gh third day resolves as learning');
+if (ghThird.kind === 'learning') {
+  assert.equal(ghThird.title, '쌍곡선과 이차곡선', 'gh third day uses planned unit title');
+  assert.equal(ghThird.pending, true, 'gh third day remains pending until assets are uploaded');
+  assert.equal(ghThird.resources.length, 0, 'gh pending day has no fake links');
+}
+
+const ghEighthDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 8);
+assert.ok(ghEighthDay, 'gh eighth day exists');
+const ghEighth = contentForDay('gh', ghEighthDay);
+assert.equal(ghEighth.kind, 'learning', 'gh eighth day resolves as learning');
+if (ghEighth.kind === 'learning') {
+  assert.equal(ghEighth.title, '정사영', 'gh eighth day closes midterm range with projection');
+  assert.equal(ghEighth.pending, true, 'gh eighth day remains pending until assets are uploaded');
+}
+
 console.log('summer-5week qa checks passed');
