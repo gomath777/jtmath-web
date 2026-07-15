@@ -159,8 +159,9 @@ const ghThird = contentForDay('gh', ghThirdDay);
 assert.equal(ghThird.kind, 'learning', 'gh third day resolves as learning');
 if (ghThird.kind === 'learning') {
   assert.equal(ghThird.title, '쌍곡선과 이차곡선', 'gh third day uses planned unit title');
-  assert.equal(ghThird.pending, true, 'gh third day remains pending until assets are uploaded');
-  assert.equal(ghThird.resources.length, 0, 'gh pending day has no fake links');
+  assert.equal(ghThird.pending, false, 'gh third day is ready');
+  assert.ok(ghThird.resources.some((resource) => resource.label === '쌍곡선과 이차곡선 개념노트'), 'gh third day has hyperbola note');
+  assert.ok(ghThird.resources.some((resource) => resource.label === '3강 쌍곡선과 이차곡선'), 'gh third day has hyperbola video');
 }
 
 const ghEighthDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 8);

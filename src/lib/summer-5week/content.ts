@@ -215,8 +215,13 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 3,
     title: '쌍곡선과 이차곡선',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '쌍곡선과 이차곡선 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/03_%EC%8C%8D%EA%B3%A1%EC%84%A0_%EC%9D%B4%EC%B0%A8%EA%B3%A1%EC%84%A0/1_1_3_%20%EC%8C%8D%EA%B3%A1%EC%84%A0%EA%B3%BC%20%EC%9D%B4%EC%B0%A8%EA%B3%A1%EC%84%A0.pdf?v=3af2c760d57f',
+      },
+    ],
+    videos: [{ num: 3, title: '쌍곡선과 이차곡선', id: '71c74973-b9cf-4a62-b328-f03272f3a4bb' }],
   },
   {
     order: 4,

@@ -33,6 +33,7 @@ function requestedCases(): readonly string[] {
         'gs2-second-lesson-ready',
         'gh-first-lesson-ready',
         'gh-second-lesson-ready',
+        'gh-third-lesson-ready',
         'gh-planned-midterm-titles',
         'ready-subjects-no-pending',
         'early-release',
@@ -180,9 +181,16 @@ function runCase(name: string): string {
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '2강 타원의 방정식'), 'gh second lesson should have lecture 2 video');
       return 'gh-second-lesson-ready: ok note-and-video';
     }
+    case 'gh-third-lesson-ready': {
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-16'));
+      assertOk(gh.kind === 'learning' && !gh.pending, 'gh third lesson should be ready');
+      assertOk(gh.kind === 'learning' && gh.title === '쌍곡선과 이차곡선', 'gh third lesson title should match');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '쌍곡선과 이차곡선 개념노트'), 'gh third lesson should have hyperbola note');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '3강 쌍곡선과 이차곡선'), 'gh third lesson should have lecture 3 video');
+      return 'gh-third-lesson-ready: ok note-and-video';
+    }
     case 'gh-planned-midterm-titles': {
       const expected = [
-        ['2026-07-16', '쌍곡선과 이차곡선'],
         ['2026-07-17', '포물선의 접선과 타원의 접선'],
         ['2026-07-20', '쌍곡선의 접선'],
         ['2026-07-21', '직선과 평면의 위치 관계'],
@@ -194,7 +202,7 @@ function runCase(name: string): string {
         assertOk(gh.kind === 'learning' && gh.title === title, `gh ${date} should show ${title}`);
         assertOk(gh.kind === 'learning' && gh.pending, `gh ${date} should remain pending until assets are uploaded`);
       }
-      return 'gh-planned-midterm-titles: ok conic-and-space-plan';
+      return 'gh-planned-midterm-titles: ok remaining-plan';
     }
     case 'ready-subjects-no-pending': {
       for (const subject of ['gs1', 'ds', 'mj1'] as const) {
