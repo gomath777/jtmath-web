@@ -30,6 +30,13 @@ Scope: this file applies to the whole repository.
 - Treat `npm run admin:release`, `npm run admin:release-lesson` without `--dry-run`, upload scripts, migration scripts, Vercel changes, Supabase writes, Bunny uploads, Resend sends, Toss actions, and Anthropic parsing calls as confirmation-required.
 - `next.config.mjs` currently allows build-time TypeScript/ESLint errors to be ignored, so a green build is not enough evidence.
 
+## GS2 Renewal Assets
+
+- For 공수2, the renewed concept course is the default. Old 공수2 assets must never be used for `/5wsummer/gs2`, renewed concept pages, or student-facing GS2 links unless the operator explicitly says "old", "올드", or `gs2-old`.
+- Treat `(개념노트)/1_공수2` and `(공수2) 개념강의` as the active source folders. Treat `(개념노트)/99_공수2`, `content/gs2_concept`, `gs2-concept-pdfs-raw`, `concept/gs2-old`, and files prefixed like `하99_` as archive/legacy-only.
+- Before any GS2 upload or link change, compare file size, page count or duration, modified time, and hash against the currently linked asset. If the active and old sources conflict, stop and ask instead of guessing.
+- When replacing a GS2 PDF at Bunny, archive the old object under an old/archive path first, then link the renewed object with a fresh filename or cache-busting URL and verify the public CDN response.
+
 ## Handoff
 
 - Keep repo-level guidance short. Put detailed operating steps in `docs/codex-operations.md`.

@@ -26,6 +26,31 @@ This playbook is for operating `/Users/cego/building/mathgo-web` after the Claud
 - Release support should confirm whether the target is the legacy session release flow or the SLA lesson release flow.
 - Wrapup should summarize changed files, data writes, generated files, command evidence, unresolved risks, and any next verification needed.
 
+## GS2 Renewal Asset Rules
+
+공수2 is in active renewal. The renewed course is the normal path; the old course is an archive path. Do not infer that an older local file is correct just because it already exists in Bunny or in legacy content folders.
+
+### Source-of-truth folders
+
+| Asset type | Active renewal source | Archive or legacy-only source |
+|---|---|---|
+| Concept notes | `/Users/cego/Library/CloudStorage/GoogleDrive-gochangeon@gmail.com/My Drive/0lecture_vid/(개념노트)/1_공수2` | `(개념노트)/99_공수2`, `content/gs2_concept`, `/Users/cego/gs2-concept-pdfs-raw` |
+| Concept videos | `/Users/cego/Library/CloudStorage/GoogleDrive-gochangeon@gmail.com/My Drive/0lecture_vid/(공수2) 개념강의` | files prefixed like `하99_`, old Stream IDs, or folders explicitly named old/archive |
+| Bunny PDF CDN | `https://mathgo-pdfs.b-cdn.net/concept/gs2/...` for renewed student-facing links | `concept/gs2-old/...` or any path explicitly containing old/archive |
+| 5-week page data | `src/lib/summer-5week/content.ts` GS2 lesson entries | old share pages, historical raw downloads, or unverified manifests |
+
+### Mandatory GS2 upload checklist
+
+1. Identify whether the operator asked for renewed GS2 or explicitly asked for old GS2. If the request does not say old, assume renewed.
+2. Read the active source folder first. Only inspect old/archive folders to compare or archive.
+3. Before upload/linking, record local evidence without exposing secrets: file path, byte size, page count for PDFs, duration for videos when available, modified time, and short hash.
+4. Compare against the currently public asset. If the public asset is smaller, older, or has fewer pages than the active source, treat public as stale even if the filename looks correct.
+5. Archive before replacing: copy the old public object to `concept/gs2-old/...` or another explicit archive path. Do not delete old assets during renewal work.
+6. Prefer a renewed filename style using lesson codes with underscores, for example `1_3_1_ 원의 방정식과 그래프.pdf`, when the existing dotted filename is cached or known to be old.
+7. After Bunny upload, verify the public CDN response for the exact student URL: HTTP 200, expected content length, expected hash when practical, and no stale old URL in the target page.
+8. For `/5wsummer/gs2`, run `npx tsx scripts/qa/check-summer-5week.ts`, `npx tsx scripts/qa/summer-5week-schedule-check.ts`, and `npm run build`. Remember that build skips type and lint checks in this project.
+9. If any source folder, naming convention, Bunny response, or manifest conflicts, stop and ask a narrow question. Do not choose between old and renewed GS2 by filename alone.
+
 ## Command Matrix
 
 | Category | Examples | Rule |
