@@ -231,8 +231,20 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 4,
     title: '포물선의 접선과 타원의 접선',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '포물선의 접선의 방정식 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/04_%EC%A0%91%EC%84%A0/1_2_1_%20%ED%8F%AC%EB%AC%BC%EC%84%A0%EC%9D%98%20%EC%A0%91%EC%84%A0%EC%9D%98%20%EB%B0%A9%EC%A0%95%EC%8B%9D.pdf?v=9c91b0efeeac',
+      },
+      {
+        name: '타원의 접선의 방정식 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/04_%EC%A0%91%EC%84%A0/1_2_2_%20%ED%83%80%EC%9B%90%EC%9D%98%20%EC%A0%91%EC%84%A0%EC%9D%98%20%EB%B0%A9%EC%A0%95%EC%8B%9D.pdf?v=46f4abc657fc',
+      },
+    ],
+    videos: [
+      { num: 4, title: '포물선의 접선의 방정식', id: 'f961c224-b7c3-431f-b2e0-6e16dae0114c' },
+      { num: 5, title: '타원의 접선의 방정식', id: 'e982297d-6795-455e-b273-a34e4f9306cd' },
+    ],
   },
   {
     order: 5,

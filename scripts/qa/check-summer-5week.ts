@@ -175,6 +175,21 @@ if (ghThird.kind === 'learning') {
   assert.ok(ghThird.resources.some((resource) => resource.label === '3강 쌍곡선과 이차곡선'), 'gh third day has hyperbola video');
 }
 
+const ghFourthDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 4);
+assert.ok(ghFourthDay, 'gh fourth day exists');
+const ghFourth = contentForDay('gh', ghFourthDay);
+assert.equal(ghFourth.kind, 'learning', 'gh fourth day resolves as learning');
+if (ghFourth.kind === 'learning') {
+  assert.equal(ghFourth.title, '포물선의 접선과 타원의 접선', 'gh fourth day uses planned tangent title');
+  assert.equal(ghFourth.pending, false, 'gh fourth day is ready');
+  assert.equal(ghFourth.resources.filter((resource) => resource.kind === 'pdf').length, 2, 'gh fourth day has two active v2 notes');
+  assert.equal(ghFourth.resources.filter((resource) => resource.kind === 'video').length, 2, 'gh fourth day has two videos');
+  assert.ok(ghFourth.resources.some((resource) => resource.label === '포물선의 접선의 방정식 개념노트'), 'gh fourth day has parabola tangent note');
+  assert.ok(ghFourth.resources.some((resource) => resource.label === '타원의 접선의 방정식 개념노트'), 'gh fourth day has ellipse tangent note');
+  assert.ok(ghFourth.resources.some((resource) => resource.label === '4강 포물선의 접선의 방정식'), 'gh fourth day has parabola tangent video');
+  assert.ok(ghFourth.resources.some((resource) => resource.label === '5강 타원의 접선의 방정식'), 'gh fourth day has ellipse tangent video');
+}
+
 const ghEighthDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 8);
 assert.ok(ghEighthDay, 'gh eighth day exists');
 const ghEighth = contentForDay('gh', ghEighthDay);
