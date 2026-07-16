@@ -31,6 +31,7 @@ function requestedCases(): readonly string[] {
         'pending-assets',
         'gs2-first-lesson-ready',
         'gs2-second-lesson-ready',
+        'gs2-fourth-lesson-ready',
         'gh-first-lesson-ready',
         'gh-second-lesson-ready',
         'gh-third-lesson-ready',
@@ -141,10 +142,10 @@ function runCase(name: string): string {
       return 'release-windows: ok sunday-and-wednesday';
     }
     case 'pending-assets': {
-      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-17'));
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-20'));
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 later lessons should be pending without links');
-      assertOk(gs2.kind === 'learning' && gs2.title === '원과 직선의 위치관계', 'gs2 pending lessons should keep planned unit title');
-      return 'pending-assets: ok gs2-day4=planned-title';
+      assertOk(gs2.kind === 'learning' && gs2.title === '평행이동과 대칭이동', 'gs2 pending lessons should keep planned unit title');
+      return 'pending-assets: ok gs2-day5=planned-title';
     }
     case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
@@ -164,6 +165,14 @@ function runCase(name: string): string {
       assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '2강 직선의 방정식'), 'gs2 second lesson should start at lecture 2');
       assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '4강 점과 직선 사이의 거리'), 'gs2 second lesson should end at lecture 4');
       return 'gs2-second-lesson-ready: ok two-notes-and-renumbered-three-videos';
+    }
+    case 'gs2-fourth-lesson-ready': {
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-17'));
+      assertOk(gs2.kind === 'learning' && !gs2.pending, 'gs2 fourth lesson should be ready');
+      assertOk(gs2.kind === 'learning' && gs2.title === '원과 직선의 위치관계', 'gs2 fourth lesson title should match');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '원과 직선의 위치관계 개념노트'), 'gs2 fourth lesson should have active v2 note');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '6강 원과 직선의 위치관계'), 'gs2 fourth lesson should have lecture 6 video');
+      return 'gs2-fourth-lesson-ready: ok note-and-video';
     }
     case 'gh-first-lesson-ready': {
       const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));

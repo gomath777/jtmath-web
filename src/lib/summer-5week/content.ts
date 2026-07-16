@@ -113,8 +113,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 4,
     title: '원과 직선의 위치관계',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '원과 직선의 위치관계 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/02_%EC%9B%90%EC%9D%98%EA%B8%B0%EC%B4%88/1_3_2_%20%EC%A2%8C%ED%91%9C%ED%8F%89%EB%A9%B4%EC%97%90%EC%84%9C%20%EC%9B%90%EA%B3%BC%20%EC%A7%81%EC%84%A0%EC%9D%98%20%EC%9C%84%EC%B9%98%20%EA%B4%80%EA%B3%84.pdf?v=da2a6213c364',
+      },
+    ],
+    videos: [{ num: 6, title: '원과 직선의 위치관계', id: '345facc4-4e4e-4089-bf6f-03ec0bbe77d5' }],
   },
   {
     order: 5,

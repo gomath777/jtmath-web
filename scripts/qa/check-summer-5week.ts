@@ -112,6 +112,17 @@ if (gs2Third.kind === 'learning') {
   assert.ok(gs2Third.resources.some((resource) => resource.label === '5강 원의 방정식과 그래프'), 'gs2 third day has new lecture 5 video');
 }
 
+const gs2FourthDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-17');
+assert.ok(gs2FourthDay, 'gs2 fourth day exists');
+const gs2Fourth = contentForDay('gs2', gs2FourthDay);
+assert.equal(gs2Fourth.kind, 'learning', 'gs2 fourth day resolves as learning');
+if (gs2Fourth.kind === 'learning') {
+  assert.equal(gs2Fourth.title, '원과 직선의 위치관계', 'gs2 fourth day uses planned unit title');
+  assert.equal(gs2Fourth.pending, false, 'gs2 fourth day is ready after circle-line upload');
+  assert.ok(gs2Fourth.resources.some((resource) => resource.label === '원과 직선의 위치관계 개념노트'), 'gs2 fourth day has circle-line note');
+  assert.ok(gs2Fourth.resources.some((resource) => resource.label === '6강 원과 직선의 위치관계'), 'gs2 fourth day has lecture 6 video');
+}
+
 const gs2ReviewDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-28');
 assert.ok(gs2ReviewDay, 'gs2 review day exists');
 assert.equal(gs2ReviewDay.role, 'review', 'gs2 uses one midterm review day');
