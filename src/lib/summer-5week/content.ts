@@ -259,9 +259,14 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 5,
-    title: '쌍곡선의 접선',
-    pdfs: [],
-    videos: [],
+    title: '쌍곡선의 접선의 방정식',
+    pdfs: [
+      {
+        name: '쌍곡선의 접선의 방정식 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/04_%EC%A0%91%EC%84%A0/1_2_3_%20%EC%8C%8D%EA%B3%A1%EC%84%A0%EC%9D%98%20%EC%A0%91%EC%84%A0%EC%9D%98%20%EB%B0%A9%EC%A0%95%EC%8B%9D_v2.pdf?v=bd9839bf2210',
+      },
+    ],
+    videos: [{ num: 6, title: '쌍곡선의 접선의 방정식', id: 'bc46aa35-74c5-4168-97d0-a1ccef7a6572' }],
   },
   {
     order: 6,
