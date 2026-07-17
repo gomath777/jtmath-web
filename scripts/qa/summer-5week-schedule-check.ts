@@ -29,6 +29,7 @@ function requestedCases(): readonly string[] {
         'mock-labels',
         'release-windows',
         'pending-assets',
+        'gs1-first-week-ready',
         'gs2-first-lesson-ready',
         'gs2-second-lesson-ready',
         'gs2-fourth-lesson-ready',
@@ -147,6 +148,22 @@ function runCase(name: string): string {
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 later lessons should be pending without links');
       assertOk(gs2.kind === 'learning' && gs2.title === '평행이동과 대칭이동', 'gs2 pending lessons should keep planned unit title');
       return 'pending-assets: ok gs2-day5=planned-title';
+    }
+    case 'gs1-first-week-ready': {
+      const expected = [
+        ['2026-07-13', '다항식의 연산', '다항식의 사칙연산', '1강 다항식의 연산'],
+        ['2026-07-14', '나머지정리', '항등식과 나머지정리', '2강 나머지정리'],
+        ['2026-07-16', '인수분해', '다항식의 인수분해', '3강 인수분해'],
+        ['2026-07-17', '복소수', '복소수의 뜻과 성질', '4강 복소수'],
+      ] as const;
+      for (const [date, title, note, video] of expected) {
+        const content = contentForDay('gs1', mustDay('gs1', date));
+        assertOk(content.kind === 'learning' && !content.pending, `gs1 ${date} should be ready`);
+        assertOk(content.kind === 'learning' && content.title === title, `gs1 ${date} should show ${title}`);
+        assertOk(content.kind === 'learning' && content.resources.some((resource) => resource.label === note), `gs1 ${date} should have note`);
+        assertOk(content.kind === 'learning' && content.resources.some((resource) => resource.label === video), `gs1 ${date} should have video`);
+      }
+      return 'gs1-first-week-ready: ok four-days-notes-and-videos';
     }
     case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));

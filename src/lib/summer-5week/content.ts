@@ -64,6 +64,17 @@ const GS1_LESSONS: readonly ConceptLesson[] = [
     ],
     videos: [{ num: 3, title: '인수분해', id: '715d2be6-b623-41fd-b57c-712311ef865d' }],
   },
+  {
+    order: 4,
+    title: '복소수',
+    pdfs: [
+      {
+        name: '복소수의 뜻과 성질',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/04_%EB%B3%B5%EC%86%8C%EC%88%98/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.1.1.%20%EB%B3%B5%EC%86%8C%EC%88%98%EC%9D%98%20%EB%9C%BB%EA%B3%BC%20%EC%84%B1%EC%A7%88.pdf',
+      },
+    ],
+    videos: [{ num: 4, title: '복소수', id: 'c108f45e-ada8-4b12-8690-8dcc3acced2e' }],
+  },
 ];
 
 const DS_LESSONS = [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2];

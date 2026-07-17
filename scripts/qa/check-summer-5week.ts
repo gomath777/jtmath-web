@@ -90,6 +90,26 @@ if (gs2First.kind === 'learning') {
   assert.ok(gs2First.resources.some((resource) => resource.label === '1강 선분의 내분점'), 'gs2 first day has renumbered lecture 1');
 }
 
+const gs1WeekOne = [
+  ['2026-07-13', '다항식의 연산', '다항식의 사칙연산', '1강 다항식의 연산'],
+  ['2026-07-14', '나머지정리', '항등식과 나머지정리', '2강 나머지정리'],
+  ['2026-07-16', '인수분해', '다항식의 인수분해', '3강 인수분해'],
+  ['2026-07-17', '복소수', '복소수의 뜻과 성질', '4강 복소수'],
+] as const;
+
+for (const [date, title, note, video] of gs1WeekOne) {
+  const day = summerCalendar('gs1').find((candidate) => candidate.date === date);
+  assert.ok(day, `gs1 ${date} exists`);
+  const content = contentForDay('gs1', day);
+  assert.equal(content.kind, 'learning', `gs1 ${date} resolves as learning`);
+  if (content.kind === 'learning') {
+    assert.equal(content.pending, false, `gs1 ${date} is ready`);
+    assert.equal(content.title, title, `gs1 ${date} title matches`);
+    assert.ok(content.resources.some((resource) => resource.label === note), `gs1 ${date} has concept note`);
+    assert.ok(content.resources.some((resource) => resource.label === video), `gs1 ${date} has concept video`);
+  }
+}
+
 const gs2SecondDay = learningDay(2);
 const gs2Second = contentForDay('gs2', gs2SecondDay);
 assert.equal(gs2Second.kind, 'learning', 'gs2 second day resolves as learning');
