@@ -135,8 +135,20 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 5,
     title: '평행이동과 대칭이동',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '평행이동 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/03_%EB%8F%84%ED%98%95%EC%9D%98%EC%9D%B4%EB%8F%99/1_4_1_%20%ED%8F%89%ED%96%89%EC%9D%B4%EB%8F%99.pdf?v=0ff2a86a29',
+      },
+      {
+        name: '대칭이동 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/03_%EB%8F%84%ED%98%95%EC%9D%98%EC%9D%B4%EB%8F%99/1_4_2_%20%EB%8C%80%EC%B9%AD%EC%9D%B4%EB%8F%99.pdf?v=efc24ed166',
+      },
+    ],
+    videos: [
+      { num: 7, title: '평행이동', id: '11c31370-fedf-4216-88d8-6f4a56174877' },
+      { num: 8, title: '대칭이동', id: 'cd457a3e-b487-4342-964d-d1139dba5bc2' },
+    ],
   },
   {
     order: 6,
