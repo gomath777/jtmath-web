@@ -39,6 +39,7 @@ function requestedCases(): readonly string[] {
         'gh-third-lesson-ready',
         'gh-fourth-lesson-ready',
         'gh-fifth-lesson-ready',
+        'gh-sixth-lesson-ready',
         'gh-planned-midterm-titles',
         'ready-subjects-no-pending',
         'early-release',
@@ -246,9 +247,16 @@ function runCase(name: string): string {
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '6강 쌍곡선의 접선의 방정식'), 'gh fifth lesson should have lecture 6 video');
       return 'gh-fifth-lesson-ready: ok note-and-video';
     }
+    case 'gh-sixth-lesson-ready': {
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-21'));
+      assertOk(gh.kind === 'learning' && !gh.pending, 'gh sixth lesson should be ready');
+      assertOk(gh.kind === 'learning' && gh.title === '직선과 평면의 위치 관계', 'gh sixth lesson title should match');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '직선과 평면의 위치 관계 개념노트'), 'gh sixth lesson should have line-plane position note');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '7강 직선과 평면의 위치관계'), 'gh sixth lesson should have lecture 7 video');
+      return 'gh-sixth-lesson-ready: ok note-and-video';
+    }
     case 'gh-planned-midterm-titles': {
       const expected = [
-        ['2026-07-21', '직선과 평면의 위치 관계'],
         ['2026-07-23', '삼수선 정리'],
         ['2026-07-24', '정사영'],
       ] as const;
