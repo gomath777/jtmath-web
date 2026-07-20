@@ -39,6 +39,8 @@ const DEFAULT_LEARNING_DATES = [
   '2026-08-11',
 ] as const;
 
+const GS1_LEARNING_DATES = [...DEFAULT_LEARNING_DATES, '2026-08-13', '2026-08-14'] as const;
+
 const MJ1_LEARNING_DATES = [
   '2026-07-13',
   '2026-07-14',
@@ -80,24 +82,29 @@ const GS2_LEARNING_DATES = [
 
 const DEFAULT_REVIEW_DATES = new Set(['2026-07-27', '2026-07-28', '2026-08-13', '2026-08-14']);
 const DEFAULT_MOCK_DATES = new Set(['2026-07-29', '2026-08-15']);
+const GS1_REVIEW_DATES = new Set(['2026-07-27', '2026-07-28']);
 const GS2_REVIEW_DATES = new Set(['2026-07-28', '2026-08-13', '2026-08-14']);
 const MJ1_REVIEW_DATES = new Set(['2026-07-29', '2026-08-13', '2026-08-14']);
 const MJ1_MOCK_DATES = new Set(['2026-07-30', '2026-08-15']);
 const DEFAULT_LEARNING_DATE_SET = new Set<string>(DEFAULT_LEARNING_DATES);
+const GS1_LEARNING_DATE_SET = new Set<string>(GS1_LEARNING_DATES);
 const GS2_LEARNING_DATE_SET = new Set<string>(GS2_LEARNING_DATES);
 const MJ1_LEARNING_DATE_SET = new Set<string>(MJ1_LEARNING_DATES);
 
 function learningDatesFor(subject: SummerSubject): readonly string[] {
+  if (subject === 'gs1') return GS1_LEARNING_DATES;
   if (subject === 'gs2') return GS2_LEARNING_DATES;
   return subject === 'mj1' ? MJ1_LEARNING_DATES : DEFAULT_LEARNING_DATES;
 }
 
 function learningDateSetFor(subject: SummerSubject): ReadonlySet<string> {
+  if (subject === 'gs1') return GS1_LEARNING_DATE_SET;
   if (subject === 'gs2') return GS2_LEARNING_DATE_SET;
   return subject === 'mj1' ? MJ1_LEARNING_DATE_SET : DEFAULT_LEARNING_DATE_SET;
 }
 
 function reviewDatesFor(subject: SummerSubject): ReadonlySet<string> {
+  if (subject === 'gs1') return GS1_REVIEW_DATES;
   if (subject === 'gs2') return GS2_REVIEW_DATES;
   return subject === 'mj1' ? MJ1_REVIEW_DATES : DEFAULT_REVIEW_DATES;
 }

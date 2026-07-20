@@ -75,6 +75,173 @@ const GS1_LESSONS: readonly ConceptLesson[] = [
     ],
     videos: [{ num: 4, title: '복소수', id: 'c108f45e-ada8-4b12-8690-8dcc3acced2e' }],
   },
+  {
+    order: 5,
+    title: '이차방정식의 풀이',
+    pdfs: [
+      {
+        name: '이차방정식의 풀이 · 판별식',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/05_%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.1.2.%20%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D%EC%9D%98%20%ED%92%80%EC%9D%B4.pdf',
+      },
+    ],
+    videos: [{ num: 5, title: '이차방정식의 풀이', id: '39fdef7f-4e14-4bea-a357-2e1a3595040f' }],
+  },
+  {
+    order: 6,
+    title: '이차방정식의 근과 계수',
+    pdfs: [
+      {
+        name: '근과 계수의 관계',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/05_%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.1.3.%20%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D%EC%9D%98%20%EA%B7%BC%EA%B3%BC%20%EA%B3%84%EC%88%98%EC%9D%98%20%EA%B4%80%EA%B3%84.pdf',
+      },
+    ],
+    videos: [{ num: 6, title: '이차방정식의 근과 계수', id: '92d6e5f4-5084-49ec-879e-34bb72a1158d' }],
+  },
+  {
+    order: 7,
+    title: '이차방정식과 이차함수의 관계',
+    pdfs: [
+      {
+        name: '이차방정식과 이차함수의 관계',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/06_%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EA%B4%80%EA%B3%84/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.2.1.%20%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D%EA%B3%BC%20%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EC%9D%98%20%EA%B4%80%EA%B3%84.pdf',
+      },
+    ],
+    videos: [
+      {
+        num: 7,
+        title: '이차방정식과 이차함수의 관계',
+        id: '31a2bfa9-6d91-4f33-bddc-e89409e6b50d',
+      },
+    ],
+  },
+  {
+    order: 8,
+    title: '이차함수의 그래프와 최대·최소',
+    pdfs: [
+      {
+        name: '이차함수 그래프와 직선의 위치관계',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/06_%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EA%B4%80%EA%B3%84/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.2.2.%20%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EC%9D%98%20%EA%B7%B8%EB%9E%98%ED%94%84%EC%99%80%20%EC%A7%81%EC%84%A0%EC%9D%98%20%EC%9C%84%EC%B9%98%20%EA%B4%80%EA%B3%84.pdf',
+      },
+      {
+        name: '이차함수의 최대·최소',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/07_%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EC%B5%9C%EB%8C%80%EC%B5%9C%EC%86%8C/%EA%B3%B5%EC%88%981%20%EA%B0%9C%EB%85%90%202.2.3.%20%EC%9D%B4%EC%B0%A8%ED%95%A8%EC%88%98%EC%9D%98%20%EC%B5%9C%EB%8C%80-%EC%B5%9C%EC%86%8C.pdf',
+      },
+    ],
+    videos: [
+      { num: 8, title: '이차함수 그래프와 직선의 위치관계', id: '2bb74c4f-a1e4-49c7-9599-e13c701ce615' },
+      { num: 9, title: '이차함수의 최대·최소', id: '956cbf02-6a1e-4dd3-a660-dab0db1f5704' },
+    ],
+  },
+  {
+    order: 9,
+    title: '삼차·사차방정식',
+    pdfs: [
+      {
+        name: '삼차방정식과 사차방정식의 풀이',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/09_%EC%82%BC%EC%B0%A8%EC%82%AC%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D/2_3_1_%20%EC%82%BC%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D%EA%B3%BC%20%EC%82%AC%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D%EC%9D%98%20%ED%92%80%EC%9D%B4.pdf',
+      },
+    ],
+    videos: [{ num: 10, title: '삼차·사차방정식', id: '2c8416f6-7e0d-4478-bfee-87fca1c96c7b' }],
+  },
+  {
+    order: 10,
+    title: '연립이차방정식',
+    pdfs: [
+      {
+        name: '미지수가 2개인 연립이차방정식',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/10_%EC%97%B0%EB%A6%BD%EB%B0%A9%EC%A0%95%EC%8B%9D%EB%B6%80%EB%93%B1%EC%8B%9D/2_3_2_%20%EB%AF%B8%EC%A7%80%EC%88%98%EA%B0%80%202%EA%B0%9C%EC%9D%B8%20%EC%97%B0%EB%A6%BD%EC%9D%B4%EC%B0%A8%EB%B0%A9%EC%A0%95%EC%8B%9D.pdf',
+      },
+    ],
+    videos: [{ num: 11, title: '연립이차방정식', id: '2025c5d5-d6fc-4e4c-95c8-d8ee33243220' }],
+  },
+  {
+    order: 11,
+    title: '연립일차부등식',
+    pdfs: [
+      {
+        name: '미지수가 1개인 연립일차부등식',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/10_%EC%97%B0%EB%A6%BD%EB%B0%A9%EC%A0%95%EC%8B%9D%EB%B6%80%EB%93%B1%EC%8B%9D/2_3_3_%20%EB%AF%B8%EC%A7%80%EC%88%98%EA%B0%80%201%EA%B0%9C%EC%9D%B8%20%EC%97%B0%EB%A6%BD%EC%9D%BC%EC%B0%A8%EB%B6%80%EB%93%B1%EC%8B%9D.pdf',
+      },
+    ],
+    videos: [{ num: 12, title: '연립일차부등식', id: 'c3ddef0e-2d08-4ec3-8e0b-b8559b8b24fc' }],
+  },
+  {
+    order: 12,
+    title: '절댓값 부등식',
+    pdfs: [
+      {
+        name: '절댓값을 포함한 일차부등식',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/11_%EC%A0%88%EB%8C%93%EA%B0%92%EB%B6%80%EB%93%B1%EC%8B%9D/2_3_4_%20%EC%A0%88%EB%8C%93%EA%B0%92%EC%9D%84%20%ED%8F%AC%ED%95%A8%ED%95%9C%20%EC%9D%BC%EC%B0%A8%EB%B6%80%EB%93%B1%EC%8B%9D.pdf',
+      },
+    ],
+    videos: [{ num: 13, title: '절댓값 부등식', id: 'ee73dced-37ce-45fa-9282-229caa58ba3d' }],
+  },
+  {
+    order: 13,
+    title: '이차부등식과 연립이차부등식',
+    pdfs: [
+      {
+        name: '이차부등식과 연립이차부등식',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/12_%EC%9D%B4%EC%B0%A8%EB%B6%80%EB%93%B1%EC%8B%9D/2_3_5_%20%EC%9D%B4%EC%B0%A8%EB%B6%80%EB%93%B1%EC%8B%9D%EA%B3%BC%20%EC%97%B0%EB%A6%BD%EC%9D%B4%EC%B0%A8%EB%B6%80%EB%93%B1%EC%8B%9D.pdf',
+      },
+    ],
+    videos: [{ num: 14, title: '이차부등식', id: 'b237de19-3deb-499c-8e23-d9f972e97ed0' }],
+  },
+  {
+    order: 14,
+    title: '경우의 수',
+    pdfs: [
+      {
+        name: '합의 법칙과 곱의 법칙',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/13_%EA%B2%BD%EC%9A%B0%EC%9D%98%EC%88%98/3_1_1_%20%ED%95%A9%EC%9D%98%EB%B2%95%EC%B9%99%EA%B3%BC%20%EA%B3%B1%EC%9D%98%20%EB%B2%95%EC%B9%99.pdf',
+      },
+    ],
+    videos: [{ num: 15, title: '경우의 수', id: '207e2f00-3531-4ab0-a1a9-18c03eaa2627' }],
+  },
+  {
+    order: 15,
+    title: '순열',
+    pdfs: [
+      {
+        name: '순열',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/13_%EA%B2%BD%EC%9A%B0%EC%9D%98%EC%88%98/3_2_1_%20%EC%88%9C%EC%97%B4.pdf',
+      },
+    ],
+    videos: [{ num: 16, title: '순열', id: 'dd9d9ac5-9c18-4120-bb30-d2db53547275' }],
+  },
+  {
+    order: 16,
+    title: '조합',
+    pdfs: [
+      {
+        name: '조합',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/14_%EC%A1%B0%ED%95%A9/3_2_2_%20%EC%A1%B0%ED%95%A9.pdf',
+      },
+    ],
+    videos: [{ num: 17, title: '조합', id: 'ebefa957-f079-4403-9b9a-46f6b753ba36' }],
+  },
+  {
+    order: 17,
+    title: '행렬',
+    pdfs: [
+      {
+        name: '행렬의 정의',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/15_%ED%96%89%EB%A0%AC/4_1_1_%20%ED%96%89%EB%A0%AC.pdf',
+      },
+    ],
+    videos: [{ num: 18, title: '행렬', id: '0d284cfa-e18d-40d0-9c62-19b524697ba7' }],
+  },
+  {
+    order: 18,
+    title: '행렬의 연산',
+    pdfs: [
+      {
+        name: '행렬의 연산',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs1/15_%ED%96%89%EB%A0%AC/4_1_2_%20%ED%96%89%EB%A0%AC%EC%9D%98%20%EC%97%B0%EC%82%B0.pdf',
+      },
+    ],
+    videos: [{ num: 19, title: '행렬의 연산', id: 'bd1d8cc5-1755-49dd-9b85-01e4bef9cedd' }],
+  },
 ];
 
 const DS_LESSONS = [...DS_CONCEPT_PART1, ...DS_CONCEPT_PART2];

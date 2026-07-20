@@ -30,6 +30,7 @@ function requestedCases(): readonly string[] {
         'release-windows',
         'pending-assets',
         'gs1-first-week-ready',
+        'gs1-full-course-ready',
         'gs2-first-lesson-ready',
         'gs2-second-lesson-ready',
         'gs2-fourth-lesson-ready',
@@ -66,6 +67,7 @@ function runCase(name: string): string {
       assertOk(SUMMER_SUBJECTS.length === 5, 'expected five subjects');
       assertOk(days.length === 34, 'expected mj1 2026-07-13 through 2026-08-15');
       assertOk(learningDays === 17, 'expected mj1 17 learning days');
+      assertOk(summerCalendar('gs1').filter((day) => day.role === 'learning').length === 18, 'expected gs1 to have 18 learning days');
       assertOk(summerCalendar('ds').filter((day) => day.role === 'learning').length === 16, 'expected default subjects to have 16 learning days');
       assertOk(summerCalendar('gs2').filter((day) => day.role === 'learning').length === 16, 'expected gs2 to keep 16 learning days');
       return `all-subjects: ok subjects=5 mj1Days=${days.length} mj1Learning=${learningDays}`;
@@ -167,6 +169,30 @@ function runCase(name: string): string {
         assertOk(content.kind === 'learning' && content.resources.some((resource) => resource.label === video), `gs1 ${date} should have video`);
       }
       return 'gs1-first-week-ready: ok four-days-notes-and-videos';
+    }
+    case 'gs1-full-course-ready': {
+      const expected = [
+        ['2026-07-20', 5, '이차방정식의 풀이', 1, 1],
+        ['2026-07-24', 8, '이차함수의 그래프와 최대·최소', 2, 2],
+        ['2026-07-30', 9, '삼차·사차방정식', 1, 1],
+        ['2026-08-11', 16, '조합', 1, 1],
+        ['2026-08-13', 17, '행렬', 1, 1],
+        ['2026-08-14', 18, '행렬의 연산', 1, 1],
+      ] as const;
+      for (const [date, learningNumber, title, pdfCount, videoCount] of expected) {
+        const day = mustDay('gs1', date);
+        const content = contentForDay('gs1', day);
+        assertOk(day.role === 'learning' && day.learningNumber === learningNumber, `gs1 ${date} should be learning day ${learningNumber}`);
+        assertOk(content.kind === 'learning' && !content.pending, `gs1 ${date} should be ready`);
+        assertOk(content.kind === 'learning' && content.title === title, `gs1 ${date} should show ${title}`);
+        assertOk(content.kind === 'learning' && content.resources.filter((resource) => resource.kind === 'pdf').length === pdfCount, `gs1 ${date} should have ${pdfCount} notes`);
+        assertOk(content.kind === 'learning' && content.resources.filter((resource) => resource.kind === 'video').length === videoCount, `gs1 ${date} should have ${videoCount} videos`);
+      }
+      for (const day of summerCalendar('gs1').filter((candidate) => candidate.role === 'learning')) {
+        const content = contentForDay('gs1', day);
+        assertOk(content.kind === 'learning' && content.resources.length > 0, `gs1 ${day.date} should have linked resources`);
+      }
+      return 'gs1-full-course-ready: ok 18-days-notes-and-videos';
     }
     case 'gs2-first-lesson-ready': {
       const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-13'));
