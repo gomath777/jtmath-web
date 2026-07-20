@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'fs/promises';
 import { dirname } from 'path';
 import {
   fixtureRosterConfig,
+  parseRosterConfigs,
   parseRosterConfig,
   type ParsedRoster,
 } from '../../src/lib/summer-5week/roster';
@@ -19,7 +20,7 @@ function requestedCases(): readonly string[] {
       if (value) cases.push(value);
     }
   }
-  return cases.length > 0 ? cases : ['valid-fixture', 'malformed', 'unknown-subject', 'pii-fields'];
+  return cases.length > 0 ? cases : ['valid-fixture', 'merged-extra-roster', 'malformed', 'unknown-subject', 'pii-fields'];
 }
 
 function assertOk(condition: boolean, message: string): void {
@@ -40,6 +41,15 @@ function runCase(name: string): string {
       assertOk(result.entries.length === 3, 'duplicate PIN rows should merge');
       assertOk(subjectCounts === '1,2,2', 'expected sanitized subject counts 1,2,2');
       return `valid-fixture: ok entries=${result.entries.length} subjectCounts=${subjectCounts}`;
+    }
+    case 'merged-extra-roster': {
+      const result = parseRosterConfigs(['100101:ds', '100101:mj1']);
+      assertOk(result.kind === 'ok', 'merged roster should parse');
+      if (result.kind !== 'ok') return 'merged-extra-roster: failed';
+      assertOk(result.entries.length === 1, 'same PIN should stay one entry');
+      const entry = result.entries[0];
+      assertOk(entry?.subjects.join(',') === 'ds,mj1', 'same PIN should merge subjects');
+      return 'merged-extra-roster: ok merged-subjects';
     }
     case 'malformed': {
       expectError(parseRosterConfig('[{"pin":"100101","subjects":["mj1"]}'), 'malformed');

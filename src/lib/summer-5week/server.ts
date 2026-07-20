@@ -13,7 +13,7 @@ import {
 import {
   fixtureRosterConfig,
   lookupAccess,
-  parseRosterConfig,
+  parseRosterConfigs,
   type AccessLookup,
   type ParsedRoster,
 } from './roster';
@@ -30,6 +30,8 @@ const ATTEMPT_COOKIE_NAME = 'summer_5week_attempts';
 const ATTEMPT_WINDOW_SECONDS = 10 * 60;
 const ATTEMPT_LIMIT = 8;
 const SERVER_ATTEMPTS = new Map<string, AttemptState>();
+const ROSTER_ENV_KEY = 'SUMMER_5WEEK_ACCESS_ROSTER';
+const ROSTER_EXTRA_ENV_PREFIX = 'SUMMER_5WEEK_ACCESS_ROSTER_EXTRA';
 
 type AttemptState = {
   readonly count: number;
@@ -122,8 +124,11 @@ function masterPin(): string | null {
 }
 
 export function configuredRoster(): ParsedRoster {
-  const raw = process.env.SUMMER_5WEEK_ACCESS_ROSTER;
-  if (raw) return parseRosterConfig(raw);
+  const rawValues = Object.entries(process.env)
+    .filter(([key, value]) => (key === ROSTER_ENV_KEY || key.startsWith(ROSTER_EXTRA_ENV_PREFIX)) && Boolean(value))
+    .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+    .map(([, value]) => value ?? '');
+  if (rawValues.length > 0) return parseRosterConfigs(rawValues);
   if (process.env.SUMMER_5WEEK_USE_FIXTURE_ROSTER === '1') return fixtureRosterConfig();
   return { kind: 'error', code: 'empty' };
 }

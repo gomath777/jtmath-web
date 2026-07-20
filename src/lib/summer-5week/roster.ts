@@ -121,6 +121,17 @@ export function parseRosterConfig(raw: string): ParsedRoster {
   return parseLineRoster(trimmed);
 }
 
+export function parseRosterConfigs(rawValues: readonly string[]): ParsedRoster {
+  const entries: RosterEntry[] = [];
+  for (const rawValue of rawValues) {
+    if (!rawValue.trim()) continue;
+    const parsed = parseRosterConfig(rawValue);
+    if (parsed.kind === 'error') return parsed;
+    entries.push(...parsed.entries);
+  }
+  return mergeDuplicatePins(entries);
+}
+
 export function mergeDuplicatePins(entries: readonly RosterEntry[]): ParsedRoster {
   const byPin = new Map<string, Set<SummerSubject>>();
   for (const entry of entries) {
