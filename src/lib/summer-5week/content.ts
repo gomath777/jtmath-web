@@ -320,8 +320,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 6,
     title: '집합의 개념과 표현',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '집합의 개념과 표현 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/04_%EC%A7%91%ED%95%A9/2_1_1_%20%EC%A7%91%ED%95%A9%EC%9D%98%20%EA%B0%9C%EB%85%90%EA%B3%BC%20%ED%91%9C%ED%98%84_v2.pdf?v=d7f674333a',
+      },
+    ],
+    videos: [{ num: 9, title: '집합의 개념과 표현', id: '0c8fe127-d314-4505-a2db-a31e67ae0c4a' }],
   },
   {
     order: 7,
