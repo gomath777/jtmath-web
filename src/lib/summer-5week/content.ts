@@ -331,8 +331,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 7,
     title: '두 집합 사이의 포함관계',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '두 집합 사이의 포함관계 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/04_%EC%A7%91%ED%95%A9/2_1_2_%20%EB%91%90%20%EC%A7%91%ED%95%A9%20%EC%82%AC%EC%9D%B4%EC%9D%98%20%ED%8F%AC%ED%95%A8%EA%B4%80%EA%B3%84.pdf?v=f4012bf5aa',
+      },
+    ],
+    videos: [{ num: 10, title: '두 집합 사이의 포함관계', id: '884e061a-d1c1-45ca-8d35-e3a059d4d4c0' }],
   },
   {
     order: 8,
