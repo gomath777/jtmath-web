@@ -76,12 +76,12 @@ export default function RegisterPage() {
             <div className="bg-sand border border-border-warm rounded-xl px-5 py-4 mb-6">
               <p className="text-[13px] text-charcoal leading-relaxed break-keep">
                 <span className="text-terracotta font-medium">
-                  본인(학생) 이름으로 입장해 주세요.
+                  친구추가 후 아래 형식으로 메세지를 보내주세요.
                 </span>
                 <br />
-                예) <strong className="text-ink">손흥민 고1 등록완료</strong>
+                예) <strong className="text-ink">고1 홍길동 등록완료</strong>
                 {' · '}
-                <strong className="text-ink">홍길동 고2 등록완료</strong>
+                <strong className="text-ink">고2 손흥민 등록완료</strong>
               </p>
             </div>
 
