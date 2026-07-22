@@ -43,6 +43,7 @@ function requestedCases(): readonly string[] {
         'gh-fourth-lesson-ready',
         'gh-fifth-lesson-ready',
         'gh-sixth-lesson-ready',
+        'gh-seventh-lesson-ready',
         'gh-planned-midterm-titles',
         'ready-subjects-no-pending',
         'early-release',
@@ -299,9 +300,16 @@ function runCase(name: string): string {
       assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '7강 직선과 평면의 위치관계'), 'gh sixth lesson should have lecture 7 video');
       return 'gh-sixth-lesson-ready: ok note-and-video';
     }
+    case 'gh-seventh-lesson-ready': {
+      const gh = contentForDay('gh', mustDay('gh', '2026-07-23'));
+      assertOk(gh.kind === 'learning' && !gh.pending, 'gh seventh lesson should be ready');
+      assertOk(gh.kind === 'learning' && gh.title === '삼수선 정리', 'gh seventh lesson title should match');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '삼수선 정리 개념노트'), 'gh seventh lesson should have three-perpendicular theorem note');
+      assertOk(gh.kind === 'learning' && gh.resources.some((resource) => resource.label === '8강 삼수선의 정리'), 'gh seventh lesson should have lecture 8 video');
+      return 'gh-seventh-lesson-ready: ok note-and-video';
+    }
     case 'gh-planned-midterm-titles': {
       const expected = [
-        ['2026-07-23', '삼수선 정리'],
         ['2026-07-24', '정사영'],
       ] as const;
       for (const [date, title] of expected) {

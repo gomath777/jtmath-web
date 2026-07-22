@@ -471,8 +471,13 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 7,
     title: '삼수선 정리',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '삼수선 정리 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/05_%EA%B3%B5%EA%B0%84%EB%8F%84%ED%98%95/2_1_2_%20%EC%82%BC%EC%88%98%EC%84%A0%20%EC%A0%95%EB%A6%AC_v2.pdf?v=a3513f908aa3',
+      },
+    ],
+    videos: [{ num: 8, title: '삼수선의 정리', id: 'ee4ebd3d-202b-4fbf-bd43-7ef04eb53473' }],
   },
   {
     order: 8,

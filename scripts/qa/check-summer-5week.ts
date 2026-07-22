@@ -221,6 +221,17 @@ if (ghFifth.kind === 'learning') {
   assert.ok(ghFifth.resources.some((resource) => resource.label === '6강 쌍곡선의 접선의 방정식'), 'gh fifth day has hyperbola tangent video');
 }
 
+const ghSeventhDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 7);
+assert.ok(ghSeventhDay, 'gh seventh day exists');
+const ghSeventh = contentForDay('gh', ghSeventhDay);
+assert.equal(ghSeventh.kind, 'learning', 'gh seventh day resolves as learning');
+if (ghSeventh.kind === 'learning') {
+  assert.equal(ghSeventh.title, '삼수선 정리', 'gh seventh day uses three-perpendicular theorem title');
+  assert.equal(ghSeventh.pending, false, 'gh seventh day is ready');
+  assert.ok(ghSeventh.resources.some((resource) => resource.label === '삼수선 정리 개념노트'), 'gh seventh day has three-perpendicular theorem v2 note');
+  assert.ok(ghSeventh.resources.some((resource) => resource.label === '8강 삼수선의 정리'), 'gh seventh day has three-perpendicular theorem video');
+}
+
 const ghEighthDay = summerCalendar('gh').find((candidate) => candidate.learningNumber === 8);
 assert.ok(ghEighthDay, 'gh eighth day exists');
 const ghEighth = contentForDay('gh', ghEighthDay);
