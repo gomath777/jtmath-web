@@ -11,7 +11,7 @@ const pdfCount = lessons.reduce((count, lesson) => count + lesson.pdfs.length, 0
 const videoCount = lessons.reduce((count, lesson) => count + lesson.videos.length, 0);
 
 assert.equal(pdfCount, 19, 'mj1 concept all share includes all concept notes');
-assert.equal(videoCount, 18, 'mj1 concept all share includes all concept videos');
+assert.equal(videoCount, 19, 'mj1 concept all share includes all concept videos');
 
 for (const lesson of lessons) {
   assert.ok(lesson.pdfs.length > 0, `${lesson.title} has at least one concept note`);
