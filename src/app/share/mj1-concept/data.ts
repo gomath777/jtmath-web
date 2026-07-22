@@ -125,6 +125,7 @@ export const MJ1_CONCEPT_PART2: readonly ConceptLesson[] = [
         num: 11,
         title: '[그래프 특강] 3차, 4차 함수 그래프 그리기',
         id: '5941d0ef-fb1c-40ed-84fa-7bbf5508a622',
+        label: '특강',
       },
     ],
   },

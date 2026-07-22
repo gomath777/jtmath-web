@@ -10,6 +10,7 @@ export type ConceptVideo = {
   readonly num: number;
   readonly title: string;
   readonly id: string;
+  readonly label?: string;
 };
 
 export type ConceptLesson = {
@@ -87,7 +88,7 @@ export function ConceptSharePage({ subjectLabel, heading, lessons }: ConceptShar
                     className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-ivory border border-border-cream hover:border-olive/40 hover:shadow-ring-warm transition-all"
                   >
                     <span className="inline-flex items-center justify-center min-w-[64px] h-6 px-2 rounded-md bg-olive/10 text-olive text-[11px] font-semibold shrink-0 tabular-nums">
-                      {video.num}강
+                      {video.label ?? `${video.num}강`}
                     </span>
                     <span className="flex-1 text-[13px] font-medium text-ink min-w-0 leading-snug">
                       {displayTitle(video.title)}

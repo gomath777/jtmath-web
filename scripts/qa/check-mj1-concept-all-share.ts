@@ -13,6 +13,11 @@ const videoCount = lessons.reduce((count, lesson) => count + lesson.videos.lengt
 assert.equal(pdfCount, 19, 'mj1 concept all share includes all concept notes');
 assert.equal(videoCount, 19, 'mj1 concept all share includes all concept videos');
 
+const graphSpecial = lessons
+  .flatMap((lesson) => lesson.videos)
+  .find((video) => video.id === '5941d0ef-fb1c-40ed-84fa-7bbf5508a622');
+assert.equal(graphSpecial?.label, '특강', 'graph drawing lecture is marked as a special lecture');
+
 for (const lesson of lessons) {
   assert.ok(lesson.pdfs.length > 0, `${lesson.title} has at least one concept note`);
   assert.ok(lesson.videos.length > 0, `${lesson.title} has at least one concept video`);
