@@ -487,8 +487,13 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 8,
     title: '정사영',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '정사영 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/05_%EA%B3%B5%EA%B0%84%EB%8F%84%ED%98%95/2_1_3_%20%EC%A0%95%EC%82%AC%EC%98%81_v2.pdf?v=ef39ffd680',
+      },
+    ],
+    videos: [{ num: 9, title: '정사영', id: 'f1100fe5-7a9e-4a0f-a822-36bb3c09782b' }],
   },
 ];
 

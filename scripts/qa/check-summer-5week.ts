@@ -249,7 +249,9 @@ const ghEighth = contentForDay('gh', ghEighthDay);
 assert.equal(ghEighth.kind, 'learning', 'gh eighth day resolves as learning');
 if (ghEighth.kind === 'learning') {
   assert.equal(ghEighth.title, '정사영', 'gh eighth day closes midterm range with projection');
-  assert.equal(ghEighth.pending, true, 'gh eighth day remains pending until assets are uploaded');
+  assert.equal(ghEighth.pending, false, 'gh eighth day is ready after projection upload');
+  assert.ok(ghEighth.resources.some((resource) => resource.label === '정사영 개념노트'), 'gh eighth day has projection v2 note');
+  assert.ok(ghEighth.resources.some((resource) => resource.label === '9강 정사영'), 'gh eighth day has projection video');
 }
 
 console.log('summer-5week qa checks passed');
