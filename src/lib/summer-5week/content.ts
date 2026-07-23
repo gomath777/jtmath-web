@@ -342,8 +342,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 8,
     title: '집합의 연산과 벤 다이어그램',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '집합의 연산과 벤 다이어그램 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/04_%EC%A7%91%ED%95%A9/2_1_3_%20%EC%A7%91%ED%95%A9%EC%9D%98%20%EC%97%B0%EC%82%B0%EA%B3%BC%20%EB%B2%A4%20%EB%8B%A4%EC%9D%B4%EC%96%B4%EA%B7%B8%EB%9E%A8.pdf?v=d8ba6ebe01',
+      },
+    ],
+    videos: [{ num: 11, title: '집합의 연산과 벤 다이어그램', id: '7448cad6-95ae-4a0b-9d7f-ee90c53ecb48' }],
   },
   {
     order: 9,

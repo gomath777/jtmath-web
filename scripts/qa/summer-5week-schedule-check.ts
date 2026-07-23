@@ -37,6 +37,7 @@ function requestedCases(): readonly string[] {
         'gs2-fifth-lesson-ready',
         'gs2-sixth-lesson-ready',
         'gs2-seventh-lesson-ready',
+        'gs2-eighth-lesson-ready',
         'gh-first-lesson-ready',
         'gh-second-lesson-ready',
         'gh-third-lesson-ready',
@@ -152,10 +153,10 @@ function runCase(name: string): string {
       return 'release-windows: ok sunday-and-wednesday';
     }
     case 'pending-assets': {
-      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-24'));
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-30'));
       assertOk(gs2.kind === 'learning' && gs2.pending && gs2.resources.length === 0, 'gs2 later lessons should be pending without links');
-      assertOk(gs2.kind === 'learning' && gs2.title === '집합의 연산과 벤 다이어그램', 'gs2 pending lessons should keep planned unit title');
-      return 'pending-assets: ok gs2-day8=planned-title';
+      assertOk(gs2.kind === 'learning' && gs2.title === '명제와 조건', 'gs2 pending lessons should keep planned unit title');
+      return 'pending-assets: ok gs2-day10=planned-title';
     }
     case 'gs1-first-week-ready': {
       const expected = [
@@ -250,6 +251,14 @@ function runCase(name: string): string {
       assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '10강 두 집합 사이의 포함관계'), 'gs2 seventh lesson should have lecture 10 video');
       return 'gs2-seventh-lesson-ready: ok note-and-video';
     }
+    case 'gs2-eighth-lesson-ready': {
+      const gs2 = contentForDay('gs2', mustDay('gs2', '2026-07-24'));
+      assertOk(gs2.kind === 'learning' && !gs2.pending, 'gs2 eighth lesson should be ready');
+      assertOk(gs2.kind === 'learning' && gs2.title === '집합의 연산과 벤 다이어그램', 'gs2 eighth lesson title should match');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '집합의 연산과 벤 다이어그램 개념노트'), 'gs2 eighth lesson should have active note');
+      assertOk(gs2.kind === 'learning' && gs2.resources.some((resource) => resource.label === '11강 집합의 연산과 벤 다이어그램'), 'gs2 eighth lesson should have lecture 11 video');
+      return 'gs2-eighth-lesson-ready: ok note-and-video';
+    }
     case 'gh-first-lesson-ready': {
       const gh = contentForDay('gh', mustDay('gh', '2026-07-13'));
       assertOk(gh.kind === 'learning' && !gh.pending, 'gh first lesson should be ready');
@@ -340,7 +349,7 @@ function runCase(name: string): string {
       return 'missing-resource-url: ok';
     }
     case 'fake-pending-link': {
-      const content = contentForDay('gs2', mustDay('gs2', '2026-07-24'));
+      const content = contentForDay('gs2', mustDay('gs2', '2026-07-30'));
       assertOk(content.kind === 'learning' && content.pending && content.resources.length === 0, 'pending content must not include links');
       assertOk(content.kind === 'learning' && content.title !== '자료 준비중', 'pending content must still show a planned title');
       return 'fake-pending-link: ok';

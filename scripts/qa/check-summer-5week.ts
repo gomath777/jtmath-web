@@ -148,6 +148,17 @@ assert.ok(gs2ReviewDay, 'gs2 review day exists');
 assert.equal(gs2ReviewDay.role, 'review', 'gs2 uses one midterm review day');
 assert.equal(summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-29')?.title, '모의중간', 'gs2 mock midterm follows review day');
 
+const gs2EighthDay = summerCalendar('gs2').find((candidate) => candidate.date === '2026-07-24');
+assert.ok(gs2EighthDay, 'gs2 eighth day exists');
+const gs2Eighth = contentForDay('gs2', gs2EighthDay);
+assert.equal(gs2Eighth.kind, 'learning', 'gs2 eighth day resolves as learning');
+if (gs2Eighth.kind === 'learning') {
+  assert.equal(gs2Eighth.title, '집합의 연산과 벤 다이어그램', 'gs2 eighth day uses planned unit title');
+  assert.equal(gs2Eighth.pending, false, 'gs2 eighth day is ready after set operation upload');
+  assert.ok(gs2Eighth.resources.some((resource) => resource.label === '집합의 연산과 벤 다이어그램 개념노트'), 'gs2 eighth day has set operation note');
+  assert.ok(gs2Eighth.resources.some((resource) => resource.label === '11강 집합의 연산과 벤 다이어그램'), 'gs2 eighth day has lecture 11 video');
+}
+
 const gs2TenthDay = summerCalendar('gs2').find((candidate) => candidate.learningNumber === 10);
 assert.ok(gs2TenthDay, 'gs2 tenth learning day exists');
 const gs2Tenth = contentForDay('gs2', gs2TenthDay);
