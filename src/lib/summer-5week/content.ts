@@ -359,8 +359,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   {
     order: 10,
     title: '명제와 조건',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '명제와 조건 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gs2/09_%EB%AA%85%EC%A0%9C/2_2_1_%20%EB%AA%85%EC%A0%9C%EC%99%80%20%EC%A1%B0%EA%B1%B4_v2.pdf?v=20260727',
+      },
+    ],
+    videos: [{ num: 12, title: '명제와 조건', id: '3acc8433-d3f4-4f73-b574-a3788193dd21' }],
   },
   {
     order: 11,
