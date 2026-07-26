@@ -394,7 +394,13 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 16,
-    title: '유리함수·무리함수 그래프',
+    title: '유리함수',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 17,
+    title: '무리함수',
     pdfs: [],
     videos: [],
   },
