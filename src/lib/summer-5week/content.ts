@@ -495,6 +495,54 @@ const GH_LESSONS: readonly ConceptLesson[] = [
     ],
     videos: [{ num: 9, title: '정사영', id: 'f1100fe5-7a9e-4a0f-a822-36bb3c09782b' }],
   },
+  {
+    order: 9,
+    title: '공간에서 점의 좌표',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 10,
+    title: '공간좌표와 내분점',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 11,
+    title: '구의 방정식',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 12,
+    title: '벡터의 덧셈·뺄셈과 실수배',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 13,
+    title: '위치벡터와 벡터의 성분',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 14,
+    title: '벡터의 내적',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 15,
+    title: '직선의 방정식',
+    pdfs: [],
+    videos: [],
+  },
+  {
+    order: 16,
+    title: '평면과 구의 방정식',
+    pdfs: [],
+    videos: [],
+  },
 ];
 
 const SUBJECT_LESSONS: Partial<Record<SummerSubject, readonly ConceptLesson[]>> = {
