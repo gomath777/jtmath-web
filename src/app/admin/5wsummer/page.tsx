@@ -1,14 +1,8 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { CalendarDays, CheckCircle2, Clock3, FileText, Play, TriangleAlert } from 'lucide-react';
 import { contentForDay } from '@/lib/summer-5week/content';
 import { nowForSummerRelease, releaseStateFor, summerCalendar, type CalendarRole } from '@/lib/summer-5week/schedule';
 import { allSubjects, SUMMER_SUBJECT_INFO, type SummerSubject } from '@/lib/summer-5week/subjects';
-import { createClient } from '@/utils/supabase/server';
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com')
-  .split(',')
-  .map((email) => email.trim());
 
 const WEEKDAY_LABELS = ['월', '화', '수', '목', '금', '토'] as const;
 
@@ -175,11 +169,6 @@ function SubjectBlock({ calendar }: { readonly calendar: SubjectCalendar }) {
 }
 
 export default async function AdminSummerCalendarsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  if (!ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
-
   const now = nowForSummerRelease();
   const calendars = allSubjects().map((subject) => buildSubjectCalendar(subject, now));
 
