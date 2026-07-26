@@ -260,7 +260,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 2,
-    title: '직선의 방정식과 점과 직선 사이의 거리',
+    title: '직선의 방정식·위치관계·거리',
     pdfs: [
       {
         name: '두 직선의 평행 조건과 수직 조건 개념노트',
@@ -301,7 +301,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 5,
-    title: '평행이동과 대칭이동',
+    title: '평행이동·대칭이동',
     pdfs: [
       {
         name: '평행이동 개념노트',
@@ -330,7 +330,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 7,
-    title: '두 집합 사이의 포함관계',
+    title: '집합의 포함관계',
     pdfs: [
       {
         name: '두 집합 사이의 포함관계 개념노트',
@@ -341,7 +341,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 8,
-    title: '집합의 연산과 벤 다이어그램',
+    title: '집합의 연산',
     pdfs: [
       {
         name: '집합의 연산과 벤 다이어그램 개념노트',
@@ -352,7 +352,7 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 9,
-    title: '중간범위 누적 정리',
+    title: '중간범위 정리',
     pdfs: [],
     videos: [],
   },
@@ -364,37 +364,37 @@ const GS2_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 11,
-    title: '명제의 증명과 절대부등식',
+    title: '역·대우와 충분·필요조건',
     pdfs: [],
     videos: [],
   },
   {
     order: 12,
-    title: '함수의 뜻과 그래프',
+    title: '증명법과 절대부등식',
     pdfs: [],
     videos: [],
   },
   {
     order: 13,
-    title: '합성함수와 역함수',
+    title: '함수의 개념과 그래프',
     pdfs: [],
     videos: [],
   },
   {
     order: 14,
-    title: '유리함수',
+    title: '함수의 합성',
     pdfs: [],
     videos: [],
   },
   {
     order: 15,
-    title: '무리함수',
+    title: '역함수',
     pdfs: [],
     videos: [],
   },
   {
     order: 16,
-    title: '유리함수와 무리함수 활용',
+    title: '유리함수·무리함수 그래프',
     pdfs: [],
     videos: [],
   },
