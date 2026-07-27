@@ -509,8 +509,13 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   {
     order: 9,
     title: '공간에서 점의 좌표',
-    pdfs: [],
-    videos: [],
+    pdfs: [
+      {
+        name: '공간에서 점의 좌표 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/06_%EA%B3%B5%EA%B0%84%EC%A2%8C%ED%91%9C/2_2_1_%20%EA%B3%B5%EA%B0%84%EC%97%90%EC%84%9C%20%EC%A0%90%EC%9D%98%20%EC%A2%8C%ED%91%9C.pdf?v=20260727',
+      },
+    ],
+    videos: [{ num: 10, title: '공간에서 점의 좌표', id: 'bff2f821-546b-4cfc-b641-859f1fc96786' }],
   },
   {
     order: 10,
