@@ -508,64 +508,60 @@ const GH_LESSONS: readonly ConceptLesson[] = [
   },
   {
     order: 9,
-    title: '공간에서 점의 좌표',
+    title: '공간에서 점의 좌표와 내분점',
     pdfs: [
       {
         name: '공간에서 점의 좌표 개념노트',
         url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/06_%EA%B3%B5%EA%B0%84%EC%A2%8C%ED%91%9C/2_2_1_%20%EA%B3%B5%EA%B0%84%EC%97%90%EC%84%9C%20%EC%A0%90%EC%9D%98%20%EC%A2%8C%ED%91%9C.pdf?v=20260727',
       },
-    ],
-    videos: [{ num: 10, title: '공간에서 점의 좌표', id: 'bff2f821-546b-4cfc-b641-859f1fc96786' }],
-  },
-  {
-    order: 10,
-    title: '공간좌표와 내분점',
-    pdfs: [
       {
         name: '공간좌표와 내분점 개념노트',
         url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/06_%EA%B3%B5%EA%B0%84%EC%A2%8C%ED%91%9C/2_2_1_%20%EA%B3%B5%EA%B0%84%EC%A2%8C%ED%91%9C%EC%99%80%20%EB%82%B4%EB%B6%84%EC%A0%90_v2.pdf?v=87aed20790',
       },
     ],
-    videos: [{ num: 11, title: '공간좌표의 내분점', id: 'acdfd9fc-94df-42b6-a3d8-d74addc01458' }],
+    videos: [
+      { num: 10, title: '공간에서 점의 좌표', id: 'bff2f821-546b-4cfc-b641-859f1fc96786' },
+      { num: 11, title: '공간좌표의 내분점', id: 'acdfd9fc-94df-42b6-a3d8-d74addc01458' },
+    ],
   },
   {
-    order: 11,
+    order: 10,
     title: '구의 방정식',
     pdfs: [],
     videos: [],
   },
   {
-    order: 12,
+    order: 11,
     title: '벡터의 덧셈·뺄셈',
     pdfs: [],
     videos: [],
   },
   {
-    order: 13,
+    order: 12,
     title: '벡터의 실수배',
     pdfs: [],
     videos: [],
   },
   {
-    order: 14,
+    order: 13,
     title: '위치벡터와 벡터의 성분',
     pdfs: [],
     videos: [],
   },
   {
-    order: 15,
+    order: 14,
     title: '벡터의 내적',
     pdfs: [],
     videos: [],
   },
   {
-    order: 16,
+    order: 15,
     title: '직선의 방정식',
     pdfs: [],
     videos: [],
   },
   {
-    order: 17,
+    order: 16,
     title: '평면과 구의 방정식',
     pdfs: [],
     videos: [],
