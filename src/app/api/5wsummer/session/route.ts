@@ -11,5 +11,6 @@ export async function GET() {
     ok: true,
     subjects: session.subjects,
     master: session.master,
+    accessThrough: session.accessThrough,
   });
 }

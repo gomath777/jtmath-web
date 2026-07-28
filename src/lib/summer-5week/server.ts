@@ -140,6 +140,7 @@ function accessToLoginResult(access: AccessLookup): LoginResult {
         kind: 'ok',
         session: {
           subjects: access.subjects,
+          accessThrough: access.accessThrough,
           exp: Math.floor(Date.now() / 1000) + SUMMER_COOKIE_MAX_AGE,
           master: false,
         },
@@ -149,6 +150,7 @@ function accessToLoginResult(access: AccessLookup): LoginResult {
         kind: 'ok',
         session: {
           subjects: access.subjects,
+          accessThrough: {},
           exp: Math.floor(Date.now() / 1000) + SUMMER_COOKIE_MAX_AGE,
           master: true,
         },
@@ -174,7 +176,9 @@ export async function setSummerCookie(session: SummerSession): Promise<void> {
   if (!secret) return;
   cookieStore.set(
     SUMMER_COOKIE_NAME,
-    createSummerToken(session.subjects, secret, session.master),
+    createSummerToken(session.subjects, secret, session.master, Date.now(), {
+      accessThrough: session.accessThrough,
+    }),
     {
       httpOnly: true,
       maxAge: SUMMER_COOKIE_MAX_AGE,

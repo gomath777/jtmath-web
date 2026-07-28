@@ -3,80 +3,37 @@
 import { mkdir, writeFile } from 'fs/promises';
 import { dirname } from 'path';
 import { contentForDay } from '../../src/lib/summer-5week/content';
-import { summerCalendar } from '../../src/lib/summer-5week/schedule';
-
-const EVIDENCE_PATH = '.omo/evidence/summer-5week-assigned-subjects/task-4-route-guards.txt';
-const MASTER_PIN = process.env.SUMMER_5WEEK_MASTER_PIN ?? '999999';
-
-function argValue(name: string, fallback: string): string {
-  const index = process.argv.indexOf(name);
-  const value = index >= 0 ? process.argv[index + 1] : undefined;
-  return value ?? fallback;
-}
-
-function requestedCases(): readonly string[] {
-  const cases: string[] = [];
-  const args = process.argv.slice(2);
-  for (let index = 0; index < args.length; index += 1) {
-    if (args[index] === '--case') {
-      const value = args[index + 1];
-      if (value) cases.push(value);
-    }
-  }
-  return cases.length > 0
-    ? cases
-    : ['assigned', 'master-all', 'unassigned-direct', 'bad-subject', 'logged-out-direct', 'locked-resource-redaction', 'rate-limit', 'rate-limit-cookie-bypass', 'rate-limit-logout-bypass'];
-}
-
-function assertOk(condition: boolean, message: string): void {
-  if (!condition) throw new Error(message);
-}
-
-async function login(baseUrl: string, pin: string): Promise<string> {
-  const response = await fetch(`${baseUrl}/api/5wsummer/login`, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ pin }),
-  });
-  assertOk(response.ok, `login failed with status ${response.status}`);
-  const cookie = response.headers.get('set-cookie');
-  assertOk(typeof cookie === 'string' && cookie.includes('summer_5week_access='), 'summer cookie missing');
-  assertOk(cookie.includes('Path=/'), 'summer cookie must be available to API and pages');
-  return cookie.split(';')[0] ?? '';
-}
-
-type FailedLoginResult = {
-  readonly status: number;
-  readonly cookie: string;
-};
-
-async function failedLogin(baseUrl: string, pin: string, cookie: string): Promise<FailedLoginResult> {
-  const response = await fetch(`${baseUrl}/api/5wsummer/login`, {
-    method: 'POST',
-    headers: cookie ? { 'content-type': 'application/json', cookie } : { 'content-type': 'application/json' },
-    body: JSON.stringify({ pin }),
-  });
-  const setCookie = response.headers.get('set-cookie');
-  return { status: response.status, cookie: setCookie?.split(';')[0] ?? cookie };
-}
-
-async function logout(baseUrl: string): Promise<number> {
-  const response = await fetch(`${baseUrl}/api/5wsummer/logout`, { method: 'POST' });
-  return response.status;
-}
-
-async function getText(url: string, cookie?: string): Promise<{ readonly status: number; readonly text: string }> {
-  const response = await fetch(url, {
-    headers: cookie ? { cookie } : {},
-    redirect: 'manual',
-  });
-  return { status: response.status, text: await response.text() };
-}
+import { releaseStateFor, summerCalendar } from '../../src/lib/summer-5week/schedule';
+import {
+  ACTIVE_PIN,
+  assertNoHrefs,
+  assertOk,
+  argValue,
+  CUTOFF_DATE,
+  CUTOFF_PIN,
+  EVIDENCE_PATH,
+  exhaustRateLimit,
+  failedLogin,
+  firstResourceHrefAfter,
+  firstResourceHrefThrough,
+  futureExp,
+  getText,
+  login,
+  logout,
+  MASTER_PIN,
+  MULTI_PIN,
+  POLICY_VERSION,
+  qaNow,
+  qaServerCommand,
+  requestedCases,
+  resourceHrefsAfter,
+  signedCookie,
+} from './summer-5week-route-guard-fixtures';
 
 async function runCase(baseUrl: string, name: string): Promise<string> {
   switch (name) {
     case 'assigned': {
-      const cookie = await login(baseUrl, '100101');
+      const cookie = await login(baseUrl, CUTOFF_PIN);
       const page = await getText(`${baseUrl}/5wsummer/mj1`, cookie);
       assertOk(page.status === 200 && page.text.includes('미적분 I') && page.text.includes('학습 달력'), 'assigned subject should render');
       return 'assigned: ok rendered';
@@ -84,13 +41,16 @@ async function runCase(baseUrl: string, name: string): Promise<string> {
     case 'master-all': {
       const cookie = await login(baseUrl, MASTER_PIN);
       const session = await getText(`${baseUrl}/api/5wsummer/session`, cookie);
-      assertOk(session.status === 200 && session.text.includes('"master":true'), 'master session missing');
+      assertOk(
+        session.status === 200 && session.text.includes('"master":true') && session.text.includes('"accessThrough":{}'),
+        'master session missing expected fields',
+      );
       const page = await getText(`${baseUrl}/5wsummer/gh`, cookie);
       assertOk(page.status === 200 && page.text.includes('기하') && page.text.includes('학습 달력'), 'master should open all subjects');
       return 'master-all: ok subjects=5';
     }
     case 'unassigned-direct': {
-      const cookie = await login(baseUrl, '100101');
+      const cookie = await login(baseUrl, CUTOFF_PIN);
       const page = await getText(`${baseUrl}/5wsummer/ds`, cookie);
       assertOk(page.status === 307 || page.status === 308, 'unassigned subject should redirect to chooser');
       return 'unassigned-direct: ok redirected';
@@ -118,11 +78,15 @@ async function runCase(baseUrl: string, name: string): Promise<string> {
       return 'rate-limit: ok ninth failure returned 429';
     }
     case 'rate-limit-cookie-bypass': {
+      await exhaustRateLimit(baseUrl);
       const status = await failedLogin(baseUrl, '000000', '');
       assertOk(status.status === 429, 'server-side attempt counter should survive missing attempt cookie');
       return 'rate-limit-cookie-bypass: ok missing cookie still returned 429';
     }
     case 'rate-limit-logout-bypass': {
+      const warmupLogoutStatus = await logout(baseUrl);
+      assertOk(warmupLogoutStatus === 200, 'logout endpoint should warm up');
+      await exhaustRateLimit(baseUrl);
       const logoutStatus = await logout(baseUrl);
       assertOk(logoutStatus === 200, 'logout endpoint should respond');
       const status = await failedLogin(baseUrl, '000000', '');
@@ -130,16 +94,77 @@ async function runCase(baseUrl: string, name: string): Promise<string> {
       return 'rate-limit-logout-bypass: ok logout did not reset 429';
     }
     case 'locked-resource-redaction': {
-      const lockedDay = summerCalendar().find((day) => day.learningNumber === 5);
-      assertOk(lockedDay !== undefined, 'locked resource redaction needs day 5');
+      const now = qaNow();
+      const lockedDay = summerCalendar('mj1').find((day) => {
+        const content = contentForDay('mj1', day);
+        return content.kind === 'learning' && content.resources.length > 0 && releaseStateFor(day.date, now, false, 'mj1').kind === 'locked';
+      });
+      if (!lockedDay) return 'locked-resource-redaction: ok no locked learning day under current QA clock';
       const content = contentForDay('mj1', lockedDay);
-      assertOk(content.kind === 'learning' && content.resources.length > 0, 'day 5 should have resources in source data');
-      const cookie = await login(baseUrl, '100101');
+      assertOk(content.kind === 'learning', 'locked resource redaction needs learning content');
+      const cookie = await login(baseUrl, CUTOFF_PIN);
       const page = await getText(`${baseUrl}/5wsummer/mj1`, cookie);
-      for (const resource of content.resources) {
-        assertOk(!page.text.includes(resource.href), `locked resource leaked: ${resource.href}`);
-      }
+      assertNoHrefs(page.text, content.resources.map((resource) => resource.href), 'locked-resource-redaction');
       return 'locked-resource-redaction: ok future links omitted from html';
+    }
+    case 'cutoff-prior-visible': {
+      const cookie = await login(baseUrl, CUTOFF_PIN);
+      const page = await getText(`${baseUrl}/5wsummer/mj1`, cookie);
+      const visibleHref = firstResourceHrefThrough('mj1', CUTOFF_DATE);
+      assertOk(page.status === 200 && page.text.includes(visibleHref), 'pre-cutoff resource should remain visible');
+      return 'cutoff-prior-visible: ok pre-cutoff href visible';
+    }
+    case 'cutoff-later-redacted': {
+      const cookie = await login(baseUrl, CUTOFF_PIN);
+      const page = await getText(`${baseUrl}/5wsummer/mj1`, cookie);
+      assertOk(page.status === 200 && page.text.includes('수강 종료 이후 자료입니다.'), 'cutoff copy should render');
+      assertNoHrefs(page.text, resourceHrefsAfter('mj1', CUTOFF_DATE), 'cutoff-later-redacted');
+      return 'cutoff-later-redacted: ok enumerated post-cutoff hrefs absent';
+    }
+    case 'cutoff-subject-still-renders': {
+      const cookie = await login(baseUrl, CUTOFF_PIN);
+      const page = await getText(`${baseUrl}/5wsummer/mj1`, cookie);
+      assertOk(page.status === 200 && page.text.includes('미적분 I') && page.text.includes('학습 달력'), 'cutoff subject should still render');
+      return 'cutoff-subject-still-renders: ok assigned cutoff subject renders';
+    }
+    case 'no-cutoff-active-still-sees-later-resource': {
+      const cookie = await login(baseUrl, ACTIVE_PIN);
+      const page = await getText(`${baseUrl}/5wsummer/gs1`, cookie);
+      const laterHref = firstResourceHrefAfter('gs1', CUTOFF_DATE);
+      assertOk(page.status === 200 && page.text.includes(laterHref), 'active student without cutoff should see later released resource');
+      return 'no-cutoff-active-still-sees-later-resource: ok later href visible';
+    }
+    case 'multi-subject-cutoff-is-subject-scoped': {
+      const cookie = await login(baseUrl, MULTI_PIN);
+      const cutoffPage = await getText(`${baseUrl}/5wsummer/gs2`, cookie);
+      assertOk(cutoffPage.status === 200, 'multi-subject cutoff page should render');
+      assertNoHrefs(cutoffPage.text, resourceHrefsAfter('gs2', CUTOFF_DATE), 'multi-subject gs2 cutoff');
+
+      const activePage = await getText(`${baseUrl}/5wsummer/gh`, cookie);
+      const ghLaterHref = firstResourceHrefAfter('gh', CUTOFF_DATE);
+      assertOk(activePage.status === 200 && activePage.text.includes(ghLaterHref), 'uncut subject should keep later resource access');
+      return 'multi-subject-cutoff-is-subject-scoped: ok cutoff applies only to configured subject';
+    }
+    case 'old-token-relogin-required': {
+      const oldStudent = signedCookie({ subjects: ['mj1'], exp: futureExp(), master: false });
+      const oldStudentSession = await getText(`${baseUrl}/api/5wsummer/session`, oldStudent);
+      assertOk(oldStudentSession.status === 401, 'old non-master token should require re-login');
+
+      const staleStudent = signedCookie({
+        v: 2,
+        subjects: ['mj1'],
+        accessThrough: { mj1: CUTOFF_DATE },
+        exp: futureExp(),
+        master: false,
+        apv: `${POLICY_VERSION}-stale`,
+      });
+      const staleStudentSession = await getText(`${baseUrl}/api/5wsummer/session`, staleStudent);
+      assertOk(staleStudentSession.status === 401, 'stale policy non-master token should require re-login');
+
+      const oldMaster = signedCookie({ subjects: ['mj1'], exp: futureExp(), master: true });
+      const oldMasterSession = await getText(`${baseUrl}/api/5wsummer/session`, oldMaster);
+      assertOk(oldMasterSession.status === 200 && oldMasterSession.text.includes('"master":true'), 'old master token should remain accepted');
+      return 'old-token-relogin-required: ok old/stale students rejected and old master accepted';
     }
     default:
       throw new Error(`unknown case: ${name}`);
@@ -148,7 +173,7 @@ async function runCase(baseUrl: string, name: string): Promise<string> {
 
 async function main(): Promise<void> {
   const baseUrl = argValue('--base-url', 'http://127.0.0.1:3105');
-  const lines: string[] = [];
+  const lines = [`server command: ${qaServerCommand(baseUrl)}`];
   for (const testCase of requestedCases()) {
     lines.push(await runCase(baseUrl, testCase));
   }

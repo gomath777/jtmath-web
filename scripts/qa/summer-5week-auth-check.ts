@@ -5,7 +5,7 @@ import { dirname } from 'path';
 import { createSummerToken, verifySummerToken } from '../../src/lib/summer-5week/auth';
 import { fixtureRosterConfig, lookupAccess } from '../../src/lib/summer-5week/roster';
 
-const EVIDENCE_PATH = '.omo/evidence/summer-5week-assigned-subjects/task-2-auth.txt';
+const EVIDENCE_PATH = '.omo/evidence/summer-refund-cutoff-access/task-2-auth-existing.txt';
 const SECRET = 'qa-secret';
 const MASTER_PIN = process.env.SUMMER_5WEEK_MASTER_PIN ?? '999999';
 
@@ -34,10 +34,14 @@ function runCase(name: string): string {
       const access = lookupAccess('100101', roster, null);
       assertOk(access.kind === 'student' && access.subjects.length === 1, 'expected one subject');
       if (access.kind !== 'student') return 'one-subject: failed';
-      const token = createSummerToken(access.subjects, SECRET, false, 1_785_600_000_000);
-      const session = verifySummerToken(token, SECRET, 1_785_600_000_000);
+      const token = createSummerToken(access.subjects, SECRET, false, 1_785_600_000_000, {
+        accessThrough: { mj1: '2026-07-28' },
+        accessPolicyVersion: 'qa-v2',
+      });
+      const session = verifySummerToken(token, SECRET, 1_785_600_000_000, 'qa-v2');
       assertOk(session?.subjects.length === 1 && !session.master, 'one-subject token failed');
-      return 'one-subject: ok subjects=1 cookie=verified';
+      assertOk(session.accessThrough.mj1 === '2026-07-28', 'one-subject token accessThrough failed');
+      return 'one-subject: ok subjects=1 cookie=verified accessThrough=round-tripped';
     }
     case 'two-subject': {
       const access = lookupAccess('120303', roster, null);
