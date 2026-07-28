@@ -7,6 +7,8 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
+export const dynamic = 'force-dynamic';
+
 async function loadVideos(): Promise<ExamVideoRow[]> {
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
