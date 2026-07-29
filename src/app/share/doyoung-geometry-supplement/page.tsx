@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: '도영 기하보충',
-  description: '기하 7~9일차 보충용 개념노트와 개념강의',
+  description: '기하 6~9일차 보충용 개념노트와 개념강의',
   robots: { index: false, follow: false },
 };
 
@@ -19,6 +19,23 @@ const GATE_CONFIG: ConceptGateConfig = {
 };
 
 const LESSONS: readonly ConceptLesson[] = [
+  {
+    order: 6,
+    title: '직선과 평면의 위치 관계',
+    pdfs: [
+      {
+        name: '직선과 평면의 위치 관계 개념노트',
+        url: 'https://mathgo-pdfs.b-cdn.net/concept/gh/05_%EA%B3%B5%EA%B0%84%EB%8F%84%ED%98%95/2_1_1_%20%EC%A7%81%EC%84%A0%EA%B3%BC%20%ED%8F%89%EB%A9%B4%EC%9D%98%20%EC%9C%84%EC%B9%98%20%EA%B4%80%EA%B3%84_v2.pdf?v=ea757ea4ed',
+      },
+    ],
+    videos: [
+      {
+        num: 7,
+        title: '직선과 평면의 위치관계',
+        id: 'bbf3c969-aeba-499b-b5ce-ca7c2d39d7c2',
+      },
+    ],
+  },
   {
     order: 7,
     title: '삼수선 정리',
