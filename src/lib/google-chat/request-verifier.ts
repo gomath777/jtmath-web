@@ -26,6 +26,9 @@ function describeUnverifiedToken(
       Buffer.from(encodedPayload, 'base64url').toString('utf8'),
     ) as Record<string, unknown>;
     const audience = typeof payload.aud === 'string' ? payload.aud : undefined;
+    const email = typeof payload.email === 'string' ? payload.email : undefined;
+    const expectedEmailDomain = serviceAccountEmail.split('@')[1];
+    const expectedProjectNumber = serviceAccountEmail.match(/\d+/)?.[0];
     const expectedUrl = new URL(endpointUrl);
     let audienceUrl: URL | undefined;
     try {
@@ -41,8 +44,12 @@ function describeUnverifiedToken(
       audienceHostMatches: audienceUrl?.host === expectedUrl.host,
       audiencePathMatches: audienceUrl?.pathname === expectedUrl.pathname,
       audienceHasQuery: Boolean(audienceUrl?.search),
-      emailMatchesExpected: payload.email === serviceAccountEmail,
-      emailMatchesChatSystem: payload.email === 'chat@system.gserviceaccount.com',
+      emailMatchesExpected: email === serviceAccountEmail,
+      emailMatchesChatSystem: email === 'chat@system.gserviceaccount.com',
+      emailDomainMatchesExpected: email?.split('@')[1] === expectedEmailDomain,
+      emailContainsExpectedProjectNumber: Boolean(
+        expectedProjectNumber && email?.includes(expectedProjectNumber),
+      ),
       emailVerifiedIsTrue: payload.email_verified === true,
     };
   } catch {
