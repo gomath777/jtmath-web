@@ -39,6 +39,20 @@ function isAllowedEndpoint(requestUrl: string, configuredEndpointUrl: string): b
   }
 }
 
+function readTokenAudience(idToken: string): string | undefined {
+  try {
+    const encodedPayload = idToken.split('.')[1];
+    if (!encodedPayload) return undefined;
+
+    const payload = JSON.parse(
+      Buffer.from(encodedPayload, 'base64url').toString('utf8'),
+    ) as { readonly aud?: unknown };
+    return typeof payload.aud === 'string' ? payload.aud : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVerifier {
   constructor(
     private readonly endpointUrl: string,
@@ -54,10 +68,15 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     const idToken = authorizationHeader.slice(bearerPrefix.length).trim();
     if (idToken.length === 0) return false;
 
+    const tokenAudience = readTokenAudience(idToken);
+    if (!tokenAudience || !isAllowedEndpoint(tokenAudience, this.endpointUrl)) {
+      return false;
+    }
+
     try {
       const ticket = await this.client.verifyIdToken({
         idToken,
-        audience: requestUrl,
+        audience: tokenAudience,
       });
       const payload = ticket.getPayload();
       return (
