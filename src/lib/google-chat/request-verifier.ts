@@ -13,6 +13,42 @@ export interface GoogleIdTokenClient {
   }>;
 }
 
+function describeUnverifiedToken(
+  idToken: string,
+  endpointUrl: string,
+  serviceAccountEmail: string,
+) {
+  try {
+    const encodedPayload = idToken.split('.')[1];
+    if (!encodedPayload) return { hasPayload: false };
+
+    const payload = JSON.parse(
+      Buffer.from(encodedPayload, 'base64url').toString('utf8'),
+    ) as Record<string, unknown>;
+    const audience = typeof payload.aud === 'string' ? payload.aud : undefined;
+    const expectedUrl = new URL(endpointUrl);
+    let audienceUrl: URL | undefined;
+    try {
+      audienceUrl = audience ? new URL(audience) : undefined;
+    } catch {
+      audienceUrl = undefined;
+    }
+
+    return {
+      hasPayload: true,
+      audienceIsNumeric: /^\d+$/.test(audience ?? ''),
+      audienceMatchesEndpoint: audience === endpointUrl,
+      audienceHostMatches: audienceUrl?.host === expectedUrl.host,
+      audiencePathMatches: audienceUrl?.pathname === expectedUrl.pathname,
+      audienceHasQuery: Boolean(audienceUrl?.search),
+      emailMatchesExpected: payload.email === serviceAccountEmail,
+      emailVerifiedIsTrue: payload.email_verified === true,
+    };
+  } catch {
+    return { hasPayload: false };
+  }
+}
+
 export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVerifier {
   constructor(
     private readonly endpointUrl: string,
@@ -37,7 +73,13 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
         payload?.email_verified === true && payload.email === this.serviceAccountEmail
       );
     } catch (error) {
-      if (error instanceof Error) return false;
+      if (error instanceof Error) {
+        console.warn(
+          '[google-chat] request token verification failed',
+          describeUnverifiedToken(idToken, this.endpointUrl, this.serviceAccountEmail),
+        );
+        return false;
+      }
       throw error;
     }
   }
