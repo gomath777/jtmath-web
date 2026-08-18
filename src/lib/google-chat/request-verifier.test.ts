@@ -134,6 +134,31 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts a project-scoped Workspace add
   );
 });
 
+test('GoogleWorkspaceAddOnRequestVerifier accepts the configured add-on identity with a non-service prefix', async () => {
+  const projectNumber = '953043722609';
+  const configuredEmail =
+    `workspace-addon-${projectNumber}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`;
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => ({
+      getPayload: () => ({
+        email:
+          `chat-app-${projectNumber}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`,
+        email_verified: true,
+      }),
+    }),
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    configuredEmail,
+    client,
+  );
+
+  assert.equal(
+    await verifier.verify(`Bearer ${tokenFor(endpointUrl)}`, endpointUrl),
+    true,
+  );
+});
+
 test('GoogleWorkspaceAddOnRequestVerifier rejects a Workspace add-on identity from another project', async () => {
   const client: GoogleIdTokenClient = {
     verifyIdToken: async () => ({
