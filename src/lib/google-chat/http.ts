@@ -5,14 +5,14 @@ import {
 } from './add-on';
 
 export interface GoogleChatRequestVerifier {
-  verify(authorizationHeader: string | null): Promise<boolean>;
+  verify(authorizationHeader: string | null, requestUrl: string): Promise<boolean>;
 }
 
 export function createGoogleChatPost(
   verifier: GoogleChatRequestVerifier,
 ): (request: Request) => Promise<Response> {
   return async (request) => {
-    if (!(await verifier.verify(request.headers.get('authorization')))) {
+    if (!(await verifier.verify(request.headers.get('authorization'), request.url))) {
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

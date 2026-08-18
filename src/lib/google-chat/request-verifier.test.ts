@@ -29,10 +29,32 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts a Google token for the configu
   );
 
   // When
-  const verified = await verifier.verify('Bearer valid-token');
+  const verified = await verifier.verify('Bearer valid-token', endpointUrl);
 
   // Then
   assert.equal(verified, true);
+});
+
+test('GoogleWorkspaceAddOnRequestVerifier verifies the exact request URL audience', async () => {
+  const requestUrl = `${endpointUrl}?x-vercel-protection-bypass=test-secret`;
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async ({ audience }) => {
+      assert.equal(audience, requestUrl);
+      return {
+        getPayload: () => ({
+          email: serviceAccountEmail,
+          email_verified: true,
+        }),
+      };
+    },
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    serviceAccountEmail,
+    client,
+  );
+
+  assert.equal(await verifier.verify('Bearer valid-token', requestUrl), true);
 });
 
 test('GoogleWorkspaceAddOnRequestVerifier rejects a token from a different service account', async () => {
@@ -52,10 +74,51 @@ test('GoogleWorkspaceAddOnRequestVerifier rejects a token from a different servi
   );
 
   // When
-  const verified = await verifier.verify('Bearer valid-token');
+  const verified = await verifier.verify('Bearer valid-token', endpointUrl);
 
   // Then
   assert.equal(verified, false);
+});
+
+test('GoogleWorkspaceAddOnRequestVerifier accepts a project-scoped Workspace add-on identity', async () => {
+  const projectNumber = '953043722609';
+  const configuredEmail =
+    `service-${projectNumber}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`;
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => ({
+      getPayload: () => ({
+        email:
+          `workspace-addon-${projectNumber}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`,
+        email_verified: true,
+      }),
+    }),
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    configuredEmail,
+    client,
+  );
+
+  assert.equal(await verifier.verify('Bearer valid-token', endpointUrl), true);
+});
+
+test('GoogleWorkspaceAddOnRequestVerifier rejects a Workspace add-on identity from another project', async () => {
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => ({
+      getPayload: () => ({
+        email:
+          'workspace-addon-111111111111@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+        email_verified: true,
+      }),
+    }),
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    'service-953043722609@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+    client,
+  );
+
+  assert.equal(await verifier.verify('Bearer valid-token', endpointUrl), false);
 });
 
 test('GoogleWorkspaceAddOnRequestVerifier rejects a request without a bearer token', async () => {
@@ -72,7 +135,7 @@ test('GoogleWorkspaceAddOnRequestVerifier rejects a request without a bearer tok
   );
 
   // When
-  const verified = await verifier.verify(null);
+  const verified = await verifier.verify(null, endpointUrl);
 
   // Then
   assert.equal(verified, false);

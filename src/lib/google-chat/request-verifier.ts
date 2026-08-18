@@ -13,47 +13,29 @@ export interface GoogleIdTokenClient {
   }>;
 }
 
-function describeUnverifiedToken(
-  idToken: string,
-  endpointUrl: string,
-  serviceAccountEmail: string,
-) {
+function isExpectedWorkspaceAddOnIdentity(
+  actualEmail: string | undefined,
+  configuredEmail: string,
+): boolean {
+  if (actualEmail === configuredEmail) return true;
+
+  const configuredMatch = configuredEmail.match(
+    /^service-(\d+)@(gcp-sa-gsuiteaddons\.iam\.gserviceaccount\.com)$/,
+  );
+  if (!configuredMatch || !actualEmail) return false;
+
+  const [, projectNumber, serviceDomain] = configuredMatch;
+  const [actualLocalPart, actualDomain] = actualEmail.split('@');
+  return actualDomain === serviceDomain && actualLocalPart.includes(projectNumber);
+}
+
+function isAllowedEndpoint(requestUrl: string, configuredEndpointUrl: string): boolean {
   try {
-    const encodedPayload = idToken.split('.')[1];
-    if (!encodedPayload) return { hasPayload: false };
-
-    const payload = JSON.parse(
-      Buffer.from(encodedPayload, 'base64url').toString('utf8'),
-    ) as Record<string, unknown>;
-    const audience = typeof payload.aud === 'string' ? payload.aud : undefined;
-    const email = typeof payload.email === 'string' ? payload.email : undefined;
-    const expectedEmailDomain = serviceAccountEmail.split('@')[1];
-    const expectedProjectNumber = serviceAccountEmail.match(/\d+/)?.[0];
-    const expectedUrl = new URL(endpointUrl);
-    let audienceUrl: URL | undefined;
-    try {
-      audienceUrl = audience ? new URL(audience) : undefined;
-    } catch {
-      audienceUrl = undefined;
-    }
-
-    return {
-      hasPayload: true,
-      audienceIsNumeric: /^\d+$/.test(audience ?? ''),
-      audienceMatchesEndpoint: audience === endpointUrl,
-      audienceHostMatches: audienceUrl?.host === expectedUrl.host,
-      audiencePathMatches: audienceUrl?.pathname === expectedUrl.pathname,
-      audienceHasQuery: Boolean(audienceUrl?.search),
-      emailMatchesExpected: email === serviceAccountEmail,
-      emailMatchesChatSystem: email === 'chat@system.gserviceaccount.com',
-      emailDomainMatchesExpected: email?.split('@')[1] === expectedEmailDomain,
-      emailContainsExpectedProjectNumber: Boolean(
-        expectedProjectNumber && email?.includes(expectedProjectNumber),
-      ),
-      emailVerifiedIsTrue: payload.email_verified === true,
-    };
+    const request = new URL(requestUrl);
+    const configured = new URL(configuredEndpointUrl);
+    return request.origin === configured.origin && request.pathname === configured.pathname;
   } catch {
-    return { hasPayload: false };
+    return false;
   }
 }
 
@@ -64,9 +46,10 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     private readonly client: GoogleIdTokenClient = new OAuth2Client(),
   ) {}
 
-  async verify(authorizationHeader: string | null): Promise<boolean> {
+  async verify(authorizationHeader: string | null, requestUrl: string): Promise<boolean> {
     const bearerPrefix = 'Bearer ';
     if (!authorizationHeader?.startsWith(bearerPrefix)) return false;
+    if (!isAllowedEndpoint(requestUrl, this.endpointUrl)) return false;
 
     const idToken = authorizationHeader.slice(bearerPrefix.length).trim();
     if (idToken.length === 0) return false;
@@ -74,20 +57,15 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     try {
       const ticket = await this.client.verifyIdToken({
         idToken,
-        audience: this.endpointUrl,
+        audience: requestUrl,
       });
       const payload = ticket.getPayload();
       return (
-        payload?.email_verified === true && payload.email === this.serviceAccountEmail
+        payload?.email_verified === true &&
+        isExpectedWorkspaceAddOnIdentity(payload.email, this.serviceAccountEmail)
       );
     } catch (error) {
-      if (error instanceof Error) {
-        console.warn(
-          '[google-chat] request token verification failed',
-          describeUnverifiedToken(idToken, this.endpointUrl, this.serviceAccountEmail),
-        );
-        return false;
-      }
+      if (error instanceof Error) return false;
       throw error;
     }
   }
