@@ -42,6 +42,7 @@ function describeUnverifiedToken(
       audiencePathMatches: audienceUrl?.pathname === expectedUrl.pathname,
       audienceHasQuery: Boolean(audienceUrl?.search),
       emailMatchesExpected: payload.email === serviceAccountEmail,
+      emailMatchesChatSystem: payload.email === 'chat@system.gserviceaccount.com',
       emailVerifiedIsTrue: payload.email_verified === true,
     };
   } catch {
