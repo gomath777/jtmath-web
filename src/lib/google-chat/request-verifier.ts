@@ -37,6 +37,16 @@ export interface GoogleIdTokenClient {
 
 type GoogleChatCertsFetcher = (client: GoogleIdTokenClient) => Promise<GooglePublicCerts>;
 
+type GoogleChatAuthRejectionDetails = Readonly<Record<string, boolean | string>>;
+
+function rejectGoogleChatAuth(
+  stage: string,
+  details: GoogleChatAuthRejectionDetails = {},
+): false {
+  console.warn('google_chat_auth_rejected', JSON.stringify({ stage, ...details }));
+  return false;
+}
+
 function isExpectedWorkspaceAddOnIdentity(
   actualEmail: string | undefined,
   configuredEmail: string,
@@ -66,6 +76,26 @@ function isAllowedEndpoint(requestUrl: string, configuredEndpointUrl: string): b
 
 function isProjectNumberAudience(audience: string): boolean {
   return /^\d{6,}$/.test(audience);
+}
+
+function classifyTokenAudience(audience: string | undefined): string {
+  if (!audience) return 'missing';
+  if (isProjectNumberAudience(audience)) return 'project_number';
+  try {
+    const parsed = new URL(audience);
+    return parsed.protocol === 'https:' ? 'https_url' : 'url_other';
+  } catch {
+    return 'other';
+  }
+}
+
+function classifyTokenEmail(actualEmail: string | undefined, configuredEmail: string): string {
+  if (!actualEmail) return 'missing';
+  if (actualEmail === googleChatIssuer) return 'chat_system';
+  if (actualEmail === configuredEmail) return 'configured';
+  return isExpectedWorkspaceAddOnIdentity(actualEmail, configuredEmail)
+    ? 'workspace_addon_project'
+    : 'other';
 }
 
 function readConfiguredProjectNumber(serviceAccountEmail: string): string | undefined {
@@ -122,22 +152,34 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
 
   async verify(authorizationHeader: string | null, requestUrl: string): Promise<boolean> {
     const bearerPrefix = 'Bearer ';
-    if (!authorizationHeader?.startsWith(bearerPrefix)) return false;
-    if (!isAllowedEndpoint(requestUrl, this.endpointUrl)) return false;
+    if (!authorizationHeader?.startsWith(bearerPrefix)) {
+      return rejectGoogleChatAuth('missing_bearer', {
+        authHeaderPresent: authorizationHeader !== null,
+      });
+    }
+    if (!isAllowedEndpoint(requestUrl, this.endpointUrl)) {
+      return rejectGoogleChatAuth('request_endpoint_mismatch');
+    }
 
     const idToken = authorizationHeader.slice(bearerPrefix.length).trim();
-    if (idToken.length === 0) return false;
+    if (idToken.length === 0) return rejectGoogleChatAuth('empty_bearer');
 
     const tokenAudience = readTokenAudience(idToken);
     if (!tokenAudience) {
-      return false;
+      return rejectGoogleChatAuth('missing_audience', {
+        audienceKind: classifyTokenAudience(tokenAudience),
+      });
     }
 
     if (isProjectNumberAudience(tokenAudience)) {
       return this.verifyProjectNumberJwt(idToken, tokenAudience);
     }
 
-    if (!isAllowedEndpoint(tokenAudience, this.endpointUrl)) return false;
+    if (!isAllowedEndpoint(tokenAudience, this.endpointUrl)) {
+      return rejectGoogleChatAuth('token_endpoint_mismatch', {
+        audienceKind: classifyTokenAudience(tokenAudience),
+      });
+    }
 
     try {
       const ticket = await this.client.verifyIdToken({
@@ -145,12 +187,22 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
         audience: tokenAudience,
       });
       const payload = ticket.getPayload();
-      return (
-        payload?.email_verified === true &&
-        isExpectedWorkspaceAddOnIdentity(payload.email, this.serviceAccountEmail)
+      const emailVerified = payload?.email_verified === true;
+      const emailMatches = isExpectedWorkspaceAddOnIdentity(
+        payload?.email,
+        this.serviceAccountEmail,
       );
+      if (!emailVerified || !emailMatches) {
+        return rejectGoogleChatAuth('oidc_payload_mismatch', {
+          emailKind: classifyTokenEmail(payload?.email, this.serviceAccountEmail),
+          emailVerified,
+        });
+      }
+      return true;
     } catch (error) {
-      if (error instanceof Error) return false;
+      if (error instanceof Error) {
+        return rejectGoogleChatAuth('oidc_verify_failed');
+      }
       throw error;
     }
   }
@@ -160,8 +212,14 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     tokenAudience: string,
   ): Promise<boolean> {
     const configuredProjectNumber = readConfiguredProjectNumber(this.serviceAccountEmail);
-    if (tokenAudience !== configuredProjectNumber) return false;
-    if (!this.client.verifySignedJwtWithCertsAsync) return false;
+    if (tokenAudience !== configuredProjectNumber) {
+      return rejectGoogleChatAuth('project_number_mismatch', {
+        configuredProjectNumberPresent: configuredProjectNumber !== undefined,
+      });
+    }
+    if (!this.client.verifySignedJwtWithCertsAsync) {
+      return rejectGoogleChatAuth('signed_jwt_verifier_unavailable');
+    }
 
     try {
       const certs = await this.fetchCerts(this.client);
@@ -173,7 +231,9 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
       );
       return true;
     } catch (error) {
-      if (error instanceof Error) return false;
+      if (error instanceof Error) {
+        return rejectGoogleChatAuth('signed_jwt_verify_failed');
+      }
       throw error;
     }
   }
