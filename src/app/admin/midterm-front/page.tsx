@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/server';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { isLocalAdminMode } from '@/utils/admin-auth';
+import { isLocalAdminMode, isSimpleAdminUnlocked } from '@/utils/admin-auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -69,6 +69,7 @@ function statusLabel(status: ReturnType<typeof getBlockStatus>): string {
 
 async function requireAdmin(): Promise<void> {
   if (isLocalAdminMode()) return;
+  if (await isSimpleAdminUnlocked()) return;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');

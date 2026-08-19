@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Users, CreditCard, LayoutDashboard, BookOpen, Calendar, GraduationCap, MessageSquare, FileText } from 'lucide-react';
 import AdminUserRow from './AdminUserRow';
+import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 
 // 관리자 이메일 목록 (환경 변수로 관리 가능)
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map((e) => e.trim());
@@ -15,8 +16,9 @@ export default async function AdminDashboardPage({
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  if (!ADMIN_EMAILS.includes(user.email || '')) {
+  const simpleAdmin = await isSimpleAdminUnlocked();
+  if (!simpleAdmin && !user) redirect('/login');
+  if (!simpleAdmin && !ADMIN_EMAILS.includes(user.email || '')) {
     redirect('/dashboard');
   }
 
@@ -74,7 +76,7 @@ export default async function AdminDashboardPage({
           <div className="flex items-center gap-3 text-sm font-medium">
             <div className="flex items-center gap-2 text-slate-300">
               <div className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-              {user.email}
+              {simpleAdmin ? 'simple admin' : user?.email}
             </div>
             <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors text-xs">대시보드 →</Link>
           </div>

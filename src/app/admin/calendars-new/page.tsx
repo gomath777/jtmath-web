@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
+import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 import CalendarsNewClient from './CalendarsNewClient';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map(e => e.trim());
@@ -49,8 +50,9 @@ const REVIEW_PHASE_LABEL = '전체 오답 반복 · 취약유형 보충 · 모�
 export default async function AdminCalendarsNewPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
-  if (!ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
+  const simpleAdmin = await isSimpleAdminUnlocked();
+  if (!simpleAdmin && !user) redirect('/login');
+  if (!simpleAdmin && !ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
 
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
