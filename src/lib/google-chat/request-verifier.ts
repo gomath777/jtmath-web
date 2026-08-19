@@ -41,6 +41,7 @@ function isExpectedWorkspaceAddOnIdentity(
   actualEmail: string | undefined,
   configuredEmail: string,
 ): boolean {
+  if (actualEmail === googleChatIssuer) return true;
   if (actualEmail === configuredEmail) return true;
 
   const configuredMatch = configuredEmail.match(

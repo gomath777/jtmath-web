@@ -40,6 +40,27 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts a Google token for the configu
   assert.equal(verified, true);
 });
 
+test('GoogleWorkspaceAddOnRequestVerifier accepts the documented Google Chat OIDC issuer', async () => {
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => ({
+      getPayload: () => ({
+        email: 'chat@system.gserviceaccount.com',
+        email_verified: true,
+      }),
+    }),
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    'service-953043722609@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+    client,
+  );
+
+  assert.equal(
+    await verifier.verify(`Bearer ${tokenFor(endpointUrl)}`, endpointUrl),
+    true,
+  );
+});
+
 test('GoogleWorkspaceAddOnRequestVerifier verifies the signed audience when Vercel strips its bypass query', async () => {
   const signedAudience = `${endpointUrl}?x-vercel-protection-bypass=test-secret`;
   const client: GoogleIdTokenClient = {
