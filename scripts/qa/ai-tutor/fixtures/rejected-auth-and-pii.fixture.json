@@ -1,0 +1,17 @@
+{
+  "headers": {
+    "authorization": "Bearer SYNTHETIC_REDACTED_TOKEN"
+  },
+  "chat": {
+    "user": {
+      "name": "users/SYNTHETIC_STUDENT_REJECTED",
+      "email": "redacted@example.invalid"
+    },
+    "messagePayload": {
+      "message": {
+        "name": "spaces/SYNTHETIC_DM_SPACE_REJECTED/messages/SYNTHETIC_MESSAGE_REJECTED",
+        "text": "이 fixture는 계약 테스트에서 거부되어야 합니다."
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "chat": {
+    "user": {
+      "name": "users/SYNTHETIC_STUDENT_001"
+    },
+    "messagePayload": {
+      "space": {
+        "name": "spaces/SYNTHETIC_DM_SPACE_001",
+        "type": "DM"
+      },
+      "message": {
+        "name": "spaces/SYNTHETIC_DM_SPACE_001/messages/SYNTHETIC_MESSAGE_001",
+        "text": "x^2-5x+6=0 풀이에서 어디가 틀렸는지 힌트가 필요해요.",
+        "thread": {
+          "name": "spaces/SYNTHETIC_DM_SPACE_001/threads/SYNTHETIC_THREAD_001"
+        }
+      }
+    }
+  }
+}

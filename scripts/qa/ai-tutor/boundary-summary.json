@@ -1,0 +1,24 @@
+{
+  "suite": "google-chat-ai-tutor-boundary-qa",
+  "scenarioCount": 15,
+  "liveNetworkAdapters": 0,
+  "fixtures": "synthetic-only",
+  "externalWrites": 0,
+  "scenarios": [
+    "prompt-injection-delimited",
+    "provider-request-redacts-pii",
+    "observability-hashes-identifiers",
+    "provider-schema-corruption-fallback",
+    "auth-before-body-parse",
+    "context-profile-scope",
+    "unreleased-context-fails-closed",
+    "feature-disabled-compatibility",
+    "unlinked-user-no-provider",
+    "named-space-no-repository",
+    "duplicate-completed-no-provider",
+    "duplicate-processing-fallback",
+    "provider-throw-fallback",
+    "oversized-or-spoofed-image-rejected",
+    "cleanup-summary-confirms-no-live-adapters"
+  ]
+}

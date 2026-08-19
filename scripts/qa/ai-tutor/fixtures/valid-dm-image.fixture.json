@@ -1,0 +1,27 @@
+{
+  "chat": {
+    "user": {
+      "name": "users/SYNTHETIC_STUDENT_002"
+    },
+    "messagePayload": {
+      "space": {
+        "name": "spaces/SYNTHETIC_DM_SPACE_002",
+        "type": "DM"
+      },
+      "message": {
+        "name": "spaces/SYNTHETIC_DM_SPACE_002/messages/SYNTHETIC_MESSAGE_002",
+        "text": "첨부한 풀이의 첫 오류만 힌트로 알려주세요.",
+        "attachment": [
+          {
+            "name": "spaces/SYNTHETIC_DM_SPACE_002/messages/SYNTHETIC_MESSAGE_002/attachments/SYNTHETIC_ATTACHMENT_001",
+            "contentName": "synthetic-redacted-math-work.png",
+            "contentType": "image/png",
+            "attachmentDataRef": {
+              "resourceName": "spaces/SYNTHETIC_DM_SPACE_002/messages/SYNTHETIC_MESSAGE_002/attachments/SYNTHETIC_ATTACHMENT_001"
+            }
+          }
+        ]
+      }
+    }
+  }
+}
