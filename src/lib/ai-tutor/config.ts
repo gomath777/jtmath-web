@@ -97,6 +97,9 @@ const integerBounds = {
 
 const forbiddenModelAliasPattern = /(^|[-_/])(latest|preview|experimental|exp)([-_/]|$)/i;
 const stableGeminiModelPattern = /^gemini-[0-9]+(?:\.[0-9]+)?-[a-z0-9][a-z0-9-]*$/i;
+const retiredGeminiModelReplacements: Readonly<Record<string, string>> = {
+  'gemini-2.5-flash': 'gemini-3.1-flash-lite',
+};
 
 export function parseAiTutorConfig(
   env: AiTutorEnvironment,
@@ -263,7 +266,7 @@ function parseModel(input: ModelParseInput): AiTutorModelConfig | undefined {
     issues.push({ envName, code: 'missing_model' });
     return undefined;
   }
-  const modelId = value.trim();
+  const modelId = retiredGeminiModelReplacements[value.trim()] ?? value.trim();
   if (!stableGeminiModelPattern.test(modelId)) {
     issues.push({ envName, code: 'invalid_model_id' });
     return undefined;

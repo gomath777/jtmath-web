@@ -32,7 +32,7 @@ test('parseAiTutorConfig returns typed enabled config when production requiremen
   assert.equal(result.config.pairingHmacSecret.present, true);
   assert.equal('value' in result.config.geminiApiKey, false);
   assert.equal('value' in result.config.pairingHmacSecret, false);
-  assert.equal(result.config.textModel.id, 'gemini-2.5-flash');
+  assert.equal(result.config.textModel.id, 'gemini-3.1-flash-lite');
   assert.equal(result.config.modelTimeoutMs, 20_000);
   assert.equal(result.config.image.maxBytes, 8 * 1024 * 1024);
   assert.deepEqual(result.config.retentionDays, {
