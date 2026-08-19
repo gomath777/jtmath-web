@@ -168,12 +168,15 @@ export default function StudentDashboardClient({
   slug,
   basePath = '/s',
   dashboardEndpoint = '/api/public/student/dashboard',
+  adminReturnHref,
 }: {
   slug: string;
   /** URL prefix: '/s' (online portal), '/c' (offline classroom), or '/st' (new system). 세션 링크 조립에 사용. */
   basePath?: string;
   /** Dashboard data endpoint. Default `/api/public/student/dashboard` for legacy /s; `/api/public/student/st-dashboard` for new /st (SLA only). */
   dashboardEndpoint?: string;
+  /** 관리자 캘린더에서 학생 페이지를 미리볼 때 돌아갈 주소. */
+  adminReturnHref?: string;
 }) {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -273,49 +276,63 @@ export default function StudentDashboardClient({
     }
   };
 
+  const adminReturnBar = adminReturnHref ? (
+    <div className="mb-5">
+      <Link
+        href={adminReturnHref}
+        className="inline-flex items-center rounded-full border border-border-warm bg-ivory px-3 py-1.5 text-[12px] font-medium text-olive shadow-ring-warm transition-colors hover:text-terracotta"
+      >
+        ← 관리자 캘린더로 돌아가기
+      </Link>
+    </div>
+  ) : null;
+
   // ─── Verify form ────────────────────────────────
   if (needsVerify) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-10 w-full max-w-sm">
-          <div className="text-center mb-6">
-            <h1 className="font-serif font-medium text-[22px] text-ink tracking-tight">
-              본인 확인
-            </h1>
-            <p className="text-[13px] text-olive mt-2">
-              생년월일 6자리를 입력하세요
-            </p>
-          </div>
-          <form onSubmit={handleVerify}>
-            <input
-              type="text"
-              inputMode="numeric"
-              maxLength={6}
-              placeholder="YYMMDD (예: 080315)"
-              value={birthPin}
-              onChange={e =>
-                setBirthPin(e.target.value.replace(/\D/g, '').slice(0, 6))
-              }
-              className="w-full px-4 py-3 bg-parchment border border-border-warm rounded-xl text-ink text-center text-lg tracking-[0.3em] font-mono placeholder:text-stone placeholder:tracking-normal placeholder:text-sm"
-              autoFocus
-            />
-            {verifyError && (
-              <p className="text-crimson text-[12px] text-center mt-2">
-                {verifyError}
+      <div>
+        {adminReturnBar}
+        <div className="flex items-center justify-center py-16">
+          <div className="bg-ivory border border-border-cream rounded-2xl px-8 py-10 w-full max-w-sm">
+            <div className="text-center mb-6">
+              <h1 className="font-serif font-medium text-[22px] text-ink tracking-tight">
+                본인 확인
+              </h1>
+              <p className="text-[13px] text-olive mt-2">
+                생년월일 6자리를 입력하세요
               </p>
-            )}
-            <button
-              type="submit"
-              disabled={birthPin.length !== 6 || verifying}
-              className="w-full mt-4 py-3 bg-terracotta text-ivory text-[14px] font-medium rounded-xl shadow-ring-terracotta disabled:opacity-30 disabled:cursor-not-allowed hover:bg-terracotta-light transition-colors"
-            >
-              {verifying ? (
-                <Loader2 className="w-4 h-4 animate-spin mx-auto" />
-              ) : (
-                '확인'
+            </div>
+            <form onSubmit={handleVerify}>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                placeholder="YYMMDD (예: 080315)"
+                value={birthPin}
+                onChange={e =>
+                  setBirthPin(e.target.value.replace(/\D/g, '').slice(0, 6))
+                }
+                className="w-full px-4 py-3 bg-parchment border border-border-warm rounded-xl text-ink text-center text-lg tracking-[0.3em] font-mono placeholder:text-stone placeholder:tracking-normal placeholder:text-sm"
+                autoFocus
+              />
+              {verifyError && (
+                <p className="text-crimson text-[12px] text-center mt-2">
+                  {verifyError}
+                </p>
               )}
-            </button>
-          </form>
+              <button
+                type="submit"
+                disabled={birthPin.length !== 6 || verifying}
+                className="w-full mt-4 py-3 bg-terracotta text-ivory text-[14px] font-medium rounded-xl shadow-ring-terracotta disabled:opacity-30 disabled:cursor-not-allowed hover:bg-terracotta-light transition-colors"
+              >
+                {verifying ? (
+                  <Loader2 className="w-4 h-4 animate-spin mx-auto" />
+                ) : (
+                  '확인'
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     );
@@ -324,8 +341,11 @@ export default function StudentDashboardClient({
   // ─── Loading ────────────────────────────────────
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-6 h-6 animate-spin text-stone" />
+      <div>
+        {adminReturnBar}
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-6 h-6 animate-spin text-stone" />
+        </div>
       </div>
     );
   }
@@ -375,6 +395,7 @@ export default function StudentDashboardClient({
   if (isMaster && masterViewMode === 'calendar') {
     return (
       <div>
+        {adminReturnBar}
         {masterBanner}
         <SessionCalendarView
           mode="master"
@@ -390,6 +411,7 @@ export default function StudentDashboardClient({
 
   return (
     <div>
+      {adminReturnBar}
       {masterBanner}
 
       {/* ─── Welcome hero ─── */}

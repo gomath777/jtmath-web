@@ -3,10 +3,15 @@ import StudentDashboardClient from './StudentDashboardClient';
 
 export default async function StudentPortalPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ admin?: string | string[] }>;
 }) {
   const { slug } = await params;
+  const sp = await searchParams;
+  const adminParam = Array.isArray(sp?.admin) ? sp?.admin[0] : sp?.admin;
+  const adminReturnHref = adminParam === '1' ? '/admin/calendars-new' : undefined;
 
   // Verify slug exists (server-side)
   const sc = createServiceClient(
@@ -48,6 +53,7 @@ export default async function StudentPortalPage({
       slug={slug}
       basePath="/s"
       dashboardEndpoint="/api/public/student/st-dashboard"
+      adminReturnHref={adminReturnHref}
     />
   );
 }

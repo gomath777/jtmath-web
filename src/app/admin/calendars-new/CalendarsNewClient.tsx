@@ -117,11 +117,10 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                         </p>
                       </div>
                       <Link
-                        href={`/s/${s.slug}`}
-                        target="_blank"
+                        href={`/s/${s.slug}?admin=1`}
                         className="text-xs text-red-600 hover:underline shrink-0"
                       >
-                        학생 페이지 ↗
+                        학생 페이지 →
                       </Link>
                     </div>
 

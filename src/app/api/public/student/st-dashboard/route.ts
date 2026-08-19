@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 import { getStudentFromRequest, renewToken, setStudentCookie } from '@/utils/student-auth';
 
 // 신 시스템 (/st/{slug}) 전용 대시보드 API.
@@ -81,16 +82,36 @@ interface TodayTask {
 }
 
 export async function GET(req: NextRequest) {
-  const student = await getStudentFromRequest(req);
-  if (!student) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const urlSlug = req.nextUrl.searchParams.get('slug');
-  if (urlSlug && urlSlug !== student.slug) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_KEY!,
   );
+
+  let student = await getStudentFromRequest(req);
+  if (!student && urlSlug && await isSimpleAdminUnlocked()) {
+    const { data: token } = await sc
+      .from('student_tokens')
+      .select('slug, profile_id, portal_expires_at')
+      .eq('slug', urlSlug)
+      .eq('is_active', true)
+      .single();
+
+    const expired =
+      !!token?.portal_expires_at && new Date(token.portal_expires_at).getTime() <= Date.now();
+
+    if (token && !expired) {
+      student = {
+        profileId: token.profile_id as string,
+        slug: token.slug as string,
+        exp: Math.floor(Date.now() / 1000) + 86400,
+        isMaster: true,
+      };
+    }
+  }
+
+  if (!student) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (urlSlug && urlSlug !== student.slug) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data: profile } = await sc
     .from('profiles')
@@ -287,7 +308,6 @@ export async function GET(req: NextRequest) {
   if (dueConcepts[0] && prioritized.length < 3) markPush(dueConcepts[0]);
   for (const t of otherSessionTasks) { if (prioritized.length >= 3) break; markPush(t); }
 
-  const newToken = await renewToken(student);
   const res = NextResponse.json({
     profile: {
       name: profile.name, school: profile.school,
@@ -311,5 +331,7 @@ export async function GET(req: NextRequest) {
     calendarSessions,
     calendarConceptItems,
   });
+  if (student.isMaster) return res;
+  const newToken = await renewToken(student);
   return setStudentCookie(res, newToken);
 }
