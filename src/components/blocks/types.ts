@@ -22,6 +22,7 @@ export const SUBJECT_LABELS: Record<string, string> = {
   mj2: '미적분2',
   s2: '수학2',
   ht: '확률과통계',
+  gh: '기하',
   gi: '기하',
 };
 

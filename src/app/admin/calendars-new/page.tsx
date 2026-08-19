@@ -9,7 +9,7 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',')
 const SUBJECT_LABEL: Record<string, string> = {
   gs1: '공통수학1', gs2: '공통수학2',
   ds2: '대수', mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
-  ht: '확률과통계', gi: '기하',
+  ht: '확률과통계', gh: '기하', gi: '기하',
 };
 
 export const dynamic = 'force-dynamic';

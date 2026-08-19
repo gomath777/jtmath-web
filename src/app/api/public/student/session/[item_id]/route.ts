@@ -6,7 +6,7 @@ const SUBJECT_LABEL: Record<string, string> = {
   gs1: '공통수학1', gs2: '공통수학2',
   ds: '대수', ds2: '대수',
   mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
-  ht: '확률과통계', gi: '기하', s2: '수학2',
+  ht: '확률과통계', gh: '기하', gi: '기하', s2: '수학2',
 };
 
 // "1주 1차시" → { week_number, session_number }

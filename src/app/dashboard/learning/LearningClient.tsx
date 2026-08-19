@@ -54,8 +54,12 @@ interface ProgressMap {
 const SUBJECT_LABELS: Record<string, string> = {
   gs1: '공통수학1',
   gs2: '공통수학2',
+  ds: '대수',
   ds2: '대수',
+  mj1: '미적분1',
   ms1: '미적분1',
+  gh: '기하',
+  gi: '기하',
 };
 
 const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
