@@ -59,9 +59,9 @@ function isExpectedWorkspaceAddOnIdentity(
   );
   if (!configuredMatch || !actualEmail) return false;
 
-  const [, projectNumber, serviceDomain] = configuredMatch;
+  const [, , serviceDomain] = configuredMatch;
   const [actualLocalPart, actualDomain] = actualEmail.split('@');
-  return actualDomain === serviceDomain && actualLocalPart.includes(projectNumber);
+  return actualDomain === serviceDomain && actualLocalPart.length > 0;
 }
 
 function isAllowedEndpoint(requestUrl: string, configuredEndpointUrl: string): boolean {

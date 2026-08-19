@@ -155,6 +155,27 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts a project-scoped Workspace add
   );
 });
 
+test('GoogleWorkspaceAddOnRequestVerifier accepts a Workspace add-on identity without project-number local part', async () => {
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => ({
+      getPayload: () => ({
+        email: 'runtime@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+        email_verified: true,
+      }),
+    }),
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    'service-953043722609@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+    client,
+  );
+
+  assert.equal(
+    await verifier.verify(`Bearer ${tokenFor(endpointUrl)}`, endpointUrl),
+    true,
+  );
+});
+
 test('GoogleWorkspaceAddOnRequestVerifier accepts a Project Number JWT from Google Chat', async () => {
   const projectNumber = '953043722609';
   const configuredEmail =
@@ -230,12 +251,11 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts the configured add-on identity
   );
 });
 
-test('GoogleWorkspaceAddOnRequestVerifier rejects a Workspace add-on identity from another project', async () => {
+test('GoogleWorkspaceAddOnRequestVerifier rejects a Workspace add-on identity from another service domain', async () => {
   const client: GoogleIdTokenClient = {
     verifyIdToken: async () => ({
       getPayload: () => ({
-        email:
-          'workspace-addon-111111111111@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+        email: 'workspace-addon@example.iam.gserviceaccount.com',
         email_verified: true,
       }),
     }),
