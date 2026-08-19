@@ -16,6 +16,7 @@ import {
   Video,
   Calendar,
   Sparkles,
+  ClipboardCheck,
 } from 'lucide-react';
 
 export type AdminNavKey =
@@ -25,6 +26,9 @@ export type AdminNavKey =
   | 'content'
   | 'concept'
   | 'concept-assign'
+  | 'content-readiness'
+  | 'midterm-front'
+  | 'calendars-new'
   | 'curriculum';
 
 interface NavItem {
@@ -40,6 +44,9 @@ const NAV_ITEMS: NavItem[] = [
   { key: 'stats', href: '/admin?tab=stats', icon: LayoutDashboard, label: '현황 요약' },
   { key: 'content', href: '/admin/content-library', icon: BookOpen, label: '보충자료' },
   { key: 'concept', href: '/admin/concept-lectures', icon: Video, label: '개념강의' },
+  { key: 'content-readiness', href: '/admin/content-readiness', icon: ClipboardCheck, label: '콘텐츠 준비 현황' },
+  { key: 'midterm-front', href: '/admin/midterm-front', icon: ClipboardCheck, label: '중간 4주 전반전' },
+  { key: 'calendars-new', href: '/admin/calendars-new', icon: Calendar, label: '학생 캘린더' },
   { key: 'concept-assign', href: '/admin/concept-assign', icon: Sparkles, label: '자연어 배정' },
   { key: 'curriculum', href: '/admin/curriculum', icon: Calendar, label: '커리큘럼' },
 ];

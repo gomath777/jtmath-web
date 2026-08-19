@@ -4,6 +4,10 @@ import { createClient as createServerClient } from '@/utils/supabase/server';
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com')
   .split(',').map(e => e.trim()).filter(Boolean);
 
+export function isLocalAdminMode(): boolean {
+  return process.env.NODE_ENV === 'development' || process.env.LOCAL_ADMIN_MODE === 'true';
+}
+
 /**
  * Guard for admin API routes. Returns NextResponse on failure (401/403),
  * or null on success. Caller should:
