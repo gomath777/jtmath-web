@@ -3,6 +3,7 @@ import {
   duplicateFallbackResult,
   storedAnswerFromTurn,
   type AiTutorClaimResult,
+  type AiTutorConversation,
   type AiTutorRepository,
   type AiTutorRepositoryErrorCode,
   type AiTutorRepositoryResult,
@@ -65,14 +66,7 @@ export function createSupabaseAiTutorRepository(client: SupabaseDataClient): AiT
       pairing_code_expires_at: input.pairingCodeExpiresAt,
       status: 'pending',
     }).select('id, chat_user_name, profile_id, status').single(), toIdentity),
-    upsertConversation: async (input) => readOne('upsert_conversation', ConversationRow, client.from('ai_tutor_conversations').upsert({
-      profile_id: input.profileId,
-      identity_id: input.identityId,
-      chat_space_name: input.chatSpaceName,
-      chat_thread_name: input.chatThreadName,
-      channel_type: input.channelType,
-      last_seen_at: input.seenAt,
-    }, { onConflict: 'profile_id,chat_space_name,chat_thread_name,channel_type' }).select('id, profile_id, channel_type').eq('profile_id', input.profileId).single(), toConversation),
+    upsertConversation: async (input) => upsertConversation(client, input),
     claimInboundTurn: async (input) => claimInboundTurn(client, input),
     getCompletedAnswer: async (input) => getCompletedAnswer(client, input.profileId, input.inboundMessageName),
     markTurnCompleted: async (input) => readOne('mark_turn_completed', TurnRow, client.from('ai_tutor_turns').update({
@@ -116,6 +110,44 @@ export function createSupabaseAiTutorRepository(client: SupabaseDataClient): AiT
     listTeacherReviewTurns: async (input) => readMany('list_review_turns', ReviewRow, client.from('ai_tutor_turns').select('id, profile_id, received_at, subject_slug, concept_tags, confidence, escalation_reason').eq('profile_id', input.profileId).eq('needs_teacher_review', true).order('received_at', { ascending: false }).limit(input.limit), toReviewTurns),
     listRetentionCandidates: async (input) => listRetentionCandidates(client, input),
   };
+}
+
+async function upsertConversation(
+  client: SupabaseDataClient,
+  input: Parameters<AiTutorRepository['upsertConversation']>[0],
+): Promise<AiTutorRepositoryResult<AiTutorConversation>> {
+  const inserted = await client.from('ai_tutor_conversations').insert({
+    profile_id: input.profileId,
+    identity_id: input.identityId,
+    chat_space_name: input.chatSpaceName,
+    chat_thread_name: input.chatThreadName,
+    channel_type: input.channelType,
+    last_seen_at: input.seenAt,
+  }).select('id, profile_id, channel_type').eq('profile_id', input.profileId).single();
+  if (inserted.error === null) {
+    return parseOne('upsert_conversation', ConversationRow, inserted.data, toConversation);
+  }
+  if (mapDbError(inserted.error) !== 'conflict') return fail('upsert_conversation', inserted.error);
+
+  let existingQuery = client.from('ai_tutor_conversations')
+    .select('id, profile_id, channel_type')
+    .eq('profile_id', input.profileId)
+    .eq('chat_space_name', input.chatSpaceName)
+    .eq('channel_type', input.channelType);
+  existingQuery = input.chatThreadName === null
+    ? existingQuery.is('chat_thread_name', null)
+    : existingQuery.eq('chat_thread_name', input.chatThreadName);
+
+  const existing = await readMaybe(
+    'upsert_conversation_conflict',
+    ConversationRow,
+    existingQuery.maybeSingle(),
+    toConversation,
+  );
+  if (!existing.ok) return existing;
+  return existing.value === null
+    ? { ok: false, error: { code: 'not_found', operation: 'upsert_conversation_conflict' } }
+    : { ok: true, value: existing.value };
 }
 
 async function claimInboundTurn(client: SupabaseDataClient, input: Parameters<AiTutorRepository['claimInboundTurn']>[0]): Promise<AiTutorRepositoryResult<AiTutorClaimResult>> {

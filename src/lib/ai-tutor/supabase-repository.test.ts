@@ -51,6 +51,33 @@ test('claimInboundTurn returns a stored answer for completed duplicates', async 
   assert.equal(fake.turnInsertCount, 1);
 });
 
+test('upsertConversation creates a DM conversation without PostgREST onConflict upsert', async () => {
+  // Given
+  const fake = new FakeSupabase();
+  const repository = createSupabaseAiTutorRepository(fake.client);
+
+  // When
+  const result = await repository.upsertConversation({
+    profileId,
+    identityId: '20000000-0000-4000-8000-000000000001',
+    chatSpaceName: 'spaces/AAA',
+    chatThreadName: null,
+    channelType: 'dm',
+    seenAt: '2026-08-19T00:00:00.000Z',
+  });
+
+  // Then
+  assert.equal(result.ok, true);
+  assert.equal(
+    fake.operations.some((operation) => operation.table === 'ai_tutor_conversations' && operation.action === 'upsert'),
+    false,
+  );
+  assert.equal(
+    fake.operations.some((operation) => operation.table === 'ai_tutor_conversations' && operation.action === 'insert'),
+    true,
+  );
+});
+
 test('student-scoped methods always add a profile_id predicate', async () => {
   // Given
   const fake = new FakeSupabase();

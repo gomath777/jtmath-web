@@ -43,10 +43,24 @@ export class FakeSupabase {
   }): DbResult {
     this.operations.push(input);
     if (this.failReads) return { data: null, error: { code: '503', message: 'secret-db-detail' } };
+    if (input.table === 'ai_tutor_conversations' && input.action === 'insert') return this.insertConversation(input.payload);
     if (input.table === 'ai_tutor_turns' && input.action === 'insert') return this.insertTurn(input.payload);
     if (input.table === 'ai_tutor_turns' && input.action === 'select') return this.selectTurn(input.filters, input.countHead);
     if (input.action === 'insert' || input.action === 'upsert' || input.action === 'update') return { data: input.payload ?? null, error: null };
     return { data: [], error: null, count: 0 };
+  }
+
+  private insertConversation(payload: unknown): DbResult {
+    const row = Array.isArray(payload) ? payload[0] : payload;
+    if (!isRecord(row)) return { data: null, error: { code: '400', message: 'bad payload' } };
+    return {
+      data: {
+        id: conversationId,
+        profile_id: row.profile_id,
+        channel_type: row.channel_type,
+      },
+      error: null,
+    };
   }
 
   private insertTurn(payload: unknown): DbResult {
