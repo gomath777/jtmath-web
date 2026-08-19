@@ -50,6 +50,7 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
   mj1: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
   mj2: { bg: 'bg-teal-50', text: 'text-teal-700' },
   ht:  { bg: 'bg-amber-50', text: 'text-amber-700' },
+  gh:  { bg: 'bg-rose-50', text: 'text-rose-700' },
   gi:  { bg: 'bg-rose-50', text: 'text-rose-700' },
   s2:  { bg: 'bg-orange-50', text: 'text-orange-700' },
 };
@@ -161,6 +162,11 @@ function formatPublishLabel(ymd: string): string {
   return `${m}/${d} 밤 배포예정`;
 }
 
+function formatSessionBadge(sessionNumber: number): string | null {
+  if (!Number.isFinite(sessionNumber) || sessionNumber <= 0) return null;
+  return `${sessionNumber}차시`;
+}
+
 function ItemCard({
   item,
   mode,
@@ -182,12 +188,18 @@ function ItemCard({
     const studentLocked = mode === 'student' && !s.is_released;
     const color = studentLocked ? LOCKED_STYLE : subjectColor;
     const isFuture = !!s.publishDate && s.publishDate > todayYmd;
+    const sessionBadge = formatSessionBadge(s.session_number);
 
     const inner = (
       <>
         <div className="flex items-center gap-0.5 mb-0.5">
           <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
           <span className="font-medium truncate text-[9px] sm:text-[10px]">{s.subject_label}</span>
+          {sessionBadge && (
+            <span className="ml-auto shrink-0 rounded bg-white/60 px-1 text-[8px] font-semibold">
+              {sessionBadge}
+            </span>
+          )}
         </div>
         {s.label && <div className="truncate opacity-80 mt-0.5 text-[9px] sm:text-[10px]">{s.label}</div>}
         {studentLocked && isFuture && s.publishDate && (
