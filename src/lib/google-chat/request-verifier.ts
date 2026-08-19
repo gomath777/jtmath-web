@@ -98,6 +98,21 @@ function classifyTokenEmail(actualEmail: string | undefined, configuredEmail: st
     : 'other';
 }
 
+function describeTokenEmail(
+  actualEmail: string | undefined,
+  configuredEmail: string,
+): GoogleChatAuthRejectionDetails {
+  const configuredProjectNumber = readConfiguredProjectNumber(configuredEmail);
+  const [actualLocalPart, actualDomain] = actualEmail?.split('@') ?? [];
+  return {
+    configuredProjectNumberPresent: configuredProjectNumber !== undefined,
+    emailDomain: actualDomain ?? 'missing',
+    localContainsConfiguredProjectNumber:
+      configuredProjectNumber !== undefined &&
+      actualLocalPart?.includes(configuredProjectNumber) === true,
+  };
+}
+
 function readConfiguredProjectNumber(serviceAccountEmail: string): string | undefined {
   return serviceAccountEmail.match(/\d{6,}/)?.[0];
 }
@@ -194,6 +209,7 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
       );
       if (!emailVerified || !emailMatches) {
         return rejectGoogleChatAuth('oidc_payload_mismatch', {
+          ...describeTokenEmail(payload?.email, this.serviceAccountEmail),
           emailKind: classifyTokenEmail(payload?.email, this.serviceAccountEmail),
           emailVerified,
         });
