@@ -1,7 +1,23 @@
 import { OAuth2Client } from 'google-auth-library';
 import type { GoogleChatRequestVerifier } from './http';
 
+const googleChatIssuer = 'chat@system.gserviceaccount.com';
+const googleChatPublicCertsUrl =
+  `https://www.googleapis.com/service_accounts/v1/metadata/x509/${googleChatIssuer}`;
+
+type GooglePublicCerts = Readonly<Record<string, string>>;
+
+interface GoogleCertificateTransport {
+  request(options: {
+    readonly url: string;
+    readonly timeout?: number;
+  }): Promise<{
+    readonly data: unknown;
+  }>;
+}
+
 export interface GoogleIdTokenClient {
+  readonly transporter?: GoogleCertificateTransport;
   verifyIdToken(options: {
     readonly idToken: string;
     readonly audience: string;
@@ -11,7 +27,15 @@ export interface GoogleIdTokenClient {
       readonly email_verified?: boolean;
     } | undefined;
   }>;
+  verifySignedJwtWithCertsAsync?(
+    jwt: string,
+    certs: GooglePublicCerts,
+    requiredAudience: string | string[],
+    issuers?: string[],
+  ): Promise<unknown>;
 }
+
+type GoogleChatCertsFetcher = (client: GoogleIdTokenClient) => Promise<GooglePublicCerts>;
 
 function isExpectedWorkspaceAddOnIdentity(
   actualEmail: string | undefined,
@@ -39,6 +63,40 @@ function isAllowedEndpoint(requestUrl: string, configuredEndpointUrl: string): b
   }
 }
 
+function isProjectNumberAudience(audience: string): boolean {
+  return /^\d{6,}$/.test(audience);
+}
+
+function readConfiguredProjectNumber(serviceAccountEmail: string): string | undefined {
+  return serviceAccountEmail.match(/\d{6,}/)?.[0];
+}
+
+function isGooglePublicCerts(value: unknown): value is GooglePublicCerts {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value).every((entry) => typeof entry === 'string')
+  );
+}
+
+async function fetchGoogleChatPublicCerts(
+  client: GoogleIdTokenClient,
+): Promise<GooglePublicCerts> {
+  if (!client.transporter) {
+    throw new Error('Google auth client transporter is unavailable');
+  }
+
+  const response = await client.transporter.request({
+    url: googleChatPublicCertsUrl,
+    timeout: 5000,
+  });
+  if (!isGooglePublicCerts(response.data)) {
+    throw new Error('Google Chat public cert response was not a string map');
+  }
+
+  return response.data;
+}
+
 function readTokenAudience(idToken: string): string | undefined {
   try {
     const encodedPayload = idToken.split('.')[1];
@@ -58,6 +116,7 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     private readonly endpointUrl: string,
     private readonly serviceAccountEmail: string,
     private readonly client: GoogleIdTokenClient = new OAuth2Client(),
+    private readonly fetchCerts: GoogleChatCertsFetcher = fetchGoogleChatPublicCerts,
   ) {}
 
   async verify(authorizationHeader: string | null, requestUrl: string): Promise<boolean> {
@@ -69,9 +128,15 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
     if (idToken.length === 0) return false;
 
     const tokenAudience = readTokenAudience(idToken);
-    if (!tokenAudience || !isAllowedEndpoint(tokenAudience, this.endpointUrl)) {
+    if (!tokenAudience) {
       return false;
     }
+
+    if (isProjectNumberAudience(tokenAudience)) {
+      return this.verifyProjectNumberJwt(idToken, tokenAudience);
+    }
+
+    if (!isAllowedEndpoint(tokenAudience, this.endpointUrl)) return false;
 
     try {
       const ticket = await this.client.verifyIdToken({
@@ -83,6 +148,29 @@ export class GoogleWorkspaceAddOnRequestVerifier implements GoogleChatRequestVer
         payload?.email_verified === true &&
         isExpectedWorkspaceAddOnIdentity(payload.email, this.serviceAccountEmail)
       );
+    } catch (error) {
+      if (error instanceof Error) return false;
+      throw error;
+    }
+  }
+
+  private async verifyProjectNumberJwt(
+    jwt: string,
+    tokenAudience: string,
+  ): Promise<boolean> {
+    const configuredProjectNumber = readConfiguredProjectNumber(this.serviceAccountEmail);
+    if (tokenAudience !== configuredProjectNumber) return false;
+    if (!this.client.verifySignedJwtWithCertsAsync) return false;
+
+    try {
+      const certs = await this.fetchCerts(this.client);
+      await this.client.verifySignedJwtWithCertsAsync(
+        jwt,
+        certs,
+        tokenAudience,
+        [googleChatIssuer],
+      );
+      return true;
     } catch (error) {
       if (error instanceof Error) return false;
       throw error;

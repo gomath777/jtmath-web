@@ -134,6 +134,56 @@ test('GoogleWorkspaceAddOnRequestVerifier accepts a project-scoped Workspace add
   );
 });
 
+test('GoogleWorkspaceAddOnRequestVerifier accepts a Project Number JWT from Google Chat', async () => {
+  const projectNumber = '953043722609';
+  const configuredEmail =
+    `service-${projectNumber}@gcp-sa-gsuiteaddons.iam.gserviceaccount.com`;
+  const certs = { chatKey: 'public cert placeholder' };
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => {
+      assert.fail('Project Number JWT should not use OIDC ID token verification');
+    },
+    verifySignedJwtWithCertsAsync: async (jwt, receivedCerts, audience, issuers) => {
+      assert.equal(jwt, tokenFor(projectNumber));
+      assert.deepEqual(receivedCerts, certs);
+      assert.equal(audience, projectNumber);
+      assert.deepEqual(issuers, ['chat@system.gserviceaccount.com']);
+    },
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    configuredEmail,
+    client,
+    async () => certs,
+  );
+
+  assert.equal(
+    await verifier.verify(`Bearer ${tokenFor(projectNumber)}`, endpointUrl),
+    true,
+  );
+});
+
+test('GoogleWorkspaceAddOnRequestVerifier rejects a Project Number JWT for another project', async () => {
+  const client: GoogleIdTokenClient = {
+    verifyIdToken: async () => {
+      assert.fail('Project Number JWT should not use OIDC ID token verification');
+    },
+    verifySignedJwtWithCertsAsync: async () => {
+      assert.fail('JWT verification should not run for the wrong project number');
+    },
+  };
+  const verifier = new GoogleWorkspaceAddOnRequestVerifier(
+    endpointUrl,
+    'service-953043722609@gcp-sa-gsuiteaddons.iam.gserviceaccount.com',
+    client,
+  );
+
+  assert.equal(
+    await verifier.verify(`Bearer ${tokenFor('111111111111')}`, endpointUrl),
+    false,
+  );
+});
+
 test('GoogleWorkspaceAddOnRequestVerifier accepts the configured add-on identity with a non-service prefix', async () => {
   const projectNumber = '953043722609';
   const configuredEmail =
