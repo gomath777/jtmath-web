@@ -23,7 +23,7 @@ export default function MainHeader() {
         {/* Right Actions */}
         <div className="flex items-center gap-3">
           <Link 
-            href="/login" 
+            href="/midterm-front"
             className="text-sm font-medium text-white/60 hover:text-white transition-colors duration-200"
           >
             로그인

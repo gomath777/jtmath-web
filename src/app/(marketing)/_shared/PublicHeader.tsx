@@ -20,7 +20,7 @@ export default function PublicHeader() {
             등록안내
           </Link>
           <Link
-            href="/login"
+            href="/midterm-front"
             className="text-stone hover:text-ink transition-colors"
           >
             로그인
