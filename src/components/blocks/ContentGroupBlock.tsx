@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Download, FileText, Play, CheckCircle2, BookOpen, Lightbulb } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
 import { CONCEPT_LIBRARY_ID, EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { formatVideoLabel } from '@/lib/video-label';
 import type { ProgressMap } from './types';
 
@@ -133,7 +134,7 @@ function ConceptLayout({
               return (
                 <a
                   key={idx}
-                  href={url}
+                  href={getPdfDownloadHref(url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
@@ -264,7 +265,7 @@ function SidePanel({ side }: { side: SideContent }) {
     <div className="p-4 space-y-2">
       <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-stone mb-2.5">{side.label}</p>
       <a
-        href={url}
+        href={getPdfDownloadHref(url)}
         target="_blank"
         rel="noopener noreferrer"
         className="group flex items-center gap-2.5 px-3 py-3 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
@@ -281,7 +282,7 @@ function SidePanel({ side }: { side: SideContent }) {
       </a>
       {side.hintbook && (
         <a
-          href={hintUrl}
+          href={getPdfDownloadHref(hintUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
@@ -361,7 +362,7 @@ function BonusLayout({ data }: { data: ContentGroupContent }) {
       </div>
       <div className="px-4 py-4 space-y-2">
         <a
-          href={pdfUrl}
+          href={getPdfDownloadHref(pdfUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
@@ -378,7 +379,7 @@ function BonusLayout({ data }: { data: ContentGroupContent }) {
         </a>
         {hintbook && (
           <a
-            href={hintUrl}
+            href={getPdfDownloadHref(hintUrl)}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
@@ -445,11 +446,11 @@ function GichulLayout({
             const url = p.url || p.cdn_url || '';
             const name = p.original_name || 'document.pdf';
             return (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
+                <a
+                  key={idx}
+                  href={getPdfDownloadHref(url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
                 className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
               >
                 <FileText className="w-5 h-5 text-charcoal shrink-0" />
@@ -471,7 +472,7 @@ function GichulLayout({
       {hintbook && (
         <div className="px-4 pt-3 pb-1">
           <a
-            href={hintbook.url || hintbook.cdn_url || ''}
+            href={getPdfDownloadHref(hintbook.url || hintbook.cdn_url || '')}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"

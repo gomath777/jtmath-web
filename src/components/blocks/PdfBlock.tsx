@@ -1,6 +1,7 @@
 'use client';
 
 import { Download, FileText, Lightbulb } from 'lucide-react';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 function getPdfMeta(name: string): { subtitle: string; badge?: string } {
   const lower = name.toLowerCase();
@@ -20,7 +21,7 @@ export default function PdfBlock({ content }: { content: Record<string, unknown>
 
   return (
     <a
-      href={url}
+      href={getPdfDownloadHref(url)}
       target="_blank"
       rel="noopener noreferrer"
       className="group flex items-center gap-4 bg-ivory border border-border-cream rounded-xl px-5 py-4 hover:bg-white hover:shadow-ring-warm transition-all"
@@ -55,7 +56,7 @@ export function HintbookBlock({ content }: { content: Record<string, unknown> })
 
   return (
     <a
-      href={url}
+      href={getPdfDownloadHref(url)}
       target="_blank"
       rel="noopener noreferrer"
       className="group flex items-center gap-4 bg-ivory border-l-[3px] border-l-terracotta border-y border-r border-border-cream rounded-xl px-5 py-4 hover:bg-white transition-all"
