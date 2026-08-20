@@ -1,0 +1,279 @@
+[
+  {
+    "chapter_order": 1,
+    "title": "1차시 - 평면좌표 및 직선의 방정식",
+    "notion_page_id": "2d7bb7915b7180f88076c396fc068b1f",
+    "lectures": [
+      {
+        "lecture_number": 1,
+        "bunny_guid": "2c27f208-3b4d-4490-9b15-fcfffc5cfda4",
+        "pdf_attachment_name": "1.1.1. 선분의 내분, 내분점의 좌표.pdf"
+      },
+      {
+        "lecture_number": 2,
+        "bunny_guid": "53e77fca-0593-4ddb-a739-37120ff75330",
+        "pdf_attachment_name": "1.2.1. 두 직선의 평행 조건과 수직조건.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 2,
+    "title": "2차시 - 평면좌표/직선 마무리 & 원의 기초",
+    "notion_page_id": "2d7bb7915b7180d7a3adfcaefba48ec2",
+    "lectures": [
+      {
+        "lecture_number": 3,
+        "bunny_guid": "ae8907a9-50a9-4bcc-99cf-12ad15466ddb",
+        "pdf_attachment_name": "1.2.2. 점과 직선 사이의 거리.pdf"
+      },
+      {
+        "lecture_number": 4,
+        "bunny_guid": "95ecce37-ea73-41ca-ac49-3a8c4946e1f2",
+        "pdf_attachment_name": "중단원 평면좌표와 직선의 방정식 문제풀이.pdf"
+      },
+      {
+        "lecture_number": 5,
+        "bunny_guid": "7f6b2c8d-f52d-42b7-8348-1d7b6769b3ff",
+        "pdf_attachment_name": "1.3.1. 원의 방정식과 그래프.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 3,
+    "title": "3차시 - 원의 방정식",
+    "notion_page_id": "2d7bb7915b718062a213fe07a9a000ab",
+    "lectures": [
+      {
+        "lecture_number": 6,
+        "bunny_guid": "760eba90-a3df-46bb-b48a-118e17be3ef7",
+        "pdf_attachment_name": "1.3.2. 좌표평면에서 원과 직선의 위치 관계.pdf"
+      },
+      {
+        "lecture_number": 7,
+        "bunny_guid": "00849a5f-16f0-4bd5-a93b-35a1aebc84c4",
+        "pdf_attachment_name": "중단원 원의 방정식.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 4,
+    "title": "4차시 - 원의 방정식 마무리 및 평행이동",
+    "notion_page_id": "2d7bb7915b7180238df7ff5be2355fd3",
+    "lectures": [
+      {
+        "lecture_number": 8,
+        "bunny_guid": "5a61cc22-5581-4c99-98be-751111f7ed21",
+        "pdf_attachment_name": "#3+ 유형기초 원의 방정식.pdf"
+      },
+      {
+        "lecture_number": 9,
+        "bunny_guid": "10048082-d106-4b2e-82de-0f5ba3e395fb",
+        "pdf_attachment_name": "#3++ 유형기초 원의 방정식_문제지.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "486f8e52-aec1-48bd-8cd5-49050740e60f",
+        "pdf_attachment_name": "1.4.1. 평행이동.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 5,
+    "title": "5차시 - 대칭이동 및 도형의 방정식 총정리",
+    "notion_page_id": "2d7bb7915b7180b4b228e461b418322e",
+    "lectures": [
+      {
+        "lecture_number": 10,
+        "bunny_guid": "e02c8f72-7ed2-4f7c-9234-5b56b4040834",
+        "pdf_attachment_name": "1.4.2. 대칭이동.pdf"
+      },
+      {
+        "lecture_number": 11,
+        "bunny_guid": "ea672c52-653d-41ba-81fd-80c1d35ad0ed",
+        "pdf_attachment_name": "중단원 도형의 이동.pdf"
+      },
+      {
+        "lecture_number": 12,
+        "bunny_guid": "",
+        "pdf_attachment_name": "대단원 도형의 방정식.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 6,
+    "title": "6차시 - 집합의 뜻과 포함관계",
+    "notion_page_id": "2d7bb7915b7180919e63fec7ca27551b",
+    "lectures": [
+      {
+        "lecture_number": 13,
+        "bunny_guid": "a06028fa-5bfe-4a7c-9e14-0e242e301c01",
+        "pdf_attachment_name": "2.1.1. 집합의 개념과 표현.pdf"
+      },
+      {
+        "lecture_number": 14,
+        "bunny_guid": "4bf07507-76b2-49e1-be9f-67ea1dd4cfaa",
+        "pdf_attachment_name": "2.1.2. 두 집합 사이의 포함 관계.pdf"
+      },
+      {
+        "lecture_number": 15,
+        "bunny_guid": "",
+        "pdf_attachment_name": ""
+      }
+    ]
+  },
+  {
+    "chapter_order": 7,
+    "title": "7차시 - 여집합/차집합 및 집합 중단원 마무리",
+    "notion_page_id": "2d7bb7915b7180b5b336fa733e1576d8",
+    "lectures": [
+      {
+        "lecture_number": 16,
+        "bunny_guid": "c7fbeaad-3e94-4345-8602-fe9908490ac5",
+        "pdf_attachment_name": "2.1.3. 집합의 연산과 벤 다이어 그램.pdf"
+      },
+      {
+        "lecture_number": 17,
+        "bunny_guid": "6caab715-ff51-4be8-a87d-009671a0d8c2",
+        "pdf_attachment_name": "중단원 문제 집합.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "5624f34b-c914-48e2-bb4e-5c87db8fe279",
+        "pdf_attachment_name": ""
+      }
+    ]
+  },
+  {
+    "chapter_order": 8,
+    "title": "Part 1 총정리: 오답 복습 + 모의 중간고사 1, 2회",
+    "notion_page_id": "2d7bb7915b7180e8a874fff9e9c5485e",
+    "lectures": [],
+    "placeholder": true
+  },
+  {
+    "chapter_order": 9,
+    "title": "8차시 - 명제와 조건 전체",
+    "notion_page_id": "2d7bb7915b718075b0dbdaea05278dec",
+    "lectures": [
+      {
+        "lecture_number": 18,
+        "bunny_guid": "c18030de-f169-4d0e-b27a-99188a58dbee",
+        "pdf_attachment_name": "2.2.1. 명제와 조건.pdf"
+      },
+      {
+        "lecture_number": 19,
+        "bunny_guid": "0781647c-3041-4feb-9f6d-1780605df266",
+        "pdf_attachment_name": "2.2.2+3. 명제의 역,대우,충분조건,필요조건.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 10,
+    "title": "9차시 - 명제의 증명 및 절대부등식",
+    "notion_page_id": "2d7bb7915b718043b622d5cec2de1e6c",
+    "lectures": [
+      {
+        "lecture_number": 20,
+        "bunny_guid": "aa1a82e2-53f8-4f9b-b0db-440a14292f6e",
+        "pdf_attachment_name": "2.2.4+5. 대우를 이용한 증명, 귀류법, 절대부등식.pdf"
+      },
+      {
+        "lecture_number": 21,
+        "bunny_guid": "4f1e95a5-928c-48a1-87f4-220cf35f6131",
+        "pdf_attachment_name": "중단원 문제 명제.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 11,
+    "title": "10차시 - 집합과 명제 대단원 정리 및 함수 기초",
+    "notion_page_id": "2d7bb7915b718091ab3aef73e87be1dc",
+    "lectures": [
+      {
+        "lecture_number": 22,
+        "bunny_guid": "aeff87f6-dcf6-4873-9c49-ea8562e0b892",
+        "pdf_attachment_name": "대단원 문제 집합과 명제.pdf"
+      },
+      {
+        "lecture_number": 23,
+        "bunny_guid": "79bb262c-79dc-4cb3-8ae0-f1f77683ec40",
+        "pdf_attachment_name": "3.1.1. 함수의 개념과 그래프.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 12,
+    "title": "11차시 - 합성함수 기초 및 그래프 특강",
+    "notion_page_id": "2d7bb7915b71809f8ae3ef0ccb4d30c5",
+    "lectures": [
+      {
+        "lecture_number": 24,
+        "bunny_guid": "47615022-7a50-42dd-8d91-742a9120ed01",
+        "pdf_attachment_name": "3.1.2. 함수의 합성.pdf"
+      },
+      {
+        "lecture_number": 25,
+        "bunny_guid": "2f581a7d-ca46-40dd-ba6a-530350b5643a",
+        "pdf_attachment_name": "#18+ 합성함수의 그래프 그리기 특강_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 13,
+    "title": "12차시 - 역함수, 함수 중단원 정리",
+    "notion_page_id": "2d7bb7915b718002aa51f9815a4cc977",
+    "lectures": [
+      {
+        "lecture_number": 26,
+        "bunny_guid": "1a82ea66-48f5-4313-96dc-b3968f25434b",
+        "pdf_attachment_name": "3.1.3. 역함수.pdf"
+      },
+      {
+        "lecture_number": 27,
+        "bunny_guid": "dd3100ca-626a-41a6-9c79-cd06e95d491f",
+        "pdf_attachment_name": "중단원 문제 함수.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 14,
+    "title": "13차시 - 유리함수 무리함수의 그래프",
+    "notion_page_id": "2d7bb7915b7180048a42cba7e2aa063b",
+    "lectures": [
+      {
+        "lecture_number": -1,
+        "bunny_guid": "22977d16-6a6e-4ddf-b858-766712c07727",
+        "pdf_attachment_name": "3.2.1. 유리함수의 그래프.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "bd544e9e-70fe-4a05-acbc-4f77c78d6b6a",
+        "pdf_attachment_name": "3.2.2. 무리함수의 그래프.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 15,
+    "title": "14차시 - 중단원, 대단원 마무리",
+    "notion_page_id": "2d7bb7915b7180678da6c060fb28ff98",
+    "lectures": [
+      {
+        "lecture_number": -1,
+        "bunny_guid": "841fbd54-1cad-45dc-b9d5-890d29116ce2",
+        "pdf_attachment_name": "중단원 문제 유리,무리함수.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "70070728-d1eb-48b0-b7c2-963493048e70",
+        "pdf_attachment_name": "대단원 문제 함수.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 16,
+    "title": "Part 2 총정리: 오답 복습 + 모의 기말고사 1, 2회",
+    "notion_page_id": "2d7bb7915b71804b9bc2dde081c23915",
+    "lectures": [],
+    "placeholder": true
+  }
+]

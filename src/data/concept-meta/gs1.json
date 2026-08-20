@@ -1,0 +1,209 @@
+[
+  {
+    "chapter_order": 1,
+    "title": "1차시 - 1.1 다항식의 연산",
+    "notion_page_id": "6a7757784d4f4fddaec16136334b0b60",
+    "lectures": [
+      {
+        "lecture_number": 1,
+        "bunny_guid": "0433291f-b6c1-40f6-9b95-cbfe183c81d2",
+        "pdf_attachment_name": "공수1 개념 1.1.1.다항식의 사칙연산.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 2,
+    "title": "2차시 - 1.2 나머지 정리",
+    "notion_page_id": "b8a65019a6f348b49cbd4d5efad6e3bf",
+    "lectures": [
+      {
+        "lecture_number": 2,
+        "bunny_guid": "18d2abe9-9dcf-4288-933a-376e7a47e6ad",
+        "pdf_attachment_name": "공수1 개념 1.1.2. 항등식과 나머지정리.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 3,
+    "title": "3차시 - 1.3 다항식의 인수분해",
+    "notion_page_id": "945c8cada85449fcb5b06c49dc38206f",
+    "lectures": [
+      {
+        "lecture_number": 3,
+        "bunny_guid": "715d2be6-b623-41fd-b57c-712311ef865d",
+        "pdf_attachment_name": "공수1 개념 1.1.3. 다항식의 인수분해.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 4,
+    "title": "4차시 - 2.1 복소수 개념 및 예제",
+    "notion_page_id": "691c1eb9f7f14557a344ace0cb74cb44",
+    "lectures": [
+      {
+        "lecture_number": 4,
+        "bunny_guid": "c108f45e-ada8-4b12-8690-8dcc3acced2e",
+        "pdf_attachment_name": "공수1 개념 2.1.1. 복소수의 뜻과 성질.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 5,
+    "title": "5차시 - 2.1 이차방정식의 풀이 및 판별식",
+    "notion_page_id": "ba12659bbe05476b839f20133308eb5d",
+    "lectures": [
+      {
+        "lecture_number": 5,
+        "bunny_guid": "39fdef7f-4e14-4bea-a357-2e1a3595040f",
+        "pdf_attachment_name": "공수1 개념 2.1.2. 이차방정식의 풀이.pdf"
+      },
+      {
+        "lecture_number": 6,
+        "bunny_guid": "92d6e5f4-5084-49ec-879e-34bb72a1158d",
+        "pdf_attachment_name": "공수1 개념 2.1.3. 이차방정식의 근과 계수의 관계.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 6,
+    "title": "6차시 - 2.2 이차방정식과 이차함수의 관계",
+    "notion_page_id": "277849074dca4027b645fdc30f06f290",
+    "lectures": [
+      {
+        "lecture_number": 7,
+        "bunny_guid": "31a2bfa9-6d91-4f33-bddc-e89409e6b50d",
+        "pdf_attachment_name": "공수1 개념 2.2.1. 이차방정식과 이차함수의 관계.pdf"
+      },
+      {
+        "lecture_number": 8,
+        "bunny_guid": "2bb74c4f-a1e4-49c7-9599-e13c701ce615",
+        "pdf_attachment_name": "공수1 개념 2.2.2. 이차함수의 그래프와 직선의 위치 관계.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 7,
+    "title": "7차시 - 2.2 이차함수의 최대최소 (전반기 마무리)",
+    "notion_page_id": "b08fa829b10e4dbab75466967e071c84",
+    "lectures": [
+      {
+        "lecture_number": 9,
+        "bunny_guid": "956cbf02-6a1e-4dd3-a660-dab0db1f5704",
+        "pdf_attachment_name": "공수1 개념 2.2.3. 이차함수의 최대-최소.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 8,
+    "title": "Part 1 총정리: 오답 복습 + 모의 중간고사 1, 2회",
+    "notion_page_id": "d3232fad89c2409dae5d299fc20c8217",
+    "lectures": [],
+    "placeholder": true
+  },
+  {
+    "chapter_order": 9,
+    "title": "8차시 - 2.3 삼차·사차방정식의 풀이",
+    "notion_page_id": "ef1fcd9875eb44d48862b3d2b071b3bf",
+    "lectures": [
+      {
+        "lecture_number": 10,
+        "bunny_guid": "2c8416f6-7e0d-4478-bfee-87fca1c96c7b",
+        "pdf_attachment_name": "2_3_1_ 삼차방정식과 사차방정식의 풀이.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 10,
+    "title": "9차시 - 2.3 연립이차방정식 및 일차부등식",
+    "notion_page_id": "3530962afd9a4e2f8121f4fa8718bde6",
+    "lectures": [
+      {
+        "lecture_number": 11,
+        "bunny_guid": "2025c5d5-d6fc-4e4c-95c8-d8ee33243220",
+        "pdf_attachment_name": "2_3_2_ 미지수가 2개인 연립이차방정식.pdf"
+      },
+      {
+        "lecture_number": 12,
+        "bunny_guid": "c3ddef0e-2d08-4ec3-8e0b-b8559b8b24fc",
+        "pdf_attachment_name": "2_3_3_ 미지수가 1개인 연립일차부등식.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 11,
+    "title": "10차시 - 절댓값 포함 부등식",
+    "notion_page_id": "6449192911b049329b74c31fcdab1520",
+    "lectures": [
+      {
+        "lecture_number": 13,
+        "bunny_guid": "ee73dced-37ce-45fa-9282-229caa58ba3d",
+        "pdf_attachment_name": "2_3_4_ 절댓값을 포함한 일차부등식.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 12,
+    "title": "11차시 - 이차부등식과 연립이차부등식",
+    "notion_page_id": "458ea6da52a7497fa1ceadf45047311a",
+    "lectures": [
+      {
+        "lecture_number": 14,
+        "bunny_guid": "b237de19-3deb-499c-8e23-d9f972e97ed0",
+        "pdf_attachment_name": "2_3_5_ 이차부등식과 연립이차부등식.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 13,
+    "title": "12차시 - 3.1 경우의 수 (합의 법칙, 곱의 법칙)",
+    "notion_page_id": "ee427786f6cb4938bf46b704b26f9453",
+    "lectures": [
+      {
+        "lecture_number": 15,
+        "bunny_guid": "207e2f00-3531-4ab0-a1a9-18c03eaa2627",
+        "pdf_attachment_name": "3_1_1_ 합의법칙과 곱의 법칙.pdf"
+      },
+      {
+        "lecture_number": 16,
+        "bunny_guid": "dd9d9ac5-9c18-4120-bb30-d2db53547275",
+        "pdf_attachment_name": "3_2_1_ 순열.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 14,
+    "title": "13차시 - 3.2 조합 개념과 예제",
+    "notion_page_id": "5dab82f5f3d84beaa4893c07c181b198",
+    "lectures": [
+      {
+        "lecture_number": 17,
+        "bunny_guid": "ebefa957-f079-4403-9b9a-46f6b753ba36",
+        "pdf_attachment_name": "3_2_2_ 조합.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 15,
+    "title": "14차시 - 4.1 행렬의 정의 및 연산",
+    "notion_page_id": "40e4322847df4a23afb4afce1796edcc",
+    "lectures": [
+      {
+        "lecture_number": 18,
+        "bunny_guid": "0d284cfa-e18d-40d0-9c62-19b524697ba7",
+        "pdf_attachment_name": "4_1_1_ 행렬.pdf"
+      },
+      {
+        "lecture_number": 19,
+        "bunny_guid": "bd1d8cc5-1755-49dd-9b85-01e4bef9cedd",
+        "pdf_attachment_name": "4_1_2_ 행렬의 연산.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 16,
+    "title": "Part 2 총정리: 오답 복습 + 모의 기말고사 1, 2회",
+    "notion_page_id": "a175b97ced4941c3bb35f53e2139e36d",
+    "lectures": [],
+    "placeholder": true
+  }
+]

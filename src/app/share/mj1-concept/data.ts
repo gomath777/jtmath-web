@@ -119,7 +119,15 @@ export const MJ1_CONCEPT_PART2: readonly ConceptLesson[] = [
         url: 'https://mathgo-pdfs.b-cdn.net/concept/mj1/09_%ED%95%A8%EC%88%98%EC%9D%98%EA%B7%B8%EB%9E%98%ED%94%84/%5B%EA%B7%B8%EB%9E%98%ED%94%84%20%ED%8A%B9%EA%B0%95%5D%203%EC%B0%A8%2C%204%EC%B0%A8%20%ED%95%A8%EC%88%98%20%EA%B7%B8%EB%9E%98%ED%94%84%20%EA%B7%B8%EB%A6%AC%EA%B8%B0.pdf',
       },
     ],
-    videos: [{ num: 11, title: '2.3.2. 함수의 그래프', id: 'a8b76464-4983-49b3-bbe7-58d43279bbed' }],
+    videos: [
+      { num: 11, title: '2.3.2. 함수의 그래프', id: 'a8b76464-4983-49b3-bbe7-58d43279bbed' },
+      {
+        num: 11,
+        title: '[그래프 특강] 3차, 4차 함수 그래프 그리기',
+        id: '5941d0ef-fb1c-40ed-84fa-7bbf5508a622',
+        label: '특강',
+      },
+    ],
   },
   {
     order: 10,

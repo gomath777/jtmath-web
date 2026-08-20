@@ -20,6 +20,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import { buildBlockProgressUpdateMessage } from '@/lib/kakao-ops/templates';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || '').split(',').map(s => s.trim()).filter(Boolean);
 const SITE_URL = 'https://jtmath.kr';
@@ -394,11 +395,13 @@ async function executeTool(name: string, rawInput: unknown, sc: ReturnType<typeo
         for (const s of Array.from(byProfile.values())) {
           const prefix = s.type === 'offline' ? '/c' : '/s';
           const slotLabel = s.labels.length ? s.labels[0] : '';
-          const msg = [
-            `학습 페이지: ${SITE_URL}${prefix}/${s.slug}`,
-            slotLabel && weekdayPair ? `${slotLabel} ${weekdayPair} 진도 업데이트되었습니다.` : '진도 업데이트되었습니다.',
-            '문제 풀고 앱에 답안 제출 후 카톡주세요!',
-          ].filter(Boolean).join('\n');
+          const msg = buildBlockProgressUpdateMessage({
+            siteUrl: SITE_URL,
+            portalBasePath: prefix,
+            portalSlug: s.slug,
+            slotLabel,
+            weekdayPair,
+          });
           messages.push(`[${s.name}]\n${msg}`);
         }
 

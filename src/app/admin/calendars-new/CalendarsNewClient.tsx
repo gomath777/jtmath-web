@@ -48,8 +48,8 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] py-8 px-4">
-      <header className="max-w-5xl mx-auto mb-8">
+    <div className="mx-auto max-w-5xl min-w-0">
+      <header className="mb-8">
         <Link href="/admin" className="text-xs text-slate-500 hover:text-slate-900">← 어드민 홈</Link>
         <div className="flex items-center justify-between mt-2 gap-4 flex-wrap">
           <h1 className="text-2xl font-bold text-slate-900">학생 캘린더 (신 시스템)</h1>
@@ -87,10 +87,10 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
         </div>
       </header>
 
-      <div className="max-w-5xl mx-auto space-y-10">
+      <div className="space-y-10">
         {groups.map(group => (
           <div key={group.grade ?? 'none'} className="space-y-5">
-            <div className="flex items-center gap-3 sticky top-0 bg-[#F8F9FA] py-2 z-10">
+            <div className="sticky top-16 z-20 -mx-1 flex items-center gap-3 bg-[#F8F9FA]/95 px-1 py-2 backdrop-blur">
               <h2 className="text-lg font-bold text-slate-900">{gradeLabel(group.grade)}</h2>
               <span className="text-xs text-slate-500">{group.students.length}명</span>
               <div className="flex-1 h-px bg-slate-200" />
@@ -102,7 +102,7 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                 return (
                   <section
                     key={s.profileId}
-                    className="bg-white border border-slate-100 rounded-2xl shadow-sm p-5"
+                    className="overflow-hidden rounded-2xl border border-slate-100 bg-white p-5 shadow-sm"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div>
@@ -129,14 +129,18 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                         신 시스템 SLA 미배정 (마이그레이션 보류 또는 신규 학생)
                       </p>
                     ) : (
-                      <SessionCalendarView
-                        mode={mode}
-                        sessions={sessions}
-                        conceptItems={[]}
-                        phase={s.phase}
-                        slug={s.slug}
-                        basePath="/s"
-                      />
+                      <div className="overflow-x-auto pb-1">
+                        <div className="min-w-[720px]">
+                          <SessionCalendarView
+                            mode={mode}
+                            sessions={sessions}
+                            conceptItems={[]}
+                            phase={s.phase}
+                            slug={s.slug}
+                            basePath="/s"
+                          />
+                        </div>
+                      </div>
                     )}
                   </section>
                 );

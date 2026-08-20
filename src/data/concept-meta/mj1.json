@@ -1,0 +1,195 @@
+[
+  {
+    "chapter_order": 1,
+    "title": "1차시 - 함수의 극한",
+    "notion_page_id": "2d7bb7915b7180ab892cf19b7b7f3454",
+    "lectures": [
+      {
+        "lecture_number": 1,
+        "bunny_guid": "31673c18-0f89-4dd6-8fd5-52231ff4d273",
+        "pdf_attachment_name": "1_1_1_ 함수의 극한.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 2,
+    "title": "2차시 - 극한의 성질 및 중단원 마무리",
+    "notion_page_id": "2d7bb7915b7180ca8ad3eddec2b4fcf7",
+    "lectures": [
+      {
+        "lecture_number": 2,
+        "bunny_guid": "19ef624b-c933-4f31-8b16-da8374bcae54",
+        "pdf_attachment_name": "1_1_2_ 함수의 극한에 대한 성질.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 3,
+    "title": "3차시 - 함수의 연속",
+    "notion_page_id": "2d7bb7915b71807ab607f3661f60013a",
+    "lectures": [
+      {
+        "lecture_number": 3,
+        "bunny_guid": "795d588c-a3d5-439c-bd23-377a9fa782bb",
+        "pdf_attachment_name": "1_2_1_ 함수의 연속.pdf"
+      },
+      {
+        "lecture_number": 4,
+        "bunny_guid": "b8e81a45-1edc-44bb-94ef-d9338be7c321",
+        "pdf_attachment_name": "1_2_1_ 함수의 연속(합성함수 연속 특강)_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 4,
+    "title": "4차시 - 연속함수의 성질 및 중단원 마무리",
+    "notion_page_id": "2d7bb7915b7180a99791e7975991dd0c",
+    "lectures": [
+      {
+        "lecture_number": 5,
+        "bunny_guid": "746551b3-065e-41d2-ab22-7d327759b7f7",
+        "pdf_attachment_name": "1_2_2_ 연속함수의 성질.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 5,
+    "title": "5차시 - 미분계수",
+    "notion_page_id": "2d7bb7915b7180eeba13d99e6b140891",
+    "lectures": [
+      {
+        "lecture_number": 6,
+        "bunny_guid": "36857a9d-d9f3-4a7a-8e87-efb123456d3f",
+        "pdf_attachment_name": "2_1_1_ 미분계수_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 6,
+    "title": "6차시 - 도함수 및 중단원 마무리",
+    "notion_page_id": "2d7bb7915b71801fb28bebe4910653d5",
+    "lectures": [
+      {
+        "lecture_number": 7,
+        "bunny_guid": "d95baa08-c2d8-42e7-b003-331c447ecc14",
+        "pdf_attachment_name": "2_1_2_ 도함수_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 7,
+    "title": "7차시 - 접선의 방정식, 평균값 정리",
+    "notion_page_id": "2d7bb7915b71803190a9ffa4c814dc71",
+    "lectures": [
+      {
+        "lecture_number": 8,
+        "bunny_guid": "959e7307-8838-45f2-ad1e-eea247a01c08",
+        "pdf_attachment_name": "2_2_1_ 접선의 방정식.pdf"
+      },
+      {
+        "lecture_number": 9,
+        "bunny_guid": "0bd14fd9-9ddb-43d8-bd9f-8fd21dab612a",
+        "pdf_attachment_name": "2_2_2_ 평균값 정리.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 8,
+    "title": "8차시 - 함수의 증가와 감소, 극대와 극소",
+    "notion_page_id": "2d7bb7915b7180c98b1ce8b161497a8b",
+    "lectures": [
+      {
+        "lecture_number": 10,
+        "bunny_guid": "04728a21-970a-4758-b449-23a1c1624a1e",
+        "pdf_attachment_name": "2_2_3_ 함수의 증가와 감소, 극대와 극소.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "5941d0ef-fb1c-40ed-84fa-7bbf5508a622",
+        "pdf_attachment_name": "[그래프 특강] 3차, 4차 함수 그래프 그리기.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 9,
+    "title": "9차시 - 함수의 그래프",
+    "notion_page_id": "2d7bb7915b7180e4aa9fdff6f6704240",
+    "lectures": [
+      {
+        "lecture_number": 11,
+        "bunny_guid": "a8b76464-4983-49b3-bbe7-58d43279bbed",
+        "pdf_attachment_name": "2_2_4_ 함수의 그래프_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 10,
+    "title": "10차시 - 방정식과 부등식 활용, 속도와 가속도",
+    "notion_page_id": "2d7bb7915b718058807dcd8e0ee0b8e8",
+    "lectures": [
+      {
+        "lecture_number": 12,
+        "bunny_guid": "85f5310a-8ce8-4f4b-8b02-ff545a5138de",
+        "pdf_attachment_name": "2_3_3_ 방정식과 부등식에의 활용.pdf"
+      },
+      {
+        "lecture_number": 13,
+        "bunny_guid": "b4ca4594-f0c0-4ff5-89ce-49268d8b3d15",
+        "pdf_attachment_name": "2_3_4_ 속도와 가속도.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 11,
+    "title": "11차시 - 부정적분",
+    "notion_page_id": "2d7bb7915b7180cc9ef6d08a82225e80",
+    "lectures": [
+      {
+        "lecture_number": 14,
+        "bunny_guid": "7bc0c018-27ef-4452-a29b-fc3567e42be7",
+        "pdf_attachment_name": "3_1_1_ 부정적분_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 12,
+    "title": "12차시 - 정적분 (1)",
+    "notion_page_id": "2d7bb7915b71805089eae21f18a2b8c2",
+    "lectures": [
+      {
+        "lecture_number": 15,
+        "bunny_guid": "cd7d74e7-f1a0-4c3f-8f7d-7fe46a0c6ae0",
+        "pdf_attachment_name": "3_1_2_ 정적분(1)_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 13,
+    "title": "13차시 - 정적분 (2)",
+    "notion_page_id": "2d7bb7915b71805da29bf993e302a12f",
+    "lectures": [
+      {
+        "lecture_number": 16,
+        "bunny_guid": "88a0a8b9-38c7-4624-811a-412abfd5be68",
+        "pdf_attachment_name": "3_1_2_ 정적분(2).pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 14,
+    "title": "14차시 - 정적분의 활용",
+    "notion_page_id": "2d7bb7915b7180f2941be32b422fe462",
+    "lectures": [
+      {
+        "lecture_number": 17,
+        "bunny_guid": "5ee68f9d-3c3c-4036-b907-cfeb9a150a42",
+        "pdf_attachment_name": "3_2_1_ 넓이(정적분 활용).pdf"
+      },
+      {
+        "lecture_number": 18,
+        "bunny_guid": "dccf568a-0c9c-4594-a3b1-4c1df85a23b6",
+        "pdf_attachment_name": "3_3_2_ 속도와 거리.pdf"
+      }
+    ]
+  }
+]

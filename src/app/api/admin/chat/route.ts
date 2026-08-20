@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient, SupabaseClient } from '@supabase/supabase-js';
+import { buildStudentCurriculumNoticeMessage } from '@/lib/kakao-ops/templates';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map(e => e.trim());
 const SITE_URL = 'https://jtmath.kr';
@@ -222,15 +223,13 @@ async function executeTool(name: string, rawInput: unknown, sc: SupabaseClient):
         const c = links?.[0]?.curricula as unknown as { title: string } | null;
         const curriculum = c?.title || '';
         const prefix = token.student_type === 'offline' ? '/c' : '/s';
-        const template = [
-          `[고T수학] ${profile.name}님`,
-          '',
-          `학습 페이지: ${SITE_URL}${prefix}/${token.slug}`,
-          '',
-          curriculum ? `이번 ${curriculum} 학습이 올라왔습니다!` : '',
-          '',
-          '문제 풀고 매쓰플랫에서 답안 제출 후 카톡 주세요~',
-        ].filter(Boolean).join('\n');
+        const template = buildStudentCurriculumNoticeMessage({
+          siteUrl: SITE_URL,
+          portalBasePath: prefix,
+          portalSlug: token.slug,
+          recipientLabel: profile.name,
+          curriculumTitle: curriculum,
+        });
         return template;
       }
       default:

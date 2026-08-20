@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Users, CreditCard, LayoutDashboard, BookOpen, Calendar, GraduationCap, MessageSquare, FileText } from 'lucide-react';
+import { Users, CreditCard, LayoutDashboard, BookOpen, Calendar, GraduationCap, MessageSquare, FileText, Send, CalendarDays, ClipboardCheck } from 'lucide-react';
 import AdminUserRow from './AdminUserRow';
 import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 
@@ -117,6 +117,13 @@ export default async function AdminDashboardPage({
               학습 페이지 (신)
             </Link>
             <Link
+              href="/admin/content-readiness"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <ClipboardCheck className="w-5 h-5" />
+              콘텐츠 준비 현황
+            </Link>
+            <Link
               href="/admin/seasons"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
             >
@@ -145,6 +152,13 @@ export default async function AdminDashboardPage({
               어드민 채팅
             </Link>
             <Link
+              href="/admin/kakao-ops"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <Send className="w-5 h-5" />
+              카카오 운영
+            </Link>
+            <Link
               href="/admin/students"
               className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
             >
@@ -157,6 +171,13 @@ export default async function AdminDashboardPage({
             >
               <Calendar className="w-5 h-5" />
               학생 캘린더
+            </Link>
+            <Link
+              href="/admin/5wsummer"
+              className="flex items-center gap-3 px-4 py-3 font-bold rounded-xl transition-colors text-slate-600 hover:bg-slate-100"
+            >
+              <CalendarDays className="w-5 h-5" />
+              5주 달력
             </Link>
             <Link
               href="/admin/portal"
@@ -174,13 +195,14 @@ export default async function AdminDashboardPage({
           {/* 모바일 탭 */}
           <div className="flex md:hidden gap-2 overflow-x-auto">
             {[
-              { key: 'users', label: '수강생 관리' },
-              { key: 'payments', label: '결제 내역' },
-              { key: 'stats', label: '현황 요약' },
+              { key: 'users', label: '수강생 관리', href: '/admin?tab=users' },
+              { key: 'payments', label: '결제 내역', href: '/admin?tab=payments' },
+              { key: 'stats', label: '현황 요약', href: '/admin?tab=stats' },
+              { key: 'kakao-ops', label: '카카오 운영', href: '/admin/kakao-ops' },
             ].map((tab) => (
               <Link
                 key={tab.key}
-                href={`/admin?tab=${tab.key}`}
+                href={tab.href}
                 className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-bold transition-colors ${activeTab === tab.key ? 'bg-slate-900 text-white' : 'bg-white text-slate-600 border border-slate-200'}`}
               >
                 {tab.label}

@@ -9,8 +9,8 @@ export default async function StudentPortalPage({
   searchParams?: Promise<{ admin?: string | string[] }>;
 }) {
   const { slug } = await params;
-  const sp = await searchParams;
-  const adminParam = Array.isArray(sp?.admin) ? sp?.admin[0] : sp?.admin;
+  const query = await searchParams;
+  const adminParam = Array.isArray(query?.admin) ? query?.admin[0] : query?.admin;
   const adminReturnHref = adminParam === '1' ? '/admin/calendars-new' : undefined;
 
   // Verify slug exists (server-side)

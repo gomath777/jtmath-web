@@ -24,6 +24,20 @@ interface CalendarConceptItem {
   publishDate: string | null;
 }
 
+interface CalendarPlannedItem {
+  id: string;
+  title: string;
+  subject_slug: string;
+  subject_label: string;
+  publishDate: string | null;
+}
+
+interface CalendarViewConfig {
+  startYmd: string;
+  weekCount: number;
+  label: string;
+}
+
 interface CalendarPhase {
   label: string;
   startYmd: string;
@@ -34,6 +48,8 @@ interface SessionCalendarViewProps {
   mode: 'master' | 'student';
   sessions: CalendarSessionEntry[];
   conceptItems?: CalendarConceptItem[];
+  plannedItems?: CalendarPlannedItem[];
+  calendarView?: CalendarViewConfig | null;
   /** 기말 마무리 단계 배너 (시작일~종료일 연속 표시). null/미지정이면 표시 안 함. */
   phase?: CalendarPhase | null;
   slug: string;
@@ -50,7 +66,6 @@ const SUBJECT_COLOR: Record<string, { bg: string; text: string }> = {
   mj1: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
   mj2: { bg: 'bg-teal-50', text: 'text-teal-700' },
   ht:  { bg: 'bg-amber-50', text: 'text-amber-700' },
-  gh:  { bg: 'bg-rose-50', text: 'text-rose-700' },
   gi:  { bg: 'bg-rose-50', text: 'text-rose-700' },
   s2:  { bg: 'bg-orange-50', text: 'text-orange-700' },
 };
@@ -60,7 +75,8 @@ const DOW_LABELS = ['일', '월', '화', '수', '목', '금', '토'];
 
 type AnyItem =
   | (CalendarSessionEntry & { kind: 'session' })
-  | (CalendarConceptItem & { kind: 'concept' });
+  | (CalendarConceptItem & { kind: 'concept' })
+  | (CalendarPlannedItem & { kind: 'planned' });
 
 // 마스터 뷰: 전전전주 일요일부터 6주 (과거 3주 · 이번주 · 다음 2주) — 위로 지나간 주, 아래로 이번주+2주
 // 학생 뷰: 지난주 일요일부터 4주 (지난주 ~ 다음 2주)
@@ -78,6 +94,18 @@ function getKstWeeks(mode: 'master' | 'student' = 'student'): Date[][] {
     for (let d = 0; d < 7; d++) {
       week.push(new Date(startSundayMs + (w * 7 + d) * 86400000));
     }
+    weeks.push(week);
+  }
+  return weeks;
+}
+
+function getFixedWeeks(startYmd: string, weekCount: number): Date[][] {
+  const dayMs = 86400000;
+  const startMs = new Date(startYmd + 'T00:00:00Z').getTime();
+  const weeks: Date[][] = [];
+  for (let w = 0; w < weekCount; w++) {
+    const week: Date[] = [];
+    for (let d = 0; d < 7; d++) week.push(new Date(startMs + (w * 7 + d) * dayMs));
     weeks.push(week);
   }
   return weeks;
@@ -162,11 +190,6 @@ function formatPublishLabel(ymd: string): string {
   return `${m}/${d} 밤 배포예정`;
 }
 
-function formatSessionBadge(sessionNumber: number): string | null {
-  if (!Number.isFinite(sessionNumber) || sessionNumber <= 0) return null;
-  return `${sessionNumber}차시`;
-}
-
 function ItemCard({
   item,
   mode,
@@ -188,16 +211,15 @@ function ItemCard({
     const studentLocked = mode === 'student' && !s.is_released;
     const color = studentLocked ? LOCKED_STYLE : subjectColor;
     const isFuture = !!s.publishDate && s.publishDate > todayYmd;
-    const sessionBadge = formatSessionBadge(s.session_number);
 
     const inner = (
       <>
         <div className="flex items-center gap-0.5 mb-0.5">
           <span className="text-[9px]">{s.is_released ? '✅' : '🔒'}</span>
           <span className="font-medium truncate text-[9px] sm:text-[10px]">{s.subject_label}</span>
-          {sessionBadge && (
-            <span className="ml-auto shrink-0 rounded bg-white/60 px-1 text-[8px] font-semibold">
-              {sessionBadge}
+          {s.session_number > 0 && (
+            <span className="ml-auto shrink-0 rounded bg-white/60 px-1 text-[8px] font-semibold opacity-80">
+              {s.session_number}차시
             </span>
           )}
         </div>
@@ -222,6 +244,23 @@ function ItemCard({
       <Link href={sessionHref} className={`${base} hover:opacity-80 transition-opacity`}>
         {inner}
       </Link>
+    );
+  }
+
+  if (item.kind === 'planned') {
+    const p = item;
+    const base = `block rounded-lg px-1 sm:px-1.5 py-0.5 sm:py-1 leading-tight ${LOCKED_STYLE.bg} ${LOCKED_STYLE.text} cursor-not-allowed`;
+    return (
+      <div className={base} aria-disabled>
+        <div className="flex items-center gap-0.5 mb-0.5">
+          <span className="font-medium truncate text-[9px] sm:text-[10px]">{p.subject_label || '예정'}</span>
+          <span className="ml-auto text-[8px] sm:text-[9px] opacity-75">예정</span>
+        </div>
+        <div className="truncate opacity-80 text-[9px] sm:text-[10px]">{p.title}</div>
+        {p.publishDate && (
+          <div className="text-[8px] sm:text-[9px] mt-0.5 opacity-70">{formatPublishLabel(p.publishDate.slice(0, 10))}</div>
+        )}
+      </div>
     );
   }
 
@@ -330,6 +369,8 @@ export default function SessionCalendarView({
   mode,
   sessions,
   conceptItems = [],
+  plannedItems = [],
+  calendarView = null,
   phase = null,
   slug,
   basePath = '/s',
@@ -348,6 +389,8 @@ export default function SessionCalendarView({
 
   const weeks = showAll
     ? getWeeksForRange(allYmds[0], allYmds[allYmds.length - 1])
+    : calendarView
+    ? getFixedWeeks(calendarView.startYmd, calendarView.weekCount)
     : getKstWeeks(mode);
 
   const sessionsByDate = new Map<string, CalendarSessionEntry[]>();
@@ -366,11 +409,20 @@ export default function SessionCalendarView({
     conceptsByDate.get(ymd)!.push(c);
   }
 
+  const plannedByDate = new Map<string, CalendarPlannedItem[]>();
+  for (const p of plannedItems) {
+    if (!p.publishDate) continue;
+    const ymd = p.publishDate.slice(0, 10);
+    if (!plannedByDate.has(ymd)) plannedByDate.set(ymd, []);
+    plannedByDate.get(ymd)!.push(p);
+  }
+
   function getItems(ymds: string[]): AnyItem[] {
     const items: AnyItem[] = [];
     for (const ymd of ymds) {
       for (const s of sessionsByDate.get(ymd) || []) items.push({ ...s, kind: 'session' });
       for (const c of conceptsByDate.get(ymd) || []) items.push({ ...c, kind: 'concept' });
+      for (const p of plannedByDate.get(ymd) || []) items.push({ ...p, kind: 'planned' });
     }
     return items;
   }
@@ -505,6 +557,7 @@ export default function SessionCalendarView({
         <span className="ml-auto text-[10px] opacity-60">
           {showAll
             ? `전체 일정 (${weeksRangeLabel(allYmds[0], allYmds[allYmds.length - 1])}, ${weeks.length}주)`
+            : calendarView ? calendarView.label
             : mode === 'master' ? '전전전주 ~ 다음 2주 (6주)' : '지난주 ~ 다음 2주'}
         </span>
       </div>

@@ -4,12 +4,12 @@ import PublicHeader from '../_shared/PublicHeader';
 import PublicFooter from '../_shared/PublicFooter';
 
 const REGISTRATION_FORM_URL = 'https://forms.gle/NCdLAFx2E8MBzPBx6';
-const OPENCHAT_URL = 'https://open.kakao.com/me/gomath777q';
+const KAKAO_CONTACT = '010 2914 1156';
 
 export const metadata: Metadata = {
   title: '등록 안내 · 고T수학',
   description:
-    '두 단계로 끝나는 등록 절차 — 등록신청서 작성 후 1:1 오픈카톡으로 메세지 보내주세요.',
+    '두 단계로 끝나는 등록 절차 — 등록신청서 작성 후 1:1 카톡메세지를 보내주세요.',
 };
 
 export default function RegisterPage() {
@@ -67,42 +67,38 @@ export default function RegisterPage() {
               <span className="h-px flex-1 bg-border-cream" />
             </div>
             <h2 className="font-serif text-[22px] sm:text-[24px] text-ink leading-snug break-keep mb-3">
-              1:1 오픈카톡 메세지
+              1:1 카톡메세지
             </h2>
             <p className="text-[15px] text-charcoal leading-relaxed break-keep mb-5">
-              신청서 전송 후 아래 1:1 오픈카톡으로 입장해 등록완료 메세지를
-              보내주세요.
+              신청서 전송 후 아래 연락처를 카카오톡 친구추가한 뒤 등록완료 메세지를 보내주세요.
             </p>
 
             <div className="bg-sand border border-border-warm rounded-xl px-5 py-4 mb-6">
               <p className="text-[13px] text-charcoal leading-relaxed break-keep">
                 <span className="text-terracotta font-medium">
-                  본인(학생) 이름으로 입장해 주세요.
+                  친구추가 후 아래 형식으로 메세지를 보내주세요.
                 </span>
                 <br />
-                예) <strong className="text-ink">손흥민 고1 등록완료</strong>
+                예) <strong className="text-ink">고1 홍길동 등록완료</strong>
                 {' · '}
-                <strong className="text-ink">홍길동 고2 등록완료</strong>
+                <strong className="text-ink">고2 손흥민 등록완료</strong>
               </p>
             </div>
 
-            <a
-              href={OPENCHAT_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-5 py-3 bg-terracotta text-ivory text-[14px] font-medium rounded-xl shadow-ring-terracotta hover:bg-terracotta-light transition-colors"
-            >
-              <MessageCircle className="w-4 h-4" />
-              1:1 오픈카톡 입장
-            </a>
+            <div className="inline-flex flex-col gap-2 rounded-xl bg-terracotta px-5 py-4 text-ivory shadow-ring-terracotta sm:flex-row sm:items-center sm:gap-4">
+              <span className="inline-flex items-center gap-2 text-[13px] font-medium">
+                <MessageCircle className="h-4 w-4" />
+                카카오톡 친구추가
+              </span>
+              <span className="text-[20px] font-semibold tracking-normal">
+                {KAKAO_CONTACT}
+              </span>
+            </div>
 
             <div className="mt-5 pt-5 border-t border-border-cream">
-              <p className="text-[13px] text-stone leading-relaxed break-keep">
-                오픈카톡이 안되는 경우
-              </p>
-              <p className="text-[15px] text-charcoal leading-relaxed break-keep mt-1">
-                <strong className="text-ink">010-2914-1156</strong> 연락처 등록 후
-                일반 카톡으로 등록완료 메세지를 보내주세요.
+              <p className="text-[15px] text-charcoal leading-relaxed break-keep">
+                <strong className="text-ink">{KAKAO_CONTACT}</strong> 친구추가 후
+                1:1 카톡으로 등록완료 메세지를 보내주세요.
               </p>
             </div>
           </section>

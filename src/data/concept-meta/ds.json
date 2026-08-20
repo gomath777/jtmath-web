@@ -1,0 +1,235 @@
+[
+  {
+    "chapter_order": 1,
+    "title": "1차시 - 1.1 지수",
+    "notion_page_id": "2d0bb7915b7180a6b6f6f7777a20af00",
+    "lectures": [
+      {
+        "lecture_number": 1,
+        "bunny_guid": "4a0331cc-a9ad-46ac-a61d-d64107bffd62",
+        "pdf_attachment_name": "1_1_1_ 거듭제곱과 거듭제곱근.pdf"
+      },
+      {
+        "lecture_number": 2,
+        "bunny_guid": "d9d0b779-6e02-4720-998d-2df13833cdb7",
+        "pdf_attachment_name": "1_1_2_ 지수의 확장과 지수법칙.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 2,
+    "title": "2차시 - 1.1 로그",
+    "notion_page_id": "2d3bb7915b7180c9968aeba281f9b544",
+    "lectures": [
+      {
+        "lecture_number": 3,
+        "bunny_guid": "b9cd1477-1d4d-44d9-a5ac-a77103228ec5",
+        "pdf_attachment_name": "1_1_3_ 로그의 뜻과 성질.pdf"
+      },
+      {
+        "lecture_number": 4,
+        "bunny_guid": "d0be9a74-fd0b-4d35-a138-5621eaedab6e",
+        "pdf_attachment_name": "1_1_4_ 상용로그.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 3,
+    "title": "3차시 - 지수함수, 로그함수",
+    "notion_page_id": "051fb479f5d7455f95576a2eb030de4b",
+    "lectures": [
+      {
+        "lecture_number": 5,
+        "bunny_guid": "6cf05900-3e67-47f0-bef6-ea905f9876de",
+        "pdf_attachment_name": "1_2_1_ 지수함수의 뜻과 그래프_문제지.pdf"
+      },
+      {
+        "lecture_number": 6,
+        "bunny_guid": "a126000f-f02d-4d5c-9aa1-1fc422b0dfe2",
+        "pdf_attachment_name": "1_2_2_ 로그함수의 뜻과 그래프_문제지.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "d9eb7d0a-8c61-4463-a1cc-c32a6f74a3d7",
+        "pdf_attachment_name": ""
+      }
+    ]
+  },
+  {
+    "chapter_order": 4,
+    "title": "4차시 - 지수로그함수 활용",
+    "notion_page_id": "7206f70845ae4077a57efaf543af6d79",
+    "lectures": [
+      {
+        "lecture_number": 7,
+        "bunny_guid": "712b99eb-7dd5-4159-b467-3afd8d199714",
+        "pdf_attachment_name": "1_2_3_ 지수함수의 활용.pdf"
+      },
+      {
+        "lecture_number": 8,
+        "bunny_guid": "f997c460-4160-41be-92b9-0010d9e32182",
+        "pdf_attachment_name": "1_2_4_ 로그함수의 활용.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 5,
+    "title": "5차시 - 삼각함수",
+    "notion_page_id": "ae4c637e722a415aaea67032f18f2f6d",
+    "lectures": [
+      {
+        "lecture_number": 9,
+        "bunny_guid": "eded7e58-5cf2-4cc5-914c-f8910d58cbf2",
+        "pdf_attachment_name": "2_1_1_ 일반각과 호도법_문제지.pdf"
+      },
+      {
+        "lecture_number": 10,
+        "bunny_guid": "56fe4f06-9fb9-4378-965c-10ce506e2ef3",
+        "pdf_attachment_name": "2_1_2_ 삼각함수_문제지.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "04c18f2b-8e8e-4d12-b12b-24cdcbf7deb8",
+        "pdf_attachment_name": ""
+      }
+    ]
+  },
+  {
+    "chapter_order": 6,
+    "title": "6차시 - 2.1 삼각함수의 그래프 (1)",
+    "notion_page_id": "e8d9145e48424af782ca96c5119e1911",
+    "lectures": [
+      {
+        "lecture_number": 11,
+        "bunny_guid": "748bda38-e088-4f17-9a78-455611a27c03",
+        "pdf_attachment_name": "2_1_3_ 삼각함수의 그래프(1)_문제지.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "40b1b2f1-71d2-489e-8767-a468b9b5f2ab",
+        "pdf_attachment_name": "2_1_3_ 삼각함수의 그래프(2).pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 7,
+    "title": "7차시 - 2.1 삼각함수의 그래프 (2) 및 중단원 마무리",
+    "notion_page_id": "9819c4ad622e4f568cbad55458e39f4e",
+    "lectures": [
+      {
+        "lecture_number": 12,
+        "bunny_guid": "61305c99-5d30-4dbc-9a5e-5e547b475537",
+        "pdf_attachment_name": "2_1_3_ 삼각함수의 그래프(3).pdf"
+      },
+      {
+        "lecture_number": 13,
+        "bunny_guid": "",
+        "pdf_attachment_name": ""
+      }
+    ]
+  },
+  {
+    "chapter_order": 8,
+    "title": "8차시 - 2.2 사인법칙 코사인법칙",
+    "notion_page_id": "4c3e2962c7344015a7c0f728a1d033c0",
+    "lectures": [
+      {
+        "lecture_number": 14,
+        "bunny_guid": "feda2e45-5303-4b75-b9c7-1d06577ca789",
+        "pdf_attachment_name": "2_1_1_ 사인법칙과 코사인법칙_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 9,
+    "title": "9차시 - 2.2 등차수열",
+    "notion_page_id": "5935bd30e8fc43638009731da419fa2c",
+    "lectures": [
+      {
+        "lecture_number": 15,
+        "bunny_guid": "b567c16b-ae11-4b9f-87ef-7d25f670db39",
+        "pdf_attachment_name": "3_1_1_ 수열의 뜻.pdf"
+      },
+      {
+        "lecture_number": 16,
+        "bunny_guid": "f2b88484-e776-410d-8ca7-dbbb0792d146",
+        "pdf_attachment_name": "3_1_2_ 등차수열.pdf"
+      },
+      {
+        "lecture_number": 17,
+        "bunny_guid": "248d9767-8fe7-4aeb-a943-3fd9867bc36a",
+        "pdf_attachment_name": "3_1_2_ 등차수열의 합.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 10,
+    "title": "10차시 - 3.1 등비수열 및 중단원 마무리",
+    "notion_page_id": "acd226a0e54444329edba004193e6933",
+    "lectures": [
+      {
+        "lecture_number": 18,
+        "bunny_guid": "f62215fb-9392-4630-8253-1ff68ae715c1",
+        "pdf_attachment_name": "3_1_3_ 등비수열.pdf"
+      },
+      {
+        "lecture_number": 19,
+        "bunny_guid": "3c9d13b9-b4b4-461c-aeb8-4a15b46743cd",
+        "pdf_attachment_name": "3_1_3_ 등비수열의 합.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 11,
+    "title": "11차시 - 3.2 수열의 합 (시그마)",
+    "notion_page_id": "2f70f98396db4b6a8da47be9a4975cc1",
+    "lectures": [
+      {
+        "lecture_number": 20,
+        "bunny_guid": "6eec82d7-1936-4d5d-a6c8-3cb4b6751867",
+        "pdf_attachment_name": "3_2_1_ 합의 기호 시그마.pdf"
+      },
+      {
+        "lecture_number": -1,
+        "bunny_guid": "",
+        "pdf_attachment_name": "등차, 등비 추가 학습지#1_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 12,
+    "title": "12차시 - 3.2 여러 가지 수열의 합",
+    "notion_page_id": "cbeb7b06c0a04d9cafabd4de4b3ac409",
+    "lectures": [
+      {
+        "lecture_number": 21,
+        "bunny_guid": "5e95ea9b-cb96-4c52-9be7-2f36e522d018",
+        "pdf_attachment_name": "3_2_2_ 여러 가지 수열의 합_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 13,
+    "title": "13차시 - 3.3 수열의 귀납적 정의",
+    "notion_page_id": "2d738da774694f4b925dbf7ff2b08aab",
+    "lectures": [
+      {
+        "lecture_number": 22,
+        "bunny_guid": "efa2112f-757b-4c78-a6c8-a815b21a9547",
+        "pdf_attachment_name": "3_2_1_ 수열의 귀납적 정의_문제지.pdf"
+      }
+    ]
+  },
+  {
+    "chapter_order": 14,
+    "title": "14차시 - 3.3 수학적 귀납법",
+    "notion_page_id": "8aab272137704c1eb31d818807c76677",
+    "lectures": [
+      {
+        "lecture_number": 23,
+        "bunny_guid": "a568e94a-889f-41c5-b93d-e6b9deac7a61",
+        "pdf_attachment_name": "3_2_2_ 수학적 귀납법_문제지.pdf"
+      }
+    ]
+  }
+]

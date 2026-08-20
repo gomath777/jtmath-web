@@ -9,3 +9,4 @@
  */
 export const CONCEPT_LIBRARY_ID = '566809';
 export const EXAM_LIBRARY_ID = '622509';
+export const CONCEPT_CDN_HOSTNAME = 'vz-0bd83516-8e5.b-cdn.net';

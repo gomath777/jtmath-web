@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
-import { ExternalLink } from 'lucide-react';
+import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
 
-const YOUTUBE_BACKUP_URL = 'https://youtu.be/4ObLI1aK6m0';
+const OT_VIDEO_ID = '8d81c260-2c07-40c2-a044-9a97e1bddaf6';
+const OT_VIDEO_URL = `https://iframe.mediadelivery.net/embed/${CONCEPT_LIBRARY_ID}/${OT_VIDEO_ID}?autoplay=false&preload=true&responsive=true`;
 
 export const metadata: Metadata = {
   title: 'OT 자료 · 고T수학',
@@ -53,10 +54,9 @@ export default function OTPage() {
                 <p>
                   등록 완료 후 학생 본인{' '}
                   <span className="text-terracotta font-medium">
-                    &apos;핸드폰번호&apos;만 입력
-                  </span>
-                  하면 자동 로그인 됩니다.{' '}
-                  <span className="text-stone">(기본 비번 123456)</span>
+                    &apos;핸드폰 번호&apos; 입력
+                  </span>{' '}
+                  <span className="text-stone">(기본 비번 123456)</span> 후 로그인해 주세요.
                 </p>
               </div>
 
@@ -88,27 +88,16 @@ export default function OTPage() {
                 아래 영상으로 어플 사용법을 먼저 시청해 주세요.
               </p>
 
-              <video
-                src="/docs/ot-app-vid.mp4"
-                controls
-                playsInline
-                preload="metadata"
-                className="w-full rounded-xl border border-border-cream bg-ink"
-              />
-
-              <p className="text-[13px] text-stone break-keep">
-                재생이 안 되시면{' '}
-                <a
-                  href={YOUTUBE_BACKUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-terracotta hover:text-terracotta-light underline underline-offset-2 inline-flex items-center gap-1"
-                >
-                  YouTube에서 보기
-                  <ExternalLink className="w-3 h-3" />
-                </a>
-                .
-              </p>
+              <div className="aspect-video w-full overflow-hidden rounded-xl border border-border-cream bg-ink">
+                <iframe
+                  src={OT_VIDEO_URL}
+                  title="내신대비 OT 영상"
+                  loading="lazy"
+                  allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture;"
+                  allowFullScreen
+                  className="h-full w-full border-0"
+                />
+              </div>
 
               <div className="text-[15px] text-charcoal leading-relaxed break-keep space-y-2 pt-2">
                 <p>
@@ -117,11 +106,10 @@ export default function OTPage() {
                   주세요.
                 </p>
                 <p>
-                  채점 후{' '}
-                  <span className="text-terracotta font-medium">
-                    카톡으로 메세지를 보내야 피드백이 진행
+                  채점 후 카톡으로 메세지를 보내야{' '}
+                  <span className="text-terracotta font-medium whitespace-nowrap">
+                    피드백이 진행됩니다.
                   </span>
-                  됩니다.
                 </p>
               </div>
 

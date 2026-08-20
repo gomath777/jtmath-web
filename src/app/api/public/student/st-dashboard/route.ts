@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
-import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 import { getStudentFromRequest, renewToken, setStudentCookie } from '@/utils/student-auth';
+import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
 
 // 신 시스템 (/st/{slug}) 전용 대시보드 API.
 // student_lesson_assignments (SLA) 단일 소스. 옛 student_sessions / block_assignments / curriculum_links
@@ -53,6 +53,14 @@ interface CalendarSessionEntry {
   lessonSlug: string | null;
 }
 
+interface CalendarPlannedItem {
+  id: string;
+  title: string;
+  subject_slug: string;
+  subject_label: string;
+  publishDate: string;
+}
+
 interface CurriculumGroup {
   id: string;
   title: string;
@@ -81,29 +89,87 @@ interface TodayTask {
   publishDate?: string | null;
 }
 
+const MIDTERM_FRONT_CALENDAR_VIEW = {
+  startYmd: '2026-08-16',
+  weekCount: 4,
+  label: '중간 4주 전반전 (8/16 시작, 4주)',
+} as const;
+
+interface SlaDisplayNotes {
+  displayWeekNumber?: number;
+  displaySessionNumber?: number;
+  displayLabel?: string;
+}
+
+function parseSlaDisplayNotes(notes: string | null): SlaDisplayNotes {
+  if (!notes) return {};
+
+  try {
+    const parsed: unknown = JSON.parse(notes);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+    const record = parsed as Record<string, unknown>;
+    const result: SlaDisplayNotes = {};
+    if (typeof record.displayWeekNumber === 'number' && Number.isInteger(record.displayWeekNumber)) {
+      result.displayWeekNumber = record.displayWeekNumber;
+    }
+    if (typeof record.displaySessionNumber === 'number' && Number.isInteger(record.displaySessionNumber)) {
+      result.displaySessionNumber = record.displaySessionNumber;
+    }
+    if (typeof record.displayLabel === 'string' && record.displayLabel.trim()) {
+      result.displayLabel = record.displayLabel.trim();
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
+function buildMidtermFrontPlannedItems(subjects: readonly string[]): CalendarPlannedItem[] {
+  const targetSubjects = subjects.length > 0 ? subjects : ['ds2'];
+  return targetSubjects.flatMap(subject => {
+    const subjectLabel = SUBJECT_LABEL[subject] || subject;
+    return [
+      {
+        id: `midterm-front-review-${subject}-2026-09-10`,
+        subject_slug: subject,
+        subject_label: subjectLabel,
+        publishDate: '2026-09-10',
+        title: '전체 오답정리 · 모의중간고사 · 취약유형 · 보충학습',
+      },
+      {
+        id: `midterm-front-school-print-${subject}-2026-09-10`,
+        subject_slug: subject,
+        subject_label: subjectLabel,
+        publishDate: '2026-09-10',
+        title: '학교 부교재·프린트 기반 모의내신 제작',
+      },
+    ];
+  });
+}
+
 export async function GET(req: NextRequest) {
   const urlSlug = req.nextUrl.searchParams.get('slug');
-  const sc = createServiceClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_KEY!,
-  );
-
   let student = await getStudentFromRequest(req);
+
   if (!student && urlSlug && await isSimpleAdminUnlocked()) {
-    const { data: token } = await sc
+    const adminSc = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_KEY!,
+    );
+    const { data: tokenRow } = await adminSc
       .from('student_tokens')
-      .select('slug, profile_id, portal_expires_at')
+      .select('profile_id, slug, is_active, portal_expires_at')
       .eq('slug', urlSlug)
       .eq('is_active', true)
       .single();
-
     const expired =
-      !!token?.portal_expires_at && new Date(token.portal_expires_at).getTime() <= Date.now();
-
-    if (token && !expired) {
+      !!tokenRow?.portal_expires_at &&
+      new Date(tokenRow.portal_expires_at).getTime() <= Date.now();
+    if (tokenRow && !expired) {
       student = {
-        profileId: token.profile_id as string,
-        slug: token.slug as string,
+        profileId: tokenRow.profile_id,
+        slug: tokenRow.slug,
         exp: Math.floor(Date.now() / 1000) + 86400,
         isMaster: true,
       };
@@ -112,6 +178,11 @@ export async function GET(req: NextRequest) {
 
   if (!student) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (urlSlug && urlSlug !== student.slug) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const sc = createServiceClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_KEY!,
+  );
 
   const { data: profile } = await sc
     .from('profiles')
@@ -134,6 +205,7 @@ export async function GET(req: NextRequest) {
     .from('student_lesson_assignments')
     .select(`
       id, scheduled_date, status, variant,
+      notes,
       curriculum_item:curriculum_items!inner (
         id, week_number, session_number, label, title, public_slug,
         curriculum:curricula ( subject_slug, title )
@@ -147,6 +219,7 @@ export async function GET(req: NextRequest) {
     scheduled_date: string;
     status: 'pending' | 'released' | 'completed';
     variant: string;
+    notes: string | null;
     curriculum_item: {
       id: string;
       week_number: number | null;
@@ -169,14 +242,17 @@ export async function GET(req: NextRequest) {
     const subj = ci.curriculum?.subject_slug || '';
     const subjectLabel = SUBJECT_LABEL[subj] || ci.curriculum?.title || subj;
     const isReleased = r.status === 'released' || r.status === 'completed';
-    const displayLabel = ci.title || ci.label;
+    const displayNotes = parseSlaDisplayNotes(r.notes);
+    const displayLabel = displayNotes.displayLabel || ci.title || ci.label;
+    const displayWeekNumber = displayNotes.displayWeekNumber ?? ci.week_number ?? 0;
+    const displaySessionNumber = displayNotes.displaySessionNumber ?? ci.session_number ?? 0;
 
     calendarSessions.push({
       id: r.id,
       subject_slug: subj,
       subject_label: subjectLabel,
-      week_number: ci.week_number ?? 0,
-      session_number: ci.session_number ?? 0,
+      week_number: displayWeekNumber,
+      session_number: displaySessionNumber,
       label: displayLabel,
       publishDate: r.scheduled_date,
       is_released: isReleased,
@@ -194,8 +270,8 @@ export async function GET(req: NextRequest) {
     }
     subjectGroups.get(subj)!.sessions.push({
       id: r.id,
-      week_number: ci.week_number ?? 0,
-      session_number: ci.session_number ?? 0,
+      week_number: displayWeekNumber,
+      session_number: displaySessionNumber,
       label: displayLabel,
       publishDate: r.scheduled_date,
       lessonSlug: ci.public_slug,
@@ -203,6 +279,8 @@ export async function GET(req: NextRequest) {
   }
 
   const curriculaWithSessions = Array.from(subjectGroups.values());
+  const assignedSubjects = Array.from(new Set(calendarSessions.map(s => s.subject_slug).filter(Boolean)));
+  const calendarPlannedItems = buildMidtermFrontPlannedItems(assignedSubjects);
 
   // 개념강의(assignments → learning_sets)를 달력 항목으로 변환.
   // SLA(기출)와 별개 트랙이지만, 학생 포탈 달력에는 함께 노출 (레거시 dashboard 라우트와 동일 로직).
@@ -308,6 +386,7 @@ export async function GET(req: NextRequest) {
   if (dueConcepts[0] && prioritized.length < 3) markPush(dueConcepts[0]);
   for (const t of otherSessionTasks) { if (prioritized.length >= 3) break; markPush(t); }
 
+  const newToken = await renewToken(student);
   const res = NextResponse.json({
     profile: {
       name: profile.name, school: profile.school,
@@ -330,8 +409,8 @@ export async function GET(req: NextRequest) {
     isMaster: student.isMaster ?? false,
     calendarSessions,
     calendarConceptItems,
+    calendarPlannedItems,
+    calendarView: MIDTERM_FRONT_CALENDAR_VIEW,
   });
-  if (student.isMaster) return res;
-  const newToken = await renewToken(student);
   return setStudentCookie(res, newToken);
 }

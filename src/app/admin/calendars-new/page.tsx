@@ -1,7 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { unstable_noStore as noStore } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { isSimpleAdminUnlocked } from '@/utils/admin-auth';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { isLocalAdminMode, isSimpleAdminUnlocked } from '@/utils/admin-auth';
 import CalendarsNewClient from './CalendarsNewClient';
 
 const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map(e => e.trim());
@@ -13,6 +15,7 @@ const SUBJECT_LABEL: Record<string, string> = {
 };
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export interface CalendarSlaEntry {
   id: string;                   // SLA id
@@ -47,12 +50,45 @@ interface StudentCard {
 // 기말 마무리 단계 배너 라벨 (st-dashboard 응답과 동일하게 유지)
 const REVIEW_PHASE_LABEL = '전체 오답 반복 · 취약유형 보충 · 모의내신';
 
+interface SlaDisplayNotes {
+  displayWeekNumber?: number;
+  displaySessionNumber?: number;
+  displayLabel?: string;
+}
+
+function parseSlaDisplayNotes(notes: string | null): SlaDisplayNotes {
+  if (!notes) return {};
+
+  try {
+    const parsed: unknown = JSON.parse(notes);
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
+
+    const record = parsed as Record<string, unknown>;
+    const result: SlaDisplayNotes = {};
+    if (typeof record.displayWeekNumber === 'number' && Number.isInteger(record.displayWeekNumber)) {
+      result.displayWeekNumber = record.displayWeekNumber;
+    }
+    if (typeof record.displaySessionNumber === 'number' && Number.isInteger(record.displaySessionNumber)) {
+      result.displaySessionNumber = record.displaySessionNumber;
+    }
+    if (typeof record.displayLabel === 'string' && record.displayLabel.trim()) {
+      result.displayLabel = record.displayLabel.trim();
+    }
+    return result;
+  } catch {
+    return {};
+  }
+}
+
 export default async function AdminCalendarsNewPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  const simpleAdmin = await isSimpleAdminUnlocked();
-  if (!simpleAdmin && !user) redirect('/login');
-  if (!simpleAdmin && !ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
+  noStore();
+
+  if (!isLocalAdminMode() && !(await isSimpleAdminUnlocked())) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect('/login');
+    if (!ADMIN_EMAILS.includes(user.email || '')) redirect('/dashboard');
+  }
 
   const sc = createServiceClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -79,7 +115,7 @@ export default async function AdminCalendarsNewPage() {
   const { data: slaRows } = await sc
     .from('student_lesson_assignments')
     .select(`
-      id, profile_id, scheduled_date, status,
+      id, profile_id, scheduled_date, status, notes,
       curriculum_item:curriculum_items!inner(
         id, public_slug, title, category, session_number, variant_label,
         curriculum:curricula!inner(subject_slug)
@@ -88,11 +124,12 @@ export default async function AdminCalendarsNewPage() {
     .order('scheduled_date');
 
   const slaByProfile = new Map<string, CalendarSlaEntry[]>();
-  for (const row of (slaRows || []) as Array<{
+  for (const row of ((slaRows || []) as unknown as Array<{
     id: string;
     profile_id: string;
     scheduled_date: string | null;
     status: string;
+    notes: string | null;
     curriculum_item: {
       public_slug: string;
       title: string;
@@ -101,11 +138,12 @@ export default async function AdminCalendarsNewPage() {
       variant_label: string | null;
       curriculum: { subject_slug: string };
     };
-  }>) {
+  }>)) {
     if (!row.scheduled_date) continue;
     const ci = row.curriculum_item;
     const subject = ci.curriculum.subject_slug;
     const titleText = ci.title || '(라벨 미설정)';
+    const displayNotes = parseSlaDisplayNotes(row.notes);
     // 개념강의는 N차시 prefix 자동 부여 — 배정 시 "공수1 N차시" 호명 쉽도록.
     // 단, title에 이미 "차시"가 들어있으면 중복 방지.
     // 기출/심화는 단원명 자체가 제목에 들어가므로 prefix 불필요.
@@ -113,7 +151,8 @@ export default async function AdminCalendarsNewPage() {
     const labelBase = ci.category === 'concept' && ci.session_number && !alreadyHasChasi
       ? `${ci.session_number}차시 ${titleText}`
       : titleText;
-    const label = ci.variant_label ? `${labelBase} (v${ci.variant_label})` : labelBase;
+    const labelText = displayNotes.displayLabel || labelBase;
+    const label = ci.variant_label ? `${labelText} (v${ci.variant_label})` : labelText;
     const arr = slaByProfile.get(row.profile_id) || [];
     arr.push({
       id: row.id,
@@ -121,8 +160,8 @@ export default async function AdminCalendarsNewPage() {
       subject_slug: subject,
       subject_label: SUBJECT_LABEL[subject] || subject,
       category: ci.category,
-      week_number: 0,    // 신 모델은 캘린더 그리드를 날짜로만 결정 (week 라벨 미사용)
-      session_number: ci.session_number ?? 0,
+      week_number: displayNotes.displayWeekNumber ?? 0,    // 신 모델은 캘린더 그리드를 날짜로만 결정 (week 라벨 미사용)
+      session_number: displayNotes.displaySessionNumber ?? ci.session_number ?? 0,
       variant_label: ci.variant_label,
       label,
       publishDate: row.scheduled_date,
@@ -155,5 +194,9 @@ export default async function AdminCalendarsNewPage() {
       return a.name.localeCompare(b.name, 'ko');
     });
 
-  return <CalendarsNewClient students={students} />;
+  return (
+    <AdminLayout activeNav="calendars-new">
+      <CalendarsNewClient students={students} />
+    </AdminLayout>
+  );
 }
