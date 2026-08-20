@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useState, useEffect } from 'react';
 import { Upload, FileText, Trash2, Loader2, Globe, User, BookOpen, ExternalLink } from 'lucide-react';
 
@@ -302,7 +303,7 @@ export default function MaterialsSection({ students, curricula }: Props) {
                 </div>
 
                 <a
-                  href={m.cdn_url}
+                  href={getPdfDownloadHref(m.cdn_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-slate-400 hover:text-slate-700"

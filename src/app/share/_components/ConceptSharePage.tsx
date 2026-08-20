@@ -1,5 +1,6 @@
 import { Download, Play } from 'lucide-react';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export type ConceptPdf = {
   readonly name: string;
@@ -64,7 +65,7 @@ export function ConceptSharePage({ subjectLabel, heading, lessons }: ConceptShar
                 {lesson.pdfs.map((pdf) => (
                   <a
                     key={pdf.url}
-                    href={pdf.url}
+                    href={getPdfDownloadHref(pdf.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-ivory border border-border-cream hover:border-terracotta/40 hover:shadow-ring-warm transition-all"

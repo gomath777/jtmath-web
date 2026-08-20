@@ -2,6 +2,7 @@ import { Download, Play } from 'lucide-react';
 import { ConceptAccessPage } from '../_components/ConceptAccessPage';
 import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -167,7 +168,7 @@ export default function Gs1ConceptPart1Page({ searchParams }: PageProps) {
                     {/* 버튼 */}
                     <div className="flex items-center gap-1.5 shrink-0">
                       <a
-                        href={lec.pdfUrl}
+                        href={getPdfDownloadHref(lec.pdfUrl)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone/8 hover:bg-terracotta/10 text-stone hover:text-terracotta transition-colors text-[11px] font-medium"

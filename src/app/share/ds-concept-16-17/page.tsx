@@ -2,6 +2,7 @@ import { Download, FileText, Play } from 'lucide-react';
 import { ConceptAccessPage } from '../_components/ConceptAccessPage';
 import type { ConceptGateConfig } from '../_components/conceptAccess';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -131,7 +132,7 @@ export default function DsConceptSuyeolSharePage({ searchParams }: PageProps) {
                     {sec.pdfs.map((p) => (
                       <a
                         key={p.url}
-                        href={p.url}
+                        href={getPdfDownloadHref(p.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-ivory border border-border-cream hover:border-terracotta/40 transition-colors"

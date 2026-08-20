@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { CheckCircle2, Download, Play, Route } from 'lucide-react';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -85,7 +86,7 @@ export default function Gs1LineEquationSupplementPage() {
           {NOTES.map((note) => (
             <a
               key={note.url}
-              href={note.url}
+              href={getPdfDownloadHref(note.url)}
               target="_blank"
               rel="noopener noreferrer"
               className="group rounded-2xl border border-border-cream bg-ivory p-4 transition-all hover:border-terracotta/40 hover:shadow-ring-warm focus:outline-none focus-visible:shadow-ring-terracotta md:col-span-1"

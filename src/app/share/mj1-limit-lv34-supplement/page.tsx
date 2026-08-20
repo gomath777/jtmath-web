@@ -9,6 +9,7 @@ import {
 } from '../_components/conceptAccess';
 import { EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
 import { LIMIT_SUPPLEMENT_SECTIONS } from './data';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -119,7 +120,7 @@ export default async function Mj1LimitLv34SupplementPage({ searchParams }: PageP
 
               <div className="grid gap-4 md:grid-cols-[minmax(0,280px)_1fr]">
                 <a
-                  href={section.pdf.url}
+                  href={getPdfDownloadHref(section.pdf.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex min-h-[112px] flex-col justify-between rounded-xl border border-border-cream bg-parchment p-4 transition-colors hover:border-terracotta/45 focus:outline-none focus-visible:shadow-ring-terracotta"
