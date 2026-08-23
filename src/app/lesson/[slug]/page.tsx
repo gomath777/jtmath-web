@@ -166,7 +166,7 @@ async function loadWebTutorContext(input: {
     token,
     secret: process.env.STUDENT_TOKEN_SECRET ?? '',
   });
-  if (identity === null || identity.isMaster === true) return null;
+  if (identity === null) return null;
   const config = parseWebAiTutorConfig(input.env);
   if (!config.ok || config.config.status !== 'enabled') return null;
   const runtime = await createDefaultWebAiTutorRuntimeDependencies(input.env, config.config);

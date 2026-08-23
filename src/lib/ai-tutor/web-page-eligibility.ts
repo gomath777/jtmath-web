@@ -19,7 +19,7 @@ export async function shouldShowWebTutorFromPort(input: WebTutorPageEligibilityI
   if (token === null) return false;
   const secret = input.env.STUDENT_TOKEN_SECRET ?? '';
   const identity = await verifyStrictWebStudentToken({ token, secret });
-  if (identity === null || identity.isMaster === true) return false;
+  if (identity === null) return false;
   const result = await resolveWebLessonContext({
     port: input.port,
     identity: {

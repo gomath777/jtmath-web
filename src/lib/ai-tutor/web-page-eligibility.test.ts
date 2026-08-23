@@ -63,6 +63,31 @@ test('Given strict eligible student When resolving page launcher Then tutor is v
   ]);
 });
 
+test('Given strict master preview for an eligible student assignment When resolving page launcher Then tutor is visible', async () => {
+  const strictMasterToken = await signStrictWebStudentToken({
+    payload: { profileId: 'synthetic-profile', slug: 'synthetic-slug', isMaster: true },
+    secret: enabledEnv.STUDENT_TOKEN_SECRET ?? '',
+    nowSeconds: 1_800_000_000,
+  });
+  const port = createCountingEligiblePort();
+
+  const visible = await shouldShowWebTutorFromPort({
+    cookieHeader: `student_session=${strictMasterToken}`,
+    lessonSlug: 'trig-lesson',
+    env: enabledEnv,
+    port,
+    now: new Date('2026-08-21T00:00:00.000Z'),
+  });
+
+  assert.equal(visible, true);
+  assert.deepEqual(port.calls, [
+    'loadCurriculumItemBySlug',
+    'loadStudentToken',
+    'loadStudentLessonAssignments',
+    'loadSessionBlocks',
+  ]);
+});
+
 function createCountingEligiblePort(): WebLessonContextQueryPort & { readonly calls: readonly string[] } {
   const calls: string[] = [];
   return {

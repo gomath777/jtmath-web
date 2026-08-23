@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { resolveWebLessonContext } from './web-lesson-context';
+import { getWebLessonAssignment, resolveWebLessonContext } from './web-lesson-context';
 import {
   activeToken,
   baseIdentity,
@@ -140,7 +140,6 @@ test('resolveWebLessonContext enforces assignment release and lesson eligibility
       assignment: releasedAssignment,
       reason: 'wrong_lesson',
     },
-    { lesson, identity: { ...baseIdentity, isMaster: true }, assignment: releasedAssignment, reason: 'wrong_lesson' },
     {
       lesson,
       identity: baseIdentity,
@@ -161,4 +160,17 @@ test('resolveWebLessonContext enforces assignment release and lesson eligibility
     // Then
     assert.deepEqual(result, { ok: false, reason: item.reason });
   }
+});
+
+test('resolveWebLessonContext keeps master previews bound to the represented student assignment', async () => {
+  const result = await resolveWebLessonContext({
+    port: fakePort({ lesson, token: activeToken, assignments: [releasedAssignment], blocksByVariant: { honors: blocks } }),
+    identity: { ...baseIdentity, isMaster: true },
+    lessonSlug: lesson.publicSlug,
+    now,
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) assert.fail('Expected the signed master preview to retain assignment-scoped access');
+  assert.equal(getWebLessonAssignment(result).id, releasedAssignment.id);
 });

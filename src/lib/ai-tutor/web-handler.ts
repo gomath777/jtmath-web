@@ -65,8 +65,6 @@ export function createWebAiTutorPost(dependencies: WebAiTutorHandlerDependencies
       nowSeconds: Math.floor(now.getTime() / 1000),
     });
     if (identity === null) return json({ status: 'unauthorized', message: '다시 로그인해 주세요.' }, 401);
-    if (identity.isMaster === true) return json({ status: 'forbidden', message: '학생 계정으로만 사용할 수 있습니다.' }, 403);
-
     const parsedRequest = await readWebTutorRequest(request);
     if (!parsedRequest.ok) return json({ status: 'invalid_request', message: '요청 형식이 올바르지 않습니다.' }, 422);
 

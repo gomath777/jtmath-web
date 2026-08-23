@@ -93,7 +93,7 @@ export async function resolveWebLessonContext(
   }
   if (isExpired(token.portalExpiresAt, input.now)) return { ok: false, reason: 'expired_token' };
 
-  if (!isEligibleLesson(lesson) || input.identity.isMaster === true) {
+  if (!isEligibleLesson(lesson)) {
     return { ok: false, reason: 'wrong_lesson' };
   }
 
