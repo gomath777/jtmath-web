@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
-import { Download, FileText, Play, CheckCircle2, BookOpen, Lightbulb } from 'lucide-react';
+import React, { useState } from 'react';
+import { FileText, Play, CheckCircle2, BookOpen, Lightbulb } from 'lucide-react';
 import LearningVideoPlayer from '@/components/LearningVideoPlayer';
 import { CONCEPT_LIBRARY_ID, EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
 import { formatVideoLabel } from '@/lib/video-label';
+import { PdfResourceActions } from './PdfResourceActions';
 import type { ProgressMap } from './types';
 
 interface PdfItem {
@@ -131,22 +132,18 @@ function ConceptLayout({
               const url = p.url || p.cdn_url || '';
               const name = p.original_name || 'document.pdf';
               return (
-                <a
-                  key={idx}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
-                >
-                  <div className="w-9 h-9 rounded-lg bg-crimson/10 flex items-center justify-center shrink-0">
-                    <FileText className="w-4.5 h-4.5 text-crimson" />
+                <div key={idx} className="space-y-2">
+                  <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+                    <div className="w-9 h-9 rounded-lg bg-crimson/10 flex items-center justify-center shrink-0">
+                      <FileText className="w-4.5 h-4.5 text-crimson" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-medium text-ink truncate tracking-tight">{name}</p>
+                      {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium text-ink truncate tracking-tight">{name}</p>
-                    {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
-                  </div>
-                  <Download className="w-4 h-4 text-stone group-hover:text-terracotta transition-colors shrink-0" />
-                </a>
+                  <PdfResourceActions name={name} sourceUrl={url} />
+                </div>
               );
             })}
           </div>
@@ -260,39 +257,33 @@ function ConceptLayout({
 function SidePanel({ side }: { side: SideContent }) {
   const url = side.pdf.url || side.pdf.cdn_url || '';
   const hintUrl = side.hintbook ? (side.hintbook.url || side.hintbook.cdn_url || '') : '';
+  const pdfName = side.pdf.original_name || 'document.pdf';
+  const hintbookName = side.hintbook?.original_name || 'hintbook.pdf';
   return (
     <div className="p-4 space-y-2">
       <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-stone mb-2.5">{side.label}</p>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group flex items-center gap-2.5 px-3 py-3 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
-      >
-        <FileText className="w-4 h-4 text-charcoal shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-[12px] font-medium text-ink truncate">{side.pdf.original_name}</p>
-          {side.pdf.file_size && <p className="text-[10px] text-stone mt-0.5">{side.pdf.file_size}</p>}
-        </div>
-        <div className="shrink-0 flex items-center gap-1 text-[10px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-2 py-1 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory transition-all">
-          <Download className="w-3 h-3" />
-          PDF
-        </div>
-      </a>
-      {side.hintbook && (
-        <a
-          href={hintUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
-        >
-          <Lightbulb className="w-3.5 h-3.5 text-terracotta shrink-0" />
+      <div className="space-y-2">
+        <div className="flex items-center gap-2.5 px-3 py-3 rounded-xl bg-sand border border-border-cream">
+          <FileText className="w-4 h-4 text-charcoal shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
-            <p className="text-[11px] text-olive">힌트만 보고 재도전</p>
+            <p className="text-[12px] font-medium text-ink truncate">{pdfName}</p>
+            {side.pdf.file_size && <p className="text-[10px] text-stone mt-0.5">{side.pdf.file_size}</p>}
           </div>
-          <Download className="w-3 h-3 text-terracotta/60 shrink-0" />
-        </a>
+        </div>
+        <PdfResourceActions name={pdfName} sourceUrl={url} />
+      </div>
+      {side.hintbook && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+            <Lightbulb className="w-3.5 h-3.5 text-terracotta shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
+              <p className="text-[11px] font-medium text-olive truncate">{hintbookName}</p>
+              <p className="text-[11px] text-olive">힌트만 보고 재도전</p>
+            </div>
+          </div>
+          <PdfResourceActions name={hintbookName} sourceUrl={hintUrl} />
+        </div>
       )}
     </div>
   );
@@ -350,6 +341,8 @@ function BonusLayout({ data }: { data: ContentGroupContent }) {
   const hintbook = data.hintbook;
   const pdfUrl = pdf.url || pdf.cdn_url || '';
   const hintUrl = hintbook ? (hintbook.url || hintbook.cdn_url || '') : '';
+  const pdfName = pdf.original_name || 'document.pdf';
+  const hintbookName = hintbook?.original_name || 'hintbook.pdf';
 
   return (
     <div className="bg-ivory border border-border-cream rounded-2xl overflow-hidden">
@@ -360,36 +353,28 @@ function BonusLayout({ data }: { data: ContentGroupContent }) {
         <h3 className="font-serif font-medium text-[17px] text-ink tracking-tight">{data.label}</h3>
       </div>
       <div className="px-4 py-4 space-y-2">
-        <a
-          href={pdfUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
-        >
-          <FileText className="w-5 h-5 text-charcoal shrink-0" />
-          <div className="flex-1 min-w-0">
-            <p className="text-[14px] font-medium text-ink truncate tracking-tight">{pdf.original_name}</p>
-            {pdf.file_size && <p className="text-[11px] text-stone mt-0.5">{pdf.file_size}</p>}
-          </div>
-          <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
-            <Download className="w-3 h-3" />
-            PDF
-          </div>
-        </a>
-        {hintbook && (
-          <a
-            href={hintUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
-          >
-            <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
+        <div className="space-y-2">
+          <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+            <FileText className="w-5 h-5 text-charcoal shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
-              <p className="text-[12px] text-olive">각 문항 힌트만 보고 재도전</p>
+              <p className="text-[14px] font-medium text-ink truncate tracking-tight">{pdfName}</p>
+              {pdf.file_size && <p className="text-[11px] text-stone mt-0.5">{pdf.file_size}</p>}
             </div>
-            <Download className="w-3.5 h-3.5 text-terracotta/60 shrink-0" />
-          </a>
+          </div>
+          <PdfResourceActions name={pdfName} sourceUrl={pdfUrl} />
+        </div>
+        {hintbook && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+              <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
+                <p className="text-[12px] font-medium text-olive truncate">{hintbookName}</p>
+                <p className="text-[12px] text-olive">각 문항 힌트만 보고 재도전</p>
+              </div>
+            </div>
+            <PdfResourceActions name={hintbookName} sourceUrl={hintUrl} />
+          </div>
         )}
       </div>
     </div>
@@ -445,23 +430,16 @@ function GichulLayout({
             const url = p.url || p.cdn_url || '';
             const name = p.original_name || 'document.pdf';
             return (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand hover:bg-white hover:shadow-ring-warm transition-all border border-border-cream"
-              >
-                <FileText className="w-5 h-5 text-charcoal shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[14px] font-medium text-ink truncate tracking-tight">{name}</p>
-                  {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
+              <div key={idx} className="space-y-2">
+                <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+                  <FileText className="w-5 h-5 text-charcoal shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-medium text-ink truncate tracking-tight">{name}</p>
+                    {p.file_size && <p className="text-[11px] text-stone mt-0.5">{p.file_size}</p>}
+                  </div>
                 </div>
-                <div className="shrink-0 flex items-center gap-1.5 text-[11px] tracking-wider uppercase font-medium text-charcoal bg-ivory px-3 py-1.5 rounded-md shadow-ring-warm group-hover:bg-terracotta group-hover:text-ivory group-hover:shadow-ring-terracotta transition-all">
-                  <Download className="w-3 h-3" />
-                  PDF
-                </div>
-              </a>
+                <PdfResourceActions name={name} sourceUrl={url} />
+              </div>
             );
           })}
         </div>
@@ -470,19 +448,20 @@ function GichulLayout({
       {/* 힌트북 */}
       {hintbook && (
         <div className="px-4 pt-3 pb-1">
-          <a
-            href={hintbook.url || hintbook.cdn_url || ''}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20 hover:bg-terracotta/10 transition-all"
-          >
-            <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
-              <p className="text-[12px] text-olive">각 문항 힌트만 보고 재도전</p>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+              <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
+                <p className="text-[12px] font-medium text-olive truncate">{hintbook.original_name || 'hintbook.pdf'}</p>
+                <p className="text-[12px] text-olive">각 문항 힌트만 보고 재도전</p>
+              </div>
             </div>
-            <Download className="w-3.5 h-3.5 text-terracotta/60 shrink-0" />
-          </a>
+            <PdfResourceActions
+              name={hintbook.original_name || 'hintbook.pdf'}
+              sourceUrl={hintbook.url || hintbook.cdn_url || ''}
+            />
+          </div>
         </div>
       )}
 
