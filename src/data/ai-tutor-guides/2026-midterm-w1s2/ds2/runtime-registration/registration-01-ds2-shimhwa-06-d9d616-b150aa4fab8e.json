@@ -46,7 +46,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/01.json",
-      "guideSha256": "1699e62a52b9cc5807ebaef5b1c930a68dba2944a80c6119cf56204702101cb4"
+      "guideSha256": "8f5e23397a2e311cfe0db6e30941fdcea384d7cc0c0223172403c80be3a1f023"
     },
     {
       "catalogEntry": {
@@ -92,7 +92,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/02.json",
-      "guideSha256": "5995fc394f96c381d5d46b235e4630b47be0c08309db5be8779969df0fdfe48b"
+      "guideSha256": "797df8603e8b610da94362c88fc5c943733ea5a00767fcdea5c1057f8a77ec9b"
     },
     {
       "catalogEntry": {
@@ -138,7 +138,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/03.json",
-      "guideSha256": "13f2d36c85500500517b72bf2df58c56c3bc78a98b18dfef75d171c5ec5404d0"
+      "guideSha256": "0bacc157a5c123d8a21d2759a613314abf4be49803b319a3c58793224657a646"
     },
     {
       "catalogEntry": {
@@ -184,7 +184,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/04.json",
-      "guideSha256": "3152ac36ffda720a3ffd7a94a01b7e9c7893bff3a824ceb50b9f6e53d6f70a31"
+      "guideSha256": "72dbb4b3bc4f42abae72f9b47c056e8b09dfe4e3362726ff27f6950df847f7bb"
     },
     {
       "catalogEntry": {
@@ -230,7 +230,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/05.json",
-      "guideSha256": "ff751189043f182a2825dd4896c5ed3bb504824b3d2cf428846bfda343704a66"
+      "guideSha256": "533833704e8e6c50df77a90a1feef5724dacbe7c4b37ecd5e57dee16ca52af84"
     },
     {
       "catalogEntry": {
@@ -276,7 +276,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/06.json",
-      "guideSha256": "3107df9690fa5f811771c8e7a4ad97a3b94871d723124944ba52f221d1fc3eb2"
+      "guideSha256": "1a50b97b28efab8c612da56e53cc475370b9cf0c4f4ace5b7d15249eb7d04136"
     },
     {
       "catalogEntry": {
@@ -322,7 +322,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/07.json",
-      "guideSha256": "838eb3908e2623040e32cc7ed0835f4dae89b08b2bc8571756c67074148ccf54"
+      "guideSha256": "8861c0991f7fca2fa1bf7b34c6a3da5158fae68fc9c2b406bf31e138a43c2867"
     },
     {
       "catalogEntry": {
@@ -368,7 +368,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/08.json",
-      "guideSha256": "63c7e901d49ff491b3107d368a535079ae44a7e2252658f9ee8b8262d144769f"
+      "guideSha256": "c93499b0e95cc0565afc6511d04a450931bfb5d66db105def340afcb7ec3eaf0"
     },
     {
       "catalogEntry": {
@@ -414,7 +414,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/09.json",
-      "guideSha256": "ce9756aa383941c3731965b3dcdfb1c122e766ceae7e62fe27f221a68aa12c63"
+      "guideSha256": "1e543443a5ace6eb6ef454a04c51c52a95b6821ec63f8d6df55594c956fc0f39"
     },
     {
       "catalogEntry": {
@@ -460,7 +460,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/10.json",
-      "guideSha256": "36fe93362ad5fbdebab0455d6d29f9c40793f03ee45892978350c9e8204c5abc"
+      "guideSha256": "2fc8a24b721f949b4e30d12e8af787593520c51e4850ce888eded25777bad837"
     },
     {
       "catalogEntry": {
@@ -506,7 +506,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/11.json",
-      "guideSha256": "dea08dea98f6c2bd16ad4a4c5be841e94df4e5939e98d59eb5eccc5d3dde4912"
+      "guideSha256": "c66f224e7d6163ca29118258cd22b58e1132524583774cab2a2f167895bebe37"
     },
     {
       "catalogEntry": {
@@ -552,7 +552,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/12.json",
-      "guideSha256": "916494998af0005bfa4c8390531c7c0a09c419a81fd00ae958e4f5bf7c6def4f"
+      "guideSha256": "2cf0d72bbaf4e254a622d3dab5f3a77d743fa738cb696bfb545926d3bdb0e2ff"
     },
     {
       "catalogEntry": {
@@ -598,7 +598,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/13.json",
-      "guideSha256": "5aface67073e4b3eca7fff058c269d4faa7981268128dc65285876f9a10ed23f"
+      "guideSha256": "20f728644f197b4505a0b32d99765e47163c814dc96907027d4cc91cddb13ae6"
     },
     {
       "catalogEntry": {
@@ -644,7 +644,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/14.json",
-      "guideSha256": "750303a518efe7337451627e84db4704ac8dd6259b380ecc10ba720183fd2fcc"
+      "guideSha256": "7b34151c6d713b5686e98e80426f00b9d55fd28f88d80de57697be7a4569c62a"
     },
     {
       "catalogEntry": {
@@ -690,7 +690,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/15.json",
-      "guideSha256": "1637928b991791478672f15e4865f46f31bca9ede16d5ee397772ba838d242da"
+      "guideSha256": "44c694bbce818cd4bceaa7820ad71e89ecb6ac5071f435c106997ae5269d0982"
     },
     {
       "catalogEntry": {
@@ -736,7 +736,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/16.json",
-      "guideSha256": "a21c533c3550485529d97f06c0b42b49f29e0280c45564d7b43420c2d175aa5f"
+      "guideSha256": "7b68fd197d9974b5368c33d96c4efedb3427cba8abe017a7e2e0e3d160627a9f"
     },
     {
       "catalogEntry": {
@@ -782,7 +782,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/17.json",
-      "guideSha256": "5972de8a01d19122f538e1f7abefd27df6c689c369cc0dfc4a27362f96ed38f3"
+      "guideSha256": "e6929d4c1c8a468c22202ca9eb2da20a61f4c5bf354db635d5f1883f8ce427a3"
     },
     {
       "catalogEntry": {
@@ -828,7 +828,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/18.json",
-      "guideSha256": "71758ee8ff7e42540ba5289f63587f3a0ff65108622846204f2c7a7808109e13"
+      "guideSha256": "9ab136f70ac39f9ab4df7e7393bb4cd00d0b7b56884e36e0c9f7f5e5b61e7665"
     },
     {
       "catalogEntry": {
@@ -874,7 +874,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/19.json",
-      "guideSha256": "0f22c7ebed230606e0fab1f17a80c5602d82a5543f8cdfd8293fc1be27993c6d"
+      "guideSha256": "bdb7750b4c9236647c05f9b97227153db7aa56ab01c2ca7ce11619c36491c930"
     },
     {
       "catalogEntry": {
@@ -920,7 +920,7 @@
         }
       },
       "guideAssetPath": "guides/ds2-shimhwa-06-d9d616-b150aa4fab8e/20.json",
-      "guideSha256": "2b0c951e4ee5262705cceb2d6d7d13e49ab58458408f58113e865064eada3ac0"
+      "guideSha256": "ae58d697e2ee700ac47d3a7e9cbfc4f8799e15c9411f34033d571f25510aa264"
     }
   ]
 }
