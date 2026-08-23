@@ -70,6 +70,56 @@ test('Given immutable private objects When loading a verified target Then bytes 
   if (result.ok) assert.deepEqual(result.problemImage, problemPng);
 });
 
+test('Given a private guide-object read that never settles When loading a tutor target Then the request is bounded instead of remaining processing', { timeout: 100 }, async () => {
+  // Given
+  const catalogEntry = entry();
+  const store = createPrivateTutorGuideStore({
+    catalog: createTutorGuideCatalog([catalogEntry]),
+    objectPort: { readPrivateObject: async () => new Promise(() => {}) },
+    guideAssetHashes: new Map([[catalogEntry.manifestKey, digest(guide(catalogEntry))]]),
+    assetReadDeadlineMs: 1,
+  });
+
+  // When
+  const result = await store.load({ lessonKey: 'lesson', level: 41, problemNumber: 1 });
+
+  // Then
+  assert.deepEqual(result, { ok: false, reason: 'not_found' });
+});
+
+test('Given one transient private guide-object read failure When loading a tutor target Then the second bounded attempt returns the verified guide', async () => {
+  // Given
+  const catalogEntry = entry();
+  const guideBytes = guide(catalogEntry);
+  const keys = privateTutorGuideAssetKeys(catalogEntry, digest(guideBytes));
+  const reads = new Map<string, number>();
+  const objects = new Map<string, Readonly<{ readonly bytes: Uint8Array; readonly mimeType: string }>>([
+    [keys.problem, { bytes: problemPng, mimeType: 'image/png' }],
+    [keys.guide, { bytes: guideBytes, mimeType: 'application/json' }],
+  ]);
+  const store = createPrivateTutorGuideStore({
+    catalog: createTutorGuideCatalog([catalogEntry]),
+    objectPort: {
+      readPrivateObject: async ({ objectKey }) => {
+        const count = (reads.get(objectKey) ?? 0) + 1;
+        reads.set(objectKey, count);
+        const object = objects.get(objectKey);
+        return count === 1 || object === undefined ? { ok: false as const, reason: 'not_found' as const } : { ok: true as const, ...object };
+      },
+    },
+    guideAssetHashes: new Map([[catalogEntry.manifestKey, digest(guideBytes)]]),
+    assetReadDeadlineMs: 1,
+  });
+
+  // When
+  const result = await store.load({ lessonKey: 'lesson', level: 41, problemNumber: 1 });
+
+  // Then
+  assert.equal(result.ok, true);
+  assert.equal(reads.get(keys.problem), 2);
+  assert.equal(reads.get(keys.guide), 2);
+});
+
 test('Given private objects with MIME, hash, source, or status drift When loading Then each fails closed', async () => {
   // Given
   const catalogEntry = entry();
