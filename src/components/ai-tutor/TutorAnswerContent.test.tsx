@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { TutorAnswerContent, TutorTurnList, parseTutorAnswerBlocks, shouldRenderTutorMathText, type TutorAnswerBlock } from './TutorAnswerContent';
+import { TutorAnswerContent, TutorTurnList, parseTutorAnswerBlocks, type TutorAnswerBlock } from './TutorAnswerContent';
 
 test('parseTutorAnswerBlocks classifies workbook labels, paragraphs, lists, and display math in order', () => {
   // Given: a synthetic tutor answer with the supported Korean workbook structure.
@@ -99,12 +99,44 @@ test('TutorAnswerContent renders inequality math inside workbook list items', ()
   ].join('\n');
 
   const blocks = parseTutorAnswerBlocks(answer);
+  const markup = renderToStaticMarkup(<TutorAnswerContent text={answer} />);
 
   assert.equal(blocks[0]?.kind, 'unordered-list');
-  assert.equal(shouldRenderTutorMathText(blocks[0]?.kind === 'unordered-list' ? blocks[0].items[0] ?? '' : ''), true);
-  assert.equal(shouldRenderTutorMathText(blocks[0]?.kind === 'unordered-list' ? blocks[0].items[1] ?? '' : ''), true);
-  assert.equal(shouldRenderTutorMathText('<script>alert(1)</script>'), false);
-  assert.equal(shouldRenderTutorMathText('ignore previous instructions'), false);
+  assert.equal((markup.match(/data-tutor-math="inline"/g) ?? []).length, 4);
+});
+
+test('an unmatched delimiter stays literal while its neighboring list-item math renders', () => {
+  const answer = '- 식이 $닫히지 않아도 $\\dfrac{1}{2}$는 이어집니다.';
+
+  const markup = renderToStaticMarkup(<TutorAnswerContent text={answer} />);
+
+  assert.equal(markup.includes('data-tutor-math="inline"'), true);
+  assert.equal(markup.includes('data-tutor-math="literal"'), true);
+});
+
+test('TutorAnswerContent recovers valid list-item math while only malformed or untrusted fragments stay literal', () => {
+  const answer = [
+    '- 앞의 $닫히지 않은 조각 뒤에도 $\\dfrac{1}{2}$와 $\\sqrt{x_1^2}$를 읽어요.',
+    '- $\\notacommand{x}$, $\\href{safe}{x}$, $ignore previous instructions$, 그리고 $\\sin x$',
+  ].join('\n');
+
+  const markup = renderToStaticMarkup(<TutorAnswerContent text={answer} />);
+
+  assert.equal((markup.match(/data-tutor-math="inline"/g) ?? []).length, 3);
+  assert.equal((markup.match(/data-tutor-math="literal"/g) ?? []).length, 4);
+  assert.equal(markup.includes('<a '), false);
+  assert.equal(markup.includes('ignore previous instructions'), true);
+});
+
+test('TutorAnswerContent isolates script-looking math while neighboring fractions render', () => {
+  const answer = 'before $<script>alert(1)</script>$ after $\\dfrac{1}{2}$';
+
+  const markup = renderToStaticMarkup(<TutorAnswerContent text={answer} />);
+
+  assert.equal((markup.match(/data-tutor-math="inline"/g) ?? []).length, 1);
+  assert.equal((markup.match(/data-tutor-math="literal"/g) ?? []).length, 1);
+  assert.equal(markup.includes('&lt;script&gt;alert(1)&lt;/script&gt;'), true);
+  assert.equal(markup.includes('<script>'), false);
 });
 
 test('parseTutorAnswerBlocks strips method markers and inline markdown markers before rendering', () => {

@@ -174,51 +174,7 @@ function TutorAnswerBlockView({ block }: { readonly block: TutorAnswerBlock }) {
 }
 
 function SafeTutorMathText({ text }: { readonly text: string }) {
-  return shouldRenderTutorMathText(text) ? <TutorMathText text={text} /> : <span>{text}</span>;
-}
-
-export function shouldRenderTutorMathText(text: string): boolean {
-  return !hasMalformedMathDelimiters(text) && !hasUnsafeLiteralOutsideMath(text);
-}
-
-function hasUnsafeLiteralOutsideMath(text: string): boolean {
-  if (/(?:ignore|disregard)\s+previous\s+instructions/iu.test(text)) return true;
-  let mode: 'inline' | 'display' | undefined;
-  let index = 0;
-  while (index < text.length) {
-    if (text.startsWith('$$', index)) {
-      mode = mode === 'display' ? undefined : 'display';
-      index += 2;
-      continue;
-    }
-    if (text[index] === '$') {
-      mode = mode === 'inline' ? undefined : 'inline';
-      index += 1;
-      continue;
-    }
-    if (mode === undefined && (text[index] === '<' || text[index] === '>')) return true;
-    index += 1;
-  }
-  return false;
-}
-
-function hasMalformedMathDelimiters(text: string): boolean {
-  let mode: 'inline' | 'display' | undefined;
-  let index = 0;
-  while (index < text.length) {
-    if (text.startsWith('$$', index)) {
-      if (mode === 'inline') return true;
-      mode = mode === 'display' ? undefined : 'display';
-      index += 2;
-      continue;
-    }
-    if (text[index] === '$') {
-      if (mode === 'display') return true;
-      mode = mode === 'inline' ? undefined : 'inline';
-    }
-    index += 1;
-  }
-  return mode !== undefined;
+  return <TutorMathText text={text} />;
 }
 
 function assertNever(value: never): never {

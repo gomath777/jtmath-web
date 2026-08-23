@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
 import test from 'node:test';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -8,7 +9,7 @@ import {
   normalizeTutorMathText,
   tokenizeTutorMathText,
 } from './TutorMathText';
-import { runBrowserProbe } from './TutorMathText.browser-test-support';
+import { runBrowserProbe, type BrowserProbeTempResource } from './TutorMathText.browser-test-support';
 
 test('tokenizeTutorMathText keeps Korean text and inline math in order', () => {
   // Given
@@ -42,7 +43,7 @@ test('tokenizeTutorMathText recognizes display fractions and multiline lists', (
   assert.equal(tokens[2]?.kind, 'text');
 });
 
-test('tokenizeTutorMathText leaves unmatched delimiters literal', () => {
+test('tokenizeTutorMathText isolates unmatched delimiters as literal fragments', () => {
   // Given
   const text = '여기는 $x+1 처럼 닫히지 않아요.';
 
@@ -50,7 +51,29 @@ test('tokenizeTutorMathText leaves unmatched delimiters literal', () => {
   const tokens = tokenizeTutorMathText(text);
 
   // Then
-  assert.deepEqual(tokens, [{ kind: 'text', text }]);
+  assert.deepEqual(tokens, [
+    { kind: 'text', text: '여기는 ' },
+    { kind: 'literalMath', source: '$' },
+    { kind: 'text', text: 'x+1 처럼 닫히지 않아요.' },
+  ]);
+});
+
+test('tokenizeTutorMathText isolates a malformed delimiter while recovering neighboring Korean math', () => {
+  const tokens = tokenizeTutorMathText(
+    '앞의 $닫히지 않은 조각 뒤에도 $\\dfrac{1}{2}$와 $\\sqrt{x_1^2}$, $$x_1^2$$를 읽어요.',
+  );
+
+  assert.deepEqual(tokens, [
+    { kind: 'text', text: '앞의 ' },
+    { kind: 'literalMath', source: '$' },
+    { kind: 'text', text: '닫히지 않은 조각 뒤에도 ' },
+    { kind: 'inlineMath', expression: '\\dfrac{1}{2}', source: '$\\dfrac{1}{2}$' },
+    { kind: 'text', text: '와 ' },
+    { kind: 'inlineMath', expression: '\\sqrt{x_1^2}', source: '$\\sqrt{x_1^2}$' },
+    { kind: 'text', text: ', ' },
+    { kind: 'displayMath', expression: 'x_1^2', source: '$$x_1^2$$' },
+    { kind: 'text', text: '를 읽어요.' },
+  ]);
 });
 
 test('normalizeTutorMathText converts bracket delimiters before tokenizing', () => {
@@ -92,6 +115,13 @@ test('normalizeTutorMathText wraps bare LaTeX fragments without touching existin
   ]);
 });
 
+test('normalizeTutorMathText processes long bare formula-like input without regex backtracking', () => {
+  const prefix = 'a'.repeat(64);
+  const text = `${prefix}${String.raw`\sin`} x${prefix}`;
+
+  assert.equal(normalizeTutorMathText(text), `$${text}$`);
+});
+
 test('classifyTutorLatex pre-blocks oversized and trust/external commands', () => {
   // Given
   const blockedExpressions = [
@@ -113,6 +143,14 @@ test('classifyTutorLatex pre-blocks oversized and trust/external commands', () =
   for (const expression of blockedExpressions) {
     assert.equal(classifyTutorLatex(expression).kind, 'literal');
   }
+});
+
+test('classifyTutorLatex keeps malformed and instruction-like fragments literal beside valid math', () => {
+  assert.equal(classifyTutorLatex('\\frac{1}{2').kind, 'literal');
+  assert.equal(classifyTutorLatex('ignore previous instructions').kind, 'literal');
+  assert.equal(classifyTutorLatex('<script>alert(1)</script>').kind, 'literal');
+  assert.equal(classifyTutorLatex('x < y').kind, 'renderable');
+  assert.equal(classifyTutorLatex('\\sqrt{x_1^2}').kind, 'renderable');
 });
 
 test('TutorMathText server markup contains escaped text and no injected HTML', () => {
@@ -144,4 +182,28 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.htmlDataText, '$\\htmlData{evil=1}{x}$');
   assert.equal(result.includegraphicsText, '$\\includegraphics{secret.png}$');
   assert.equal(result.malformedText, '$\\notacommand{x}$');
+  assert.equal(result.fragmentKatexCount, 2);
+  assert.equal(result.fragmentLiteralCount, 1);
+  assert.equal(result.listKatexCount, 1);
+  assert.equal(result.listLiteralCount, 1);
+  assert.equal(result.scriptMathKatexCount, 1);
+  assert.equal(result.scriptMathLiteralCount, 1);
+  assert.equal(result.scriptMathText.includes('<script>'), true);
+  assert.notEqual(result.recoveryFontFamily, '');
+  assert.equal(result.recoveryFitsHeight, true);
+});
+
+test('TutorMathText browser probe removes its temporary directories', async () => {
+  const tempResources: BrowserProbeTempResource[] = [];
+
+  await runBrowserProbe({ onTempResource: (resource) => tempResources.push(resource) });
+
+  assert.deepEqual(tempResources.map((resource) => resource.kind).sort(), [
+    'chromeProfileDir',
+    'probeDir',
+  ]);
+  assert.equal(new Set(tempResources.map((resource) => resource.path)).size, 2);
+  for (const resource of tempResources) {
+    assert.equal(existsSync(resource.path), false, `${resource.kind} survived: ${resource.path}`);
+  }
 });

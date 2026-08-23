@@ -41,6 +41,10 @@ export function TutorMathText({ text }: TutorMathTextProps) {
           return <span key={key}>{token.text}</span>;
         }
 
+        if (token.kind === 'literalMath') {
+          return <span key={key} data-tutor-math="literal">{token.source}</span>;
+        }
+
         return <MathFragment key={key} token={token} />;
       })}
     </span>
@@ -64,10 +68,12 @@ function MathFragment({ token }: MathFragmentProps) {
       });
       if (element.matches('.katex-error') || element.querySelector('.katex-error') !== null) {
         element.textContent = token.source;
+        element.dataset.tutorMath = 'literal';
       }
     } catch (error) {
       if (error instanceof Error) {
         element.textContent = token.source;
+        element.dataset.tutorMath = 'literal';
         return;
       }
       throw error;

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Gowun_Batang } from 'next/font/google';
+import 'katex/dist/katex.min.css';
 import './globals.css';
 
 // Headline serif — 고운 바탕 (modern, elegant Korean serif)
