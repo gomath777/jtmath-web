@@ -43,7 +43,7 @@ test('Given a routed quota failure followed by a fallback error When answering T
   assert.equal(answer.metadata.failureCategory, 'provider_error');
 });
 
-test('Given a routed transient provider error When answering Then the configured primary model retries once without fallback', async () => {
+test('Given a routed transient provider error When answering Then the web route switches once to its configured fallback model', async () => {
   // Given
   const calls: GeminiGenerateContentParameters[] = [];
   let attempts = 0;
@@ -72,13 +72,13 @@ test('Given a routed transient provider error When answering Then the configured
   // Then
   assert.equal(calls.length, 2);
   assert.equal(calls[0]?.model, 'gemini-3.1-pro');
-  assert.equal(calls[1]?.model, 'gemini-3.1-pro');
-  assert.equal(answer.metadata.modelAlias, 'reasoning');
+  assert.equal(calls[1]?.model, 'gemini-3.1-flash');
+  assert.equal(answer.metadata.modelAlias, 'fallback');
   assert.equal(answer.metadata.attemptCount, 2);
   assert.deepEqual(answer.metadata.tokenCounts, { input: 13, output: 17, total: 30 });
 });
 
-test('Given a primary retry consumes the recovery budget and then returns 429 When answering Then no fallback third call starts', async () => {
+test('Given a transient primary error followed by a fallback quota error When answering Then the web route stays bounded at two calls', async () => {
   // Given
   const calls: GeminiGenerateContentParameters[] = [];
   let attempts = 0;
@@ -105,8 +105,8 @@ test('Given a primary retry consumes the recovery budget and then returns 429 Wh
 
   // Then
   assert.equal(calls.length, 2);
-  assert.deepEqual(calls.map((call) => call.model), ['gemini-3.1-pro', 'gemini-3.1-pro']);
-  assert.equal(answer.metadata.modelAlias, 'reasoning');
+  assert.deepEqual(calls.map((call) => call.model), ['gemini-3.1-pro', 'gemini-3.1-flash']);
+  assert.equal(answer.metadata.modelAlias, 'fallback');
   assert.equal(answer.metadata.attemptCount, 2);
   assert.equal(answer.metadata.failureCategory, 'provider_error');
 });

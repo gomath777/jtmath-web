@@ -8,6 +8,7 @@ type GeminiCallOptions = {
   readonly deadlineMs: number;
   readonly deadline?: (milliseconds: number) => Promise<'timeout'>;
   readonly retryDelay?: (milliseconds: number) => Promise<void>;
+  readonly retryTransient?: boolean;
 };
 
 export type GeminiCallResult = {
@@ -60,19 +61,26 @@ export async function callGeminiWithRouteFallback(options: {
   readonly deadlineMs: number;
   readonly deadline?: (milliseconds: number) => Promise<'timeout'>;
   readonly retryDelay?: (milliseconds: number) => Promise<void>;
+  readonly fallbackOnTransientFailure?: boolean;
+  readonly now?: () => number;
 }): Promise<GeminiRoutedCallResult> {
+  const now = options.now ?? Date.now;
+  const startedAt = now();
   const primary = await callGeminiWithRetryWithMetadata({
     client: options.client,
     params: options.primaryParams,
     deadlineMs: options.deadlineMs,
     deadline: options.deadline,
     retryDelay: options.retryDelay,
+    retryTransient: options.fallbackOnTransientFailure !== true,
   });
-  if (primary.failedStatus !== 429 || primary.attemptCount === 2) return { ...primary, usedFallback: false };
+  if (!shouldUseFallback(primary, options.fallbackOnTransientFailure)) return { ...primary, usedFallback: false };
+  const fallbackDeadlineMs = Math.max(0, options.deadlineMs - Math.max(0, now() - startedAt));
+  if (fallbackDeadlineMs === 0) return { ...primary, usedFallback: false };
   const fallback = await callGeminiOnce({
     client: options.client,
     params: options.fallbackParams,
-    deadlineMs: options.deadlineMs,
+    deadlineMs: fallbackDeadlineMs,
     deadline: options.deadline,
   });
   return { ...fallback, attemptCount: 2, usedFallback: true };
@@ -88,7 +96,9 @@ async function generateWithRetry(
     return { response: await options.client.generateContent(options.params) };
   } catch (error) {
     const status = readGeminiErrorStatus(error);
-    if (isExpired() || !isTransientGeminiError(error)) return { response: providerErrorResponse(), ...(status === undefined ? {} : { failedStatus: status }) };
+    if (isExpired() || options.retryTransient === false || !isTransientGeminiError(error)) {
+      return { response: providerErrorResponse(), ...(status === undefined ? {} : { failedStatus: status }) };
+    }
   }
 
   await (options.retryDelay ?? wait)(transientRetryDelayMs);
@@ -100,6 +110,16 @@ async function generateWithRetry(
     const status = readGeminiErrorStatus(error);
     return { response: providerErrorResponse(), ...(status === undefined ? {} : { failedStatus: status }) };
   }
+}
+
+function shouldUseFallback(
+  primary: GeminiCallResult,
+  fallbackOnTransientFailure: boolean | undefined,
+): boolean {
+  if (primary.failedStatus === 429 && primary.attemptCount === 1) return true;
+  return fallbackOnTransientFailure === true
+    && primary.failedStatus !== undefined
+    && transientStatuses.has(primary.failedStatus);
 }
 
 async function callGeminiOnce(options: GeminiCallOptions): Promise<GeminiCallResult> {

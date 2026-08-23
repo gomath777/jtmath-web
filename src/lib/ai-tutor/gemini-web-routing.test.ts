@@ -82,11 +82,74 @@ test('Given a final Gemini web provider failure When the route returns Then it e
   assert.deepEqual(diagnostics, [{
     event: 'ai_tutor.web_provider_failed',
     failureCategory: 'http_5xx',
-    modelAlias: 'reasoning',
-    modelId: 'gemini-3.1-flash-lite',
+    modelAlias: 'fallback',
+    modelId: 'gemini-3.1-flash',
     attemptCount: 2,
     durationMs: 0,
   }]);
   assert.equal(JSON.stringify(diagnostics).includes('must not enter diagnostics'), false);
   assert.equal(JSON.stringify(diagnostics).includes(request.input.messageText), false);
+});
+
+test('Given a transient primary Gemini 503 When the web tutor route answers Then it uses the fallback model within the same request budget', async () => {
+  // Given
+  const models: string[] = [];
+
+  // When
+  const answer = await answerGeminiWebRoute({
+    route: {
+      request,
+      primaryModel: { id: 'gemini-3.1-flash-lite', alias: 'reasoning' },
+      fallbackModel: { id: 'gemini-3.1-flash', alias: 'fallback' },
+    },
+    client: {
+      generateContent: async (params) => {
+        models.push(params.model);
+        if (models.length === 1) throw { status: 503 };
+        return { text: validGeminiText };
+      },
+    },
+    modelTimeoutMs: 40_000,
+    deadline: () => new Promise<'timeout'>(() => {}),
+    retryDelay: async () => undefined,
+    now: () => 0,
+    failureLogger: () => undefined,
+  });
+
+  // Then
+  assert.equal(answer.result.errorType, null);
+  assert.deepEqual(models, ['gemini-3.1-flash-lite', 'gemini-3.1-flash']);
+  assert.equal(answer.metadata.modelAlias, 'fallback');
+  assert.equal(answer.metadata.attemptCount, 2);
+});
+
+test('Given a late transient primary failure When the web tutor route starts its fallback Then the fallback receives only the remaining request budget', async () => {
+  // Given
+  const timeValues = [0, 0, 35_000, 35_000];
+  let fallbackTimeoutMs: number | undefined;
+
+  // When
+  const answer = await answerGeminiWebRoute({
+    route: {
+      request,
+      primaryModel: { id: 'gemini-3.1-flash-lite', alias: 'reasoning' },
+      fallbackModel: { id: 'gemini-3.1-flash', alias: 'fallback' },
+    },
+    client: {
+      generateContent: async (params) => {
+        if (params.model === 'gemini-3.1-flash-lite') throw { status: 503 };
+        fallbackTimeoutMs = params.config.httpOptions?.timeout;
+        return { text: validGeminiText };
+      },
+    },
+    modelTimeoutMs: 40_000,
+    deadline: () => new Promise<'timeout'>(() => {}),
+    now: () => timeValues.shift() ?? 35_000,
+    failureLogger: () => undefined,
+  });
+
+  // Then
+  assert.equal(answer.result.errorType, null);
+  assert.equal(fallbackTimeoutMs, 5_000);
+  assert.equal(answer.metadata.latencyMs, 35_000);
 });

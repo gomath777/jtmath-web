@@ -43,6 +43,8 @@ export async function answerGeminiWebRoute(input: AnswerGeminiWebRouteInput): Pr
     deadlineMs: Math.min(input.modelTimeoutMs, maxProviderDeadlineMs),
     deadline: input.deadline,
     retryDelay: input.retryDelay,
+    fallbackOnTransientFailure: true,
+    now: input.now,
   });
   const model = call.usedFallback ? fallback : primary;
   const result = call.response === 'timeout' ? timeoutResult() : parseGeminiResponse(call.response);
