@@ -7,7 +7,7 @@ import type { AiTutorObservability, AiTutorTokenCounts } from './observability';
 import { AI_TUTOR_PROMPT_VERSION } from './prompt';
 import type { WebTutorProviderRouteAnswer, WebTutorProviderRouteInput } from './web-provider-routing';
 
-const maxProviderDeadlineMs = 110_000;
+const maxProviderDeadlineMs = 55_000;
 const zeroTokenCounts: AiTutorTokenCounts = { input: 0, output: 0, total: 0 };
 
 export type AnswerGeminiWebRouteInput = {

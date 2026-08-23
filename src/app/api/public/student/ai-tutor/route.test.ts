@@ -28,8 +28,8 @@ const env = {
   VERCEL_ENV: 'preview',
 } as const;
 
-test('Given Gemini 3.1 Pro can answer slowly When the route runs Then the platform budget exceeds the provider deadline', () => {
-  assert.equal(maxDuration, 120);
+test('Given Gemini 3.1 Pro can answer slowly When the route runs Then the route remains within the Vercel 60 second limit', () => {
+  assert.equal(maxDuration, 60);
 });
 
 test('Given fallback cookie When route receives request Then dependencies are not constructed', async () => {
