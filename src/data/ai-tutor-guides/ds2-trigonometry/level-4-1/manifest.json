@@ -1,0 +1,383 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "manifestKey": "ds2-trigonometry:41:1",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 1
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/01.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/01/problem-01.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "72692360afffb283637e2bbf126280033b7ed7bb506bbb2de5d0eb93f5546f78",
+        "dimensions": {
+          "width": 909,
+          "height": 1338
+        },
+        "crop": {
+          "page": 1,
+          "left": 0,
+          "top": 548,
+          "right": 909,
+          "bottom": 1886
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/01/solution-01.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "c88186d8aecdbf88874f24a38ccd535e54afaca68b6595968de4b5254ab062bb",
+        "dimensions": {
+          "width": 909,
+          "height": 1952
+        },
+        "crop": {
+          "page": 7,
+          "left": 0,
+          "top": 548,
+          "right": 909,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:2",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 2
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/02.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/02/problem-02.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "7c19ae62bcf881684bdea1ad50659332ffb2798479a691b65a2f32d0820665d8",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 1,
+          "left": 909,
+          "top": 548,
+          "right": 1819,
+          "bottom": 1886
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/02/solution-02.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "803ee70f05b3f27ab2047297477de9a2fd1d46bf5d65a3d0a55402e5b506861d",
+        "dimensions": {
+          "width": 910,
+          "height": 1952
+        },
+        "crop": {
+          "page": 7,
+          "left": 909,
+          "top": 548,
+          "right": 1819,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:3",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 3
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/03.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/03/problem-03.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "5fd30ea6cad4e0ea1bea278074d71bd6dd816bad4a5ceb0da571251019e32c6b",
+        "dimensions": {
+          "width": 909,
+          "height": 1338
+        },
+        "crop": {
+          "page": 2,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/03/solution-03.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "ef2de4fca8258cd9690fd0fc3a87c3e34156050e94bc564fdfac5f7b34269ad4",
+        "dimensions": {
+          "width": 909,
+          "height": 2319
+        },
+        "crop": {
+          "page": 8,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:4",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 4
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/04.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/04/problem-04.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "5404f3f8efbd3d79cf85fb8aab1c1bbfd3469601ca84b8759a7f23bde987b2e3",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 2,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/04/solution-04.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "1f2d0f32be06254b9f61803ef092581e94a931fc7e7aa25531e499ce52e2957f",
+        "dimensions": {
+          "width": 910,
+          "height": 2319
+        },
+        "crop": {
+          "page": 8,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:5",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 5
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/05.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/05/problem-05.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "21901798329d96f08c2efb489d01a34915045273e9c45434a731311459be5e69",
+        "dimensions": {
+          "width": 909,
+          "height": 1338
+        },
+        "crop": {
+          "page": 3,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/05/solution-05.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "7f7be2bf8642a3f3dc2c2c3edca26885c7de5fa3e3cc2442ac8361f28f32cab7",
+        "dimensions": {
+          "width": 909,
+          "height": 2319
+        },
+        "crop": {
+          "page": 9,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:6",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 6
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/06.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/06/problem-06.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "b03a80bcc8b678dbb155f824ac588cc0eeea6bc226f558cd636d28d782b895af",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 3,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/06/solution-06.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "aa482e1454dbeb0a45ba15ecaa2bd128de8521f27ad7f5c62c3d17e708c43198",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 9,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 1519
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:7",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 7
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/07.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/07/problem-07.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "e24c5075dcdc9452e20c61cceaa0cf844745dec56a29a8c7bc230c0ef69985ea",
+        "dimensions": {
+          "width": 909,
+          "height": 1338
+        },
+        "crop": {
+          "page": 4,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/07/solution-07.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "083abc0b2a1cb6531bb53606881e3221f7841e829e2a78a4e4fbec86874d0d05",
+        "dimensions": {
+          "width": 909,
+          "height": 2319
+        },
+        "crop": {
+          "page": 10,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 2500
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:8",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 8
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/08.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/08/problem-08.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "6d4929f5db38e32111a68835214522c4bcab8e0afe26bfe1f674b9a75365cee8",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 4,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/08/solution-08.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "4df5fa6315eadd67257c8893db9bdc12f3021130624aaf193accfc6206a00b5b",
+        "dimensions": {
+          "width": 910,
+          "height": 1338
+        },
+        "crop": {
+          "page": 10,
+          "left": 909,
+          "top": 181,
+          "right": 1819,
+          "bottom": 1519
+        }
+      }
+    },
+    {
+      "manifestKey": "ds2-trigonometry:41:9",
+      "target": {
+        "lessonKey": "ds2-trigonometry",
+        "level": 41,
+        "problemNumber": 9
+      },
+      "guidePath": "src/data/ai-tutor-guides/ds2-trigonometry/level-4-1/problems/09.json",
+      "status": "verified",
+      "problemAsset": {
+        "assetKey": "problem/09/problem-09.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "7e9d73a1912deca632c8523da2ddde7efba71996cc2b783ba951c6c9a022b358",
+        "dimensions": {
+          "width": 909,
+          "height": 1338
+        },
+        "crop": {
+          "page": 5,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 1519
+        }
+      },
+      "solutionAsset": {
+        "assetKey": "solution/09/solution-09.png",
+        "sourceSha256": "d145e59a93aeb9795f8a10e91e363bea0089eac9203dfc213851789495206bb5",
+        "sha256": "8d6882e8ea0fbb64ad4095a4beba88ae6a3b76c439a481ce5286f34362fee48e",
+        "dimensions": {
+          "width": 909,
+          "height": 2319
+        },
+        "crop": {
+          "page": 11,
+          "left": 0,
+          "top": 181,
+          "right": 909,
+          "bottom": 2500
+        }
+      }
+    }
+  ]
+}

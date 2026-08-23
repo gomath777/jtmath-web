@@ -1,7 +1,7 @@
 import { handleGoogleChatEvent, type GoogleChatEvent, type GoogleChatResponse } from '../google-chat/add-on';
 import type { TutorContext, TutorImageInput, TutorProviderResult } from './contracts';
 import { buildReviewResult } from './contracts';
-import type { TutorEngine } from './engine';
+import type { TutorEngine, TutorEngineMetadata } from './engine';
 import { createGoogleChatIdentityPairing, type GoogleChatIdentityPairingResult } from './identity';
 import type { AiTutorMediaReviewOutcome } from './chat-media';
 import type { AiTutorRepository } from './repository';
@@ -80,13 +80,13 @@ export function createGoogleChatAiTutorOrchestrator(
     }
 
     const context = await options.contextProvider.load(identity.profileId);
-    const result = await options.engine.answer({
+    const answer = await options.engine.answerWithMetadata({
       input: { kind: 'text', messageText: event.text || '이미지 질문' },
       context,
       ...(image.image === undefined ? {} : { image: image.image }),
     });
-    await persistResult(options.repository, identity.profileId, turnId, result, now);
-    return createMessage(result.answerText);
+    await persistResult(options.repository, identity.profileId, turnId, answer.result, answer.metadata, now);
+    return createMessage(answer.result.answerText);
   };
 }
 
@@ -95,6 +95,7 @@ async function persistResult(
   profileId: string,
   turnId: string,
   result: TutorProviderResult,
+  metadata: TutorEngineMetadata | null,
   now: Date,
 ): Promise<void> {
   if (result.errorType === null) {
@@ -102,12 +103,12 @@ async function persistResult(
       profileId,
       turnId,
       result,
-      provider: 'gemini',
-      modelAlias: 'runtime',
-      promptVersion: 'runtime',
-      latencyMs: 0,
-      inputTokens: 0,
-      outputTokens: 0,
+      provider: metadata?.provider ?? 'gemini',
+      modelAlias: metadata?.modelAlias ?? 'unknown',
+      promptVersion: metadata?.promptVersion ?? 'unknown',
+      latencyMs: metadata?.latencyMs ?? 0,
+      inputTokens: metadata?.tokenCounts.input ?? 0,
+      outputTokens: metadata?.tokenCounts.output ?? 0,
       completedAt: now.toISOString(),
     });
     return;

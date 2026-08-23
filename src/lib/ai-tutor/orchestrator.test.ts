@@ -3,6 +3,7 @@ import test from 'node:test';
 import { createGoogleChatAiTutorOrchestrator } from './orchestrator';
 import type { AiTutorMediaOutcomeCode } from './chat-media';
 import type { TutorContext, TutorProviderResult } from './contracts';
+import type { TutorEngineAnswer } from './engine';
 import type { AiTutorRepository, AiTutorRepositoryResult, AiTutorTurnSnapshot } from './repository';
 
 const profileId = '00000000-0000-4000-8000-000000000001';
@@ -50,6 +51,33 @@ test('orchestrator answers a linked DM after claim context engine and persistenc
   assert.deepEqual(deps.calls, ['lookupIdentity', 'upsertConversation', 'claimInboundTurn', 'context', 'engine', 'markTurnCompleted']);
 });
 
+test('orchestrator persists provider metadata for a linked Google Chat tutor answer', async () => {
+  const deps = createDeps({
+    engineAnswer: {
+      result: answer,
+      metadata: {
+        provider: 'gemini',
+        modelId: 'gemini-3.1-flash',
+        modelAlias: 'fallback',
+        promptVersion: 'ai-tutor-mvp-002',
+        latencyMs: 4321,
+        tokenCounts: { input: 7, output: 11, total: 18 },
+        attemptCount: 2,
+      },
+    },
+  });
+  const handler = createGoogleChatAiTutorOrchestrator(deps);
+
+  await handler(messageEvent());
+
+  assert.equal(deps.completed?.provider, 'gemini');
+  assert.equal(deps.completed?.modelAlias, 'fallback');
+  assert.equal(deps.completed?.promptVersion, 'ai-tutor-mvp-002');
+  assert.equal(deps.completed?.latencyMs, 4321);
+  assert.equal(deps.completed?.inputTokens, 7);
+  assert.equal(deps.completed?.outputTokens, 11);
+});
+
 test('orchestrator returns stored duplicate answer without a second model call', async () => {
   const deps = createDeps({ duplicateAnswer: answer });
   const handler = createGoogleChatAiTutorOrchestrator(deps);
@@ -90,9 +118,11 @@ function createDeps(options: {
   readonly identity?: null;
   readonly duplicateAnswer?: TutorProviderResult;
   readonly imageFails?: AiTutorMediaOutcomeCode;
+  readonly engineAnswer?: TutorEngineAnswer;
 } = {}) {
   const calls: string[] = [];
   const turn = turnSnapshot('processing');
+  let completed: Parameters<AiTutorRepository['markTurnCompleted']>[0] | undefined;
   const repository: AiTutorRepository = {
     lookupIdentity: async () => {
       calls.push('lookupIdentity');
@@ -108,7 +138,7 @@ function createDeps(options: {
       return ok(options.duplicateAnswer === undefined ? { kind: 'claimed', turn } : { kind: 'duplicate_completed', turnId, answer: options.duplicateAnswer });
     },
     getCompletedAnswer: async () => ok(null),
-    markTurnCompleted: async () => { calls.push('markTurnCompleted'); return ok(turnSnapshot('completed')); },
+    markTurnCompleted: async (input) => { calls.push('markTurnCompleted'); completed = input; return ok(turnSnapshot('completed')); },
     markTurnFailed: async () => { calls.push('markTurnFailed'); return ok(turnSnapshot('failed')); },
     readRecentTurns: async () => ok([]),
     countRecentConceptRepeats: async () => ok(0),
@@ -122,7 +152,13 @@ function createDeps(options: {
     hmacSecret: 'secret',
     now: () => new Date('2026-08-19T00:00:00.000Z'),
     contextProvider: { load: async () => { calls.push('context'); return context; } },
-    engine: { answer: async () => { calls.push('engine'); return answer; } },
+    engine: {
+      answer: async () => { calls.push('engine'); return options.engineAnswer?.result ?? answer; },
+      answerWithMetadata: async () => {
+        calls.push('engine');
+        return options.engineAnswer ?? { result: answer, metadata: null };
+      },
+    },
     imageProcessor: {
       process: async () => {
         calls.push('image');
@@ -131,6 +167,7 @@ function createDeps(options: {
           : { ok: true as const };
       },
     },
+    get completed() { return completed; },
   };
 }
 

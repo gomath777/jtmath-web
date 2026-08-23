@@ -27,15 +27,21 @@ test('createAiTutorObservability emits only content-free structured fields', () 
       output: 80,
       total: 200,
     },
+    attemptCount: 2,
     modelAlias: 'text',
+    materialKind: 'guide',
+    guideSchemaVersion: 1,
   });
 
   // Then
   assert.equal(records.length, 1);
   assert.deepEqual(Object.keys(records[0] ?? {}).sort(), [
+    'attemptCount',
     'durationMs',
     'eventClass',
     'externalIdHash',
+    'guideSchemaVersion',
+    'materialKind',
     'modelAlias',
     'requestId',
     'status',

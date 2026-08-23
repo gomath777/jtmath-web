@@ -24,6 +24,8 @@ export type RetentionCandidateSet = {
   readonly imageAttachments: readonly ImageRetentionCandidate[];
   readonly rawContentTurnIds: readonly string[];
   readonly metadataTurnIds: readonly string[];
+  readonly webRawContentTurnIds?: readonly string[];
+  readonly webMetadataTurnIds?: readonly string[];
 };
 
 export type PrivatePathParseResult =
@@ -47,7 +49,14 @@ export interface RetentionCleanupStore {
     readonly turnId: string;
     readonly deletedAt: string;
   }): Promise<RetentionWriteResult>;
+  markWebRawContentDeleted(input: {
+    readonly turnId: string;
+    readonly deletedAt: string;
+  }): Promise<RetentionWriteResult>;
   deleteTurnMetadata(input: {
+    readonly turnId: string;
+  }): Promise<RetentionWriteResult>;
+  deleteWebTurnMetadata(input: {
     readonly turnId: string;
   }): Promise<RetentionWriteResult>;
 }
@@ -129,14 +138,29 @@ export async function applyRetentionCleanup(input: RetentionApplyInput): Promise
     if (!deleted.ok) return { ok: false, reason: 'write_failed', operation: deleted.operation };
   }
 
+  for (const turnId of input.candidates.webRawContentTurnIds ?? []) {
+    const marked = await input.store.markWebRawContentDeleted({
+      turnId,
+      deletedAt: input.deletedAt,
+    });
+    if (!marked.ok) return { ok: false, reason: 'write_failed', operation: marked.operation };
+  }
+
+  for (const turnId of input.candidates.webMetadataTurnIds ?? []) {
+    const deleted = await input.store.deleteWebTurnMetadata({ turnId });
+    if (!deleted.ok) return { ok: false, reason: 'write_failed', operation: deleted.operation };
+  }
+
   return { ok: true, appliedCount: retentionScopeIds(input.candidates).length };
 }
 
 function retentionScopeIds(candidates: RetentionCandidateSet): readonly string[] {
   return [
-    ...candidates.imageAttachments.map((attachment) => attachment.attachmentId),
-    ...candidates.rawContentTurnIds,
-    ...candidates.metadataTurnIds,
+    ...candidates.imageAttachments.map((attachment) => `image:${attachment.attachmentId}`),
+    ...candidates.rawContentTurnIds.map((turnId) => `chat-raw:${turnId}`),
+    ...candidates.metadataTurnIds.map((turnId) => `chat-metadata:${turnId}`),
+    ...(candidates.webRawContentTurnIds ?? []).map((turnId) => `web-raw:${turnId}`),
+    ...(candidates.webMetadataTurnIds ?? []).map((turnId) => `web-metadata:${turnId}`),
   ].sort();
 }
 

@@ -74,7 +74,13 @@ test('createGoogleChatAiTutorRuntime wires injected dependency factory into orch
           listTeacherReviewTurns: async () => ({ ok: true, value: [] }),
           listRetentionCandidates: async () => ({ ok: true, value: { rawContentTurnIds: [], imageAttachmentIds: [], metadataTurnIds: [] } }),
         },
-        engine: { answer: async () => ({ answerText: 'unused', confidence: 0, subjectSlug: null, conceptTags: [], errorType: null, needsTeacherReview: false, escalationReason: null }) },
+        engine: {
+          answer: async () => ({ answerText: 'unused', confidence: 0, subjectSlug: null, conceptTags: [], errorType: null, needsTeacherReview: false, escalationReason: null }),
+          answerWithMetadata: async () => ({
+            result: { answerText: 'unused', confidence: 0, subjectSlug: null, conceptTags: [], errorType: null, needsTeacherReview: false, escalationReason: null },
+            metadata: null,
+          }),
+        },
         contextProvider: { load: async () => ({ gradeLabel: '고2', releasedCurriculum: [], recentTurns: [], repeatedConceptSignal: false }) },
         imageProcessor: { process: async () => ({ ok: true }) },
       },

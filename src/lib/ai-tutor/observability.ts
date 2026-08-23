@@ -24,7 +24,8 @@ export type AiTutorErrorCategory =
   | 'validation'
   | 'unknown';
 
-export type AiTutorModelAliasLabel = 'text' | 'vision' | 'none';
+export type AiTutorModelAliasLabel = 'text' | 'vision' | 'fast' | 'reasoning' | 'fallback' | 'none';
+export type AiTutorMaterialKind = 'guide' | 'pdf' | 'chat';
 
 export type AiTutorTokenCounts = {
   readonly input: number;
@@ -40,7 +41,10 @@ export type AiTutorLogRecord = {
   readonly turnIdHash?: string;
   readonly durationMs?: number;
   readonly tokenCounts?: AiTutorTokenCounts;
+  readonly attemptCount?: 1 | 2;
   readonly modelAlias?: AiTutorModelAliasLabel;
+  readonly materialKind?: AiTutorMaterialKind;
+  readonly guideSchemaVersion?: 1;
   readonly errorCategory?: AiTutorErrorCategory;
 };
 
@@ -51,7 +55,10 @@ export type AiTutorLogInput = {
   readonly turnId?: string;
   readonly durationMs?: number;
   readonly tokenCounts?: AiTutorTokenCounts;
+  readonly attemptCount?: 1 | 2;
   readonly modelAlias?: AiTutorModelAliasLabel;
+  readonly materialKind?: AiTutorMaterialKind;
+  readonly guideSchemaVersion?: 1;
   readonly errorCategory?: AiTutorErrorCategory;
   readonly error?: unknown;
 };
@@ -106,7 +113,10 @@ function toLogRecord(
       : { turnIdHash: hashIdentifier(input.turnId, hashSalt) }),
     ...(input.durationMs === undefined ? {} : { durationMs: input.durationMs }),
     ...(input.tokenCounts === undefined ? {} : { tokenCounts: input.tokenCounts }),
+    ...(input.attemptCount === undefined ? {} : { attemptCount: input.attemptCount }),
     ...(input.modelAlias === undefined ? {} : { modelAlias: input.modelAlias }),
+    ...(input.materialKind === undefined ? {} : { materialKind: input.materialKind }),
+    ...(input.guideSchemaVersion === undefined ? {} : { guideSchemaVersion: input.guideSchemaVersion }),
     ...(input.errorCategory === undefined && input.error === undefined
       ? {}
       : { errorCategory: input.errorCategory ?? categorizeAiTutorError(input.error) }),
