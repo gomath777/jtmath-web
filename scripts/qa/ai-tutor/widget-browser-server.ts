@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse } from 'http';
 import { join } from 'path';
-import { qaCss } from './browser-qa-css';
+import { productKatexCss, qaCss } from './browser-qa-css';
 import {
   createBrowserQaBundle,
   isUnknownRecord,
@@ -11,6 +11,7 @@ import {
   type RuntimeObject,
 } from './browser-qa-core';
 import { browserFixture, type WidgetBrowserFixtureName } from './widget-browser-fixtures';
+import { handlePdfDownloadRequest } from './widget-browser-pdf-download-server';
 
 export type WidgetQaServer = {
   readonly baseUrl: string;
@@ -45,6 +46,7 @@ export async function startWidgetQaServer(workDir: string, options: { readonly r
         await sendBundle(response, workDir);
         return;
       }
+      if (await handlePdfDownloadRequest(request, response)) return;
       if (request.url?.startsWith('/api/public/student/ai-tutor') && request.method === 'POST') {
         await handleTutorRequest(request, response, calls, graphMode, firstMaterial.materialKey, () => {
           abortCount += 1;
@@ -56,7 +58,7 @@ export async function startWidgetQaServer(workDir: string, options: { readonly r
         sendJson(response, { error: 'exact synthetic lesson route required' }, 404);
         return;
       }
-      sendHtml(response, 'AI Tutor Widget QA', qaCss(), { route: options.route, auth: options.auth });
+      sendHtml(response, 'AI Tutor Widget QA', `${productKatexCss()}${qaCss()}`, { route: options.route, auth: options.auth });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'synthetic QA server error';
       sendJson(response, { error: message }, 500);
@@ -212,6 +214,7 @@ function successResponse(kind: string, defaultMaterialKey: string): RuntimeObjec
     status: 'answered',
     message: [
       '핵심 힌트: 두 점의 좌표를 먼저 분리해서 읽어요.',
+      '기울기 $m=\\dfrac{1}{2}$ 를 먼저 확인해요.',
       '',
       '1. 공통 인자를 먼저 묶어요.',
       '2. 긴 식은 아래처럼 한 번에 보지 말고 분자와 분모를 따로 확인해요.',

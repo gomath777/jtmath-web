@@ -19,9 +19,10 @@ import {
 } from './widget-browser-accessibility';
 import {
   assertGraphEvidence,
-  assertWorkbookTypography,
   assertZoomTypography,
 } from './widget-browser-presentation';
+import { assertWorkbookTypography } from './widget-browser-math-presentation';
+import { assertPdfResourceActions } from './widget-browser-pdf-actions';
 import type { WidgetQaServer } from './widget-browser-server';
 
 export type WidgetQaScenarioOptions = {
@@ -49,6 +50,13 @@ export async function runWidgetViewport(
   await waitForText(cdp, 'AI 튜터에게 힌트 묻기', `${viewport.name} launcher`);
   await assertExactRouteAndSyntheticAuth(cdp, viewport, lines, options.route);
   const pdfHrefBaselineMatched = await assertPdfHrefBaseline(cdp, viewport, lines, options.fixtureName);
+  await assertPdfResourceActions({
+    cdp,
+    viewport,
+    lines,
+    evidenceDir: options.evidenceDir,
+    materialCount: browserFixture(options.fixtureName).materials.length,
+  });
   await clickButtonText(cdp, '열기');
   await waitForText(cdp, '질문할 학습지', `${viewport.name} expanded`);
   await assertExpandedAccessibility(cdp, viewport, lines);

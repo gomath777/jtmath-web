@@ -3,7 +3,6 @@ import { join } from 'node:path';
 
 export function qaCss(): string {
   const tailwindPreflightCss = readTailwindPreflightCss();
-  const katexCss = readKatexCss();
   const faithfulTutorCss = readGlobalsTutorCss();
 
   return `
@@ -21,9 +20,13 @@ export function qaCss(): string {
     .text-\\[10px\\]{font-size:10px}.text-\\[11px\\]{font-size:11px}.text-\\[12px\\]{font-size:12px}.text-\\[13px\\]{font-size:13px}.text-\\[14px\\]{font-size:14px}.text-\\[15px\\]{font-size:15px}.text-\\[16px\\]{font-size:16px}.text-\\[28px\\]{font-size:28px}.text-\\[32px\\]{font-size:32px}
     .font-medium{font-weight:500}.font-semibold{font-weight:600}.font-normal{font-weight:400}.font-serif{font-family:Georgia,"Noto Serif KR",serif}.font-mono{font-family:ui-monospace,monospace}.leading-5{line-height:20px}.leading-6{line-height:24px}.leading-snug{line-height:1.35}.leading-tight{line-height:1.25}.tracking-\\[0\\.08em\\]{letter-spacing:.08em}.tracking-\\[0\\.12em\\]{letter-spacing:.12em}.tracking-tight{letter-spacing:0}.tracking-wider{letter-spacing:.05em}.uppercase{text-transform:uppercase}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.line-through{text-decoration:line-through}.no-underline{text-decoration:none}
     .transition,.transition-all,.transition-colors{transition:all .15s ease-out}.duration-150{transition-duration:150ms}.ease-out{transition-timing-function:ease-out}.outline-none{outline:none}.break-keep{word-break:keep-all;overflow-wrap:break-word}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.bg-white\\/60,.hover\\\\:bg-white\\/60:hover{background:rgba(250,249,245,.6)}.bg-sand\\/50{background:rgba(232,230,220,.5)}.bg-crimson\\/10{background:rgba(181,51,51,.1)}.bg-terracotta\\/10{background:rgba(201,100,66,.1)}
-    button:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid #c96442;outline-offset:2px}button:disabled{opacity:.65;cursor:not-allowed}#unmount-harness{position:fixed;right:8px;bottom:8px;opacity:.01}${katexCss}${faithfulTutorCss}
+    button:focus-visible,textarea:focus-visible,a:focus-visible{outline:2px solid #c96442;outline-offset:2px}button:disabled{opacity:.65;cursor:not-allowed}#unmount-harness{position:fixed;right:8px;bottom:8px;opacity:.01}${faithfulTutorCss}
     .bg-terracotta{background:#c96442;background-color:#c96442}.text-white{color:#fff}.bg-white\\/70{background:rgba(250,249,245,.7);background-color:rgba(250,249,245,.7)}
   `;
+}
+
+export function productKatexCss(): string {
+  return readKatexCss();
 }
 
 function readTailwindPreflightCss(): string {
