@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { ArrowUpRight, CheckCircle2, Download, FileText, Play } from 'lucide-react';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const metadata: Metadata = {
   title: '공통수학2 · 심화유형 모음',
@@ -151,7 +152,7 @@ export default function Gs2CircleShimhwaW2S2Page() {
                     {week.materials.map((material) => (
                       <a
                         key={material.url}
-                        href={material.url}
+                        href={getPdfDownloadHref(material.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="group flex items-center gap-3 rounded-2xl border border-border-cream bg-ivory p-4 transition-colors hover:border-terracotta/40 focus:outline-none focus-visible:shadow-ring-terracotta"

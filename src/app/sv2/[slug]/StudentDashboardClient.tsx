@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useState, useEffect } from 'react';
 import { Loader2, BookOpen, ChevronRight, FolderOpen, FileText, Download, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
@@ -625,7 +626,7 @@ export default function StudentDashboardClient({
               {materials.map(m => (
                 <a
                   key={m.id}
-                  href={m.cdn_url}
+                  href={getPdfDownloadHref(m.cdn_url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group bg-ivory border border-border-cream rounded-xl px-5 py-4 flex items-center gap-4 hover:bg-white hover:shadow-ring-warm transition-all"

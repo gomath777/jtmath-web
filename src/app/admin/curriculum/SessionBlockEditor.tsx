@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useState, useEffect, useRef } from 'react';
 import {
   ChevronLeft, Plus, Trash2, ChevronUp, ChevronDown, Loader2,
@@ -395,7 +396,7 @@ function BlockEditor({
                     </p>
                   )}
                 </div>
-                <a href={block.content.url as string} target="_blank" className="text-xs text-blue-500 hover:text-blue-700 font-bold">
+                <a href={getPdfDownloadHref(block.content.url as string)} target="_blank" className="text-xs text-blue-500 hover:text-blue-700 font-bold">
                   보기
                 </a>
                 <button onClick={() => fileInputRef.current?.click()} className="text-xs text-slate-400 hover:text-slate-600">

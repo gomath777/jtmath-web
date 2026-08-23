@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useEffect, useMemo, useState } from 'react';
 import {
   Loader2, Video, Check, X, Plus, AlertCircle, FileText, PlayCircle, Sparkles, ChevronRight,
@@ -446,7 +447,7 @@ function DetailPanel({
                 {set.pdfs!.map((p, i) => (
                   <li key={i} className="text-sm">
                     <a
-                      href={p.url}
+                      href={getPdfDownloadHref(p.url)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-slate-700 hover:text-red-600 underline-offset-2 hover:underline truncate block"

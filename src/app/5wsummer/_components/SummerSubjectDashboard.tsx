@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, BookOpen, CheckCircle2, Download, Lock, Play, RotateCcw } from 'lucide-react';
@@ -281,7 +282,7 @@ export function SummerSubjectDashboard({ subjectLabel, shortLabel, days, master,
                           selected.content.resources.map((resource) => (
                             <a
                               key={`${resource.kind}-${resource.href}`}
-                              href={resource.href}
+                              href={getPdfDownloadHref(resource.href)}
                               target="_blank"
                               rel="noopener"
                               referrerPolicy="strict-origin-when-cross-origin"

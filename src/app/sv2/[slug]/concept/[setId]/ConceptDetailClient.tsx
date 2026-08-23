@@ -1,5 +1,6 @@
 'use client';
 
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
@@ -193,7 +194,7 @@ export default function ConceptDetailClient({ setId, backHref }: Props) {
                     {set.pdfs.map((p, idx) => (
                       <a
                         key={idx}
-                        href={p.url}
+                        href={getPdfDownloadHref(p.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setPdfDownloaded(true)}

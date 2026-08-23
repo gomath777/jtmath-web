@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Download, Play } from 'lucide-react';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +53,7 @@ export default function Mj1CompositeLimitSupplementPage() {
 
         <section className="mt-8 grid gap-3 md:grid-cols-2">
           <a
-            href={NOTE_URL}
+            href={getPdfDownloadHref(NOTE_URL)}
             target="_blank"
             rel="noopener noreferrer"
             className="group rounded-2xl border border-border-cream bg-ivory p-4 transition-all hover:border-terracotta/40 hover:shadow-ring-warm focus:outline-none focus-visible:shadow-ring-terracotta"

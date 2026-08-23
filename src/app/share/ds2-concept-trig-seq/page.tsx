@@ -1,5 +1,6 @@
 import { Download, FileText, Play } from 'lucide-react';
 import { CONCEPT_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const metadata = {
   title: '대수 · 개념강의 (삼각함수~수학적귀납법)',
@@ -188,7 +189,7 @@ export default function Ds2ConceptTrigSeqPage() {
                     {sec.pdfs.map((p) => (
                       <a
                         key={p.url}
-                        href={p.url}
+                        href={getPdfDownloadHref(p.url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-ivory border border-border-cream hover:border-terracotta/40 transition-colors"

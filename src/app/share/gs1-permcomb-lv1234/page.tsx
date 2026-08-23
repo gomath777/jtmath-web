@@ -1,5 +1,6 @@
 import { Download, FileText, Play } from 'lucide-react';
 import { EXAM_LIBRARY_ID } from '@/lib/bunny-libraries';
+import { getPdfDownloadHref } from '@/lib/pdf-download';
 
 export const metadata = {
   title: '공수1 · 경우의 수 레벨1~4',
@@ -85,7 +86,7 @@ export default function Gs1PermCombLv1234Page() {
                     학습지
                   </p>
                   <a
-                    href={sec.pdf.url}
+                    href={getPdfDownloadHref(sec.pdf.url)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 px-3.5 py-3 rounded-xl bg-ivory border border-border-cream hover:border-terracotta/40 transition-colors"
