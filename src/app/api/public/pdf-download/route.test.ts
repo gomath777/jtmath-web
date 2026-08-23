@@ -1,5 +1,4 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { createPdfDownloadGet, type PdfFetchResponse } from './route';
 
@@ -121,24 +120,49 @@ test('Given hostile filename characters and an invalid content length When an oc
   assert.equal(response.headers.get('content-length'), null);
 });
 
-test('Given a large upstream-only ReadableStream When it is returned Then the route does not use buffered body helpers or logging', async () => {
+test('Given a large upstream-only ReadableStream When it is returned Then the route does not pre-buffer or log the body', async () => {
   // Given
-  const body = streamFromChunks([new Uint8Array(1024 * 1024), new Uint8Array([37, 80, 68, 70])]);
+  let consoleCalls = 0;
+  const originalConsole = {
+    error: console.error,
+    info: console.info,
+    log: console.log,
+    warn: console.warn,
+  };
+  console.error = () => {
+    consoleCalls += 1;
+  };
+  console.info = () => {
+    consoleCalls += 1;
+  };
+  console.log = () => {
+    consoleCalls += 1;
+  };
+  console.warn = () => {
+    consoleCalls += 1;
+  };
+  const body = streamThatFailsIfDrained([new Uint8Array(1024 * 1024)]);
   const get = createPdfDownloadGet({
     fetch: async () => upstreamResponse(body, { headers: { 'content-type': 'application/pdf' } }),
   });
 
   // When
-  const response = await get(request(sourceUrl));
+  try {
+    const response = await get(request(sourceUrl));
 
-  // Then
-  const reader = response.body?.getReader();
-  assert.notEqual(reader, undefined);
-  const firstChunk = await reader?.read();
-  assert.equal(firstChunk?.value?.byteLength, 1024 * 1024);
-  const routeSource = readFileSync(`${process.cwd()}/src/app/api/public/pdf-download/route.ts`, 'utf8');
-  assert.doesNotMatch(routeSource, /\.(arrayBuffer|blob|text)\(/);
-  assert.doesNotMatch(routeSource, /console\.(log|warn|error|info)/);
+    // Then
+    const reader = response.body?.getReader();
+    assert.notEqual(reader, undefined);
+    const firstChunk = await reader?.read();
+    assert.equal(response.status, 200);
+    assert.equal(firstChunk?.value?.byteLength, 1024 * 1024);
+    assert.equal(consoleCalls, 0);
+  } finally {
+    console.error = originalConsole.error;
+    console.info = originalConsole.info;
+    console.log = originalConsole.log;
+    console.warn = originalConsole.warn;
+  }
 });
 
 function request(url: string | null): Request {
@@ -151,6 +175,21 @@ function streamFromChunks(chunks: readonly Uint8Array[]): ReadableStream<Uint8Ar
     start(controller) {
       for (const chunk of chunks) controller.enqueue(chunk);
       controller.close();
+    },
+  });
+}
+
+function streamThatFailsIfDrained(chunks: readonly Uint8Array[]): ReadableStream<Uint8Array> {
+  let nextChunkIndex = 0;
+  return new ReadableStream<Uint8Array>({
+    pull(controller) {
+      const chunk = chunks[nextChunkIndex];
+      nextChunkIndex += 1;
+      if (chunk !== undefined) {
+        controller.enqueue(chunk);
+        return;
+      }
+      controller.error(new Error('route should return the stream without draining it'));
     },
   });
 }
