@@ -18,6 +18,7 @@ const BROWSER_SAMPLES = [
   ['htmlStyle', '$\\htmlStyle{color:red}{x}$'], ['htmlData', '$\\htmlData{evil=1}{x}$'],
   ['includegraphics', '$\\includegraphics{secret.png}$'], ['malformed', '$\\notacommand{x}$'],
   ['bareLatex', '시작은 f(x)=a\\sin x+b 로 잡아요.'],
+  ['curriculumNotation', '$\\lim_{x \\to 0}\\frac{\\sin x}{x}=1$, $\\angle A=90^\\circ$, $AB\\parallel CD$, $AB\\perp CD$, $\\triangle ABC$, $\\overrightarrow{AB}$, $x\\ne 0$'],
   ['fragmentRecovery', '앞의 $닫히지 않은 조각 뒤에도 $\\dfrac{1}{2}$와 $\\sqrt{x_1^2}$를 읽어요.'],
   ['listRecovery', '목록도 $닫히지 않은 조각 뒤에 $\\dfrac{1}{2}$를 읽어요.'],
   ['scriptMath', 'before $<script>alert(1)</script>$ after $\\dfrac{1}{2}$'],
@@ -77,7 +78,7 @@ function buildEntrySource(workspaceDir: string): string {
 }
 
 function buildProbeExpression(): string {
-  return `new Promise((resolve) => { const text = (id) => document.querySelector('#' + id)?.textContent ?? ''; const read = () => { const recovery = document.querySelector('#fragmentRecovery'); const recoveryStyle = recovery === null ? null : getComputedStyle(recovery); resolve({ hasKatexHtml: Boolean(document.querySelector('#valid .katex-html')), hasKatexMathml: Boolean(document.querySelector('#valid .katex-mathml math')), unsafeNodeCount: document.querySelectorAll(${JSON.stringify(UNSAFE_NODE_SELECTOR)}).length, hasBareLatexHtml: Boolean(document.querySelector('#bareLatex .katex-html')), hrefText: text('href'), htmlClassText: text('htmlClass'), htmlIdText: text('htmlId'), htmlStyleText: text('htmlStyle'), htmlDataText: text('htmlData'), includegraphicsText: text('includegraphics'), malformedText: text('malformed'), fragmentKatexCount: document.querySelectorAll('#fragmentRecovery .katex').length, fragmentLiteralCount: document.querySelectorAll('#fragmentRecovery [data-tutor-math="literal"]').length, listKatexCount: document.querySelectorAll('#listRecovery .katex').length, listLiteralCount: document.querySelectorAll('#listRecovery [data-tutor-math="literal"]').length, scriptMathKatexCount: document.querySelectorAll('#scriptMath .katex').length, scriptMathLiteralCount: document.querySelectorAll('#scriptMath [data-tutor-math="literal"]').length, scriptMathText: text('scriptMath'), recoveryFontFamily: recoveryStyle?.fontFamily ?? '', recoveryFitsHeight: recovery !== null && recovery.scrollHeight <= recovery.clientHeight }); }; let attempts = 0; const tick = () => { attempts += 1; if (document.querySelector('#valid .katex-html') || attempts >= 40) { read(); return; } setTimeout(tick, 50); }; tick(); })`;
+  return `new Promise((resolve) => { const text = (id) => document.querySelector('#' + id)?.textContent ?? ''; const read = () => { const recovery = document.querySelector('#fragmentRecovery'); const recoveryStyle = recovery === null ? null : getComputedStyle(recovery); resolve({ hasKatexHtml: Boolean(document.querySelector('#valid .katex-html')), hasKatexMathml: Boolean(document.querySelector('#valid .katex-mathml math')), unsafeNodeCount: document.querySelectorAll(${JSON.stringify(UNSAFE_NODE_SELECTOR)}).length, hasBareLatexHtml: Boolean(document.querySelector('#bareLatex .katex-html')), curriculumKatexCount: document.querySelectorAll('#curriculumNotation .katex').length, curriculumLiteralCount: document.querySelectorAll('#curriculumNotation [data-tutor-math="literal"]').length, hrefText: text('href'), htmlClassText: text('htmlClass'), htmlIdText: text('htmlId'), htmlStyleText: text('htmlStyle'), htmlDataText: text('htmlData'), includegraphicsText: text('includegraphics'), malformedText: text('malformed'), fragmentKatexCount: document.querySelectorAll('#fragmentRecovery .katex').length, fragmentLiteralCount: document.querySelectorAll('#fragmentRecovery [data-tutor-math="literal"]').length, listKatexCount: document.querySelectorAll('#listRecovery .katex').length, listLiteralCount: document.querySelectorAll('#listRecovery [data-tutor-math="literal"]').length, scriptMathKatexCount: document.querySelectorAll('#scriptMath .katex').length, scriptMathLiteralCount: document.querySelectorAll('#scriptMath [data-tutor-math="literal"]').length, scriptMathText: text('scriptMath'), recoveryFontFamily: recoveryStyle?.fontFamily ?? '', recoveryFitsHeight: recovery !== null && recovery.scrollHeight <= recovery.clientHeight }); }; let attempts = 0; const tick = () => { attempts += 1; if (document.querySelector('#valid .katex-html') || attempts >= 40) { read(); return; } setTimeout(tick, 50); }; tick(); })`;
 }
 
 async function launchChrome(url: string, options: BrowserProbeOptions): Promise<ChromeHandle> {
@@ -179,12 +180,11 @@ async function evaluateInChrome(webSocketDebuggerUrl: string, expression: string
   });
   try {
     return await new Promise<unknown>((resolve, reject) => {
-      let timeout: ReturnType<typeof setTimeout>;
       const settle = (callback: () => void) => {
         clearTimeout(timeout);
         callback();
       };
-      timeout = setTimeout(
+      const timeout = setTimeout(
         () => settle(() => reject(new Error('CDP evaluation timed out'))),
         CDP_EVALUATION_TIMEOUT_MS,
       );

@@ -1,6 +1,7 @@
 export type BrowserProbeResult = {
   readonly hasKatexHtml: boolean; readonly hasKatexMathml: boolean; readonly unsafeNodeCount: number;
   readonly hasBareLatexHtml: boolean; readonly hrefText: string; readonly htmlClassText: string;
+  readonly curriculumKatexCount: number; readonly curriculumLiteralCount: number;
   readonly htmlIdText: string; readonly htmlStyleText: string; readonly htmlDataText: string;
   readonly includegraphicsText: string; readonly malformedText: string; readonly fragmentKatexCount: number;
   readonly fragmentLiteralCount: number; readonly listKatexCount: number; readonly listLiteralCount: number;
@@ -15,6 +16,8 @@ export function parseBrowserProbeResult(value: unknown): BrowserProbeResult {
     hasKatexMathml: readBooleanField(value, 'hasKatexMathml'),
     unsafeNodeCount: readNumberField(value, 'unsafeNodeCount'),
     hasBareLatexHtml: readBooleanField(value, 'hasBareLatexHtml'),
+    curriculumKatexCount: readNumberField(value, 'curriculumKatexCount'),
+    curriculumLiteralCount: readNumberField(value, 'curriculumLiteralCount'),
     hrefText: readStringField(value, 'hrefText'),
     htmlClassText: readStringField(value, 'htmlClassText'),
     htmlIdText: readStringField(value, 'htmlIdText'),

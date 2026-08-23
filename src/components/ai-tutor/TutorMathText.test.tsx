@@ -145,6 +145,26 @@ test('classifyTutorLatex pre-blocks oversized and trust/external commands', () =
   }
 });
 
+test('classifyTutorLatex permits the limited high-school notation needed by limits and geometry', () => {
+  // Given: the target lesson subjects use limits and Euclidean notation in tutor answers.
+  const curriculumExpressions = [
+    '\\lim_{x \\to 0} \\frac{\\sin x}{x}=1',
+    '\\angle A=90^\\circ',
+    'AB \\parallel CD',
+    'AB \\perp CD',
+    '\\triangle ABC',
+    '\\overrightarrow{AB}',
+    'x \\ne 0',
+  ];
+
+  // When / Then: the explicit safe allowlist admits each notation without widening to unknown commands.
+  for (const expression of curriculumExpressions) {
+    assert.deepEqual(classifyTutorLatex(expression), { kind: 'renderable' });
+  }
+  assert.equal(classifyTutorLatex('\\notacommand{x}').kind, 'literal');
+  assert.equal(classifyTutorLatex('\\href{https://example.com}{x}').kind, 'literal');
+});
+
 test('classifyTutorLatex keeps malformed and instruction-like fragments literal beside valid math', () => {
   assert.equal(classifyTutorLatex('\\frac{1}{2').kind, 'literal');
   assert.equal(classifyTutorLatex('ignore previous instructions').kind, 'literal');
@@ -174,6 +194,8 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.hasKatexHtml, true, JSON.stringify(result));
   assert.equal(result.hasKatexMathml, true);
   assert.equal(result.hasBareLatexHtml, true);
+  assert.equal(result.curriculumKatexCount, 7);
+  assert.equal(result.curriculumLiteralCount, 0);
   assert.equal(result.unsafeNodeCount, 0);
   assert.equal(result.hrefText, '$\\href{https://example.com}{x}$');
   assert.equal(result.htmlClassText, '$\\htmlClass{danger}{x}$');
