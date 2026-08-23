@@ -1,0 +1,190 @@
+{
+  "schemaVersion": 1,
+  "assetRoot": "src/data/ai-tutor-guides/2026-midterm-w1s2/mj1",
+  "entries": [
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-level42:42:1",
+        "target": {
+          "lessonKey": "mj1-limit-level42",
+          "level": 42,
+          "problemNumber": 1
+        },
+        "guidePath": "guides/mj1-limit-level42/01.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-level42/problem/01/problem-01.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "eb1c8e3929b1135a364620085848fdf5134e64f56033c516f448d9e443523bca",
+          "dimensions": {
+            "width": 909,
+            "height": 1942
+          },
+          "crop": {
+            "page": 1,
+            "left": 0,
+            "top": 548,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-level42/solution/01/solution-01.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "0e72e5ae1c555e44643675829e0a3985d492a2d96aaec67403a3a20e966d0f4e",
+          "dimensions": {
+            "width": 909,
+            "height": 1942
+          },
+          "crop": {
+            "page": 4,
+            "left": 0,
+            "top": 548,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-level42/01.json",
+      "guideSha256": "dcb83a21e83098ebf27a0a272b1a3b07d553be880914a7a6636f5e0bdd91dc27"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-level42:42:2",
+        "target": {
+          "lessonKey": "mj1-limit-level42",
+          "level": 42,
+          "problemNumber": 2
+        },
+        "guidePath": "guides/mj1-limit-level42/02.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-level42/problem/02/problem-02.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "9ddf7f5d1e40aa416efaf6be6f957f45d773a5801fcfece398b82731caafb31e",
+          "dimensions": {
+            "width": 910,
+            "height": 1942
+          },
+          "crop": {
+            "page": 1,
+            "left": 909,
+            "top": 548,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-level42/solution/02/solution-02.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "9ce311401cb2c4760dd6945dd098158daeb75c8ee5b7bc148e1131aaa68ec384",
+          "dimensions": {
+            "width": 910,
+            "height": 1942
+          },
+          "crop": {
+            "page": 4,
+            "left": 909,
+            "top": 548,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-level42/02.json",
+      "guideSha256": "7ecd9f1fa6c71214acbfe6140a4668315e9bab1b8f64135f6ef94c952afdaef9"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-level42:42:3",
+        "target": {
+          "lessonKey": "mj1-limit-level42",
+          "level": 42,
+          "problemNumber": 3
+        },
+        "guidePath": "guides/mj1-limit-level42/03.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-level42/problem/03/problem-03.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "d97bb3c9c8dd19c7a2fd9bf1e33e8ca91cc164f897a492506d6612755990d94e",
+          "dimensions": {
+            "width": 909,
+            "height": 2309
+          },
+          "crop": {
+            "page": 2,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-level42/solution/03/solution-03.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "6ebf3d0aeb1f8d675937f6f94b66ba0badfa63a54ca8f7877316262534e83893",
+          "dimensions": {
+            "width": 909,
+            "height": 2309
+          },
+          "crop": {
+            "page": 5,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-level42/03.json",
+      "guideSha256": "912df0c0420324c07901bb367f0f53e8629cdf17c4d8bb90f7159c4db441a423"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-level42:42:4",
+        "target": {
+          "lessonKey": "mj1-limit-level42",
+          "level": 42,
+          "problemNumber": 4
+        },
+        "guidePath": "guides/mj1-limit-level42/04.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-level42/problem/04/problem-04.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "9ffc38b823f83b9002c428ee8c2e6fb8753726552f38c16eb21634d1f6979502",
+          "dimensions": {
+            "width": 910,
+            "height": 2309
+          },
+          "crop": {
+            "page": 2,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-level42/solution/04/solution-04.png",
+          "sourceSha256": "ec13a45d55a797a92cd692e7318f1eca83c0616cd0c9cc992f1d6c9cdde81623",
+          "sha256": "9fc8a4e06e947b8c9afd02476c991e28918289cf51eef4c888886e8befbbfc67",
+          "dimensions": {
+            "width": 910,
+            "height": 2309
+          },
+          "crop": {
+            "page": 5,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-level42/04.json",
+      "guideSha256": "60610b98b102b5c64411d53a9964861a9c14c7ff9166807a79021b55dea9784a"
+    }
+  ]
+}

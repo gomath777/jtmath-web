@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:7",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 7
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수의 그래프와 삼각방정식",
+    "allowedConcepts": [
+      "사인함수의 그래프",
+      "삼각방정식의 해의 개수",
+      "곱이 영이 되는 조건"
+    ],
+    "forbiddenMethods": [
+      "음함수 미분",
+      "미분법",
+      "적분법",
+      "벡터"
+    ]
+  },
+  "officialApproach": {
+    "summary": "곱으로 주어진 식을 두 사인방정식으로 나누고, 사인함수 그래프에서 서로 다른 해가 정확히 두 개인 정수 $k$를 가려 그 곱을 구한다.",
+    "steps": [
+      "두 인수를 각각 영으로 놓아 $\\sin x=\\frac{k}{4}$ 및 $\\sin x=-\\frac{k^2}{4}+\\frac{3k}{4}$를 얻는다.",
+      "두 우변이 같은 경우와 다른 경우를 구분하고, $0\\le x\\le2\\pi$에서 사인값에 따른 해의 개수를 그래프로 판정한다.",
+      "각 정수 $k$에서 두 방정식의 서로 다른 해가 두 개인 경우만 골라 그 값을 곱한다."
+    ]
+  },
+  "hints": {
+    "concept": "사인함수 그래프에서 $-1$, $0$, $1$과 그 사이의 값이 각각 몇 개의 $x$값을 가지는지 먼저 정리해 보세요.",
+    "start": "주어진 곱을 두 인수로 나누어 각각 $\\sin x$에 대한 방정식으로 만들고, 두 우변이 같아지는 $k$는 따로 처리하세요.",
+    "decisive": "각 우변이 $[-1,1]$ 안에 있는지부터 확인한 뒤, 끝값이면 한 해, $0$이면 세 해, 나머지 내부값이면 두 해라는 그래프 판정을 적용하세요. 두 우변이 같으면 중복 해를 한 번만 세어야 합니다."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "48",
+    "steps": [
+      "두 우변이 같아지는 조건은 $\\frac{k}{4}=-\\frac{k^2}{4}+\\frac{3k}{4}$이므로 $k(k-2)=0$이다. $k=0$에서는 해가 세 개이고, $k=2$에서는 해가 두 개이다.",
+      "$k\\ne0,2$에서는 $\\sin x=\\frac{k}{4}$와 $\\sin x=-\\frac{k^2}{4}+\\frac{3k}{4}$의 해를 중복 없이 센다. 사인 그래프의 범위를 적용하면 조건을 만족하는 정수는 $-3,-2,2,4$이다.",
+      "따라서 구하는 곱은 $(-3)(-2)(2)(4)=48$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "e24c5075dcdc9452e20c61cceaa0cf844745dec56a29a8c7bc230c0ef69985ea",
+    "solutionSha256": "083abc0b2a1cb6531bb53606881e3221f7841e829e2a78a4e4fbec86874d0d05",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}

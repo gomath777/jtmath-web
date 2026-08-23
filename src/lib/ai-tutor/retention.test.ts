@@ -17,6 +17,8 @@ const profileId = '20000000-0000-4000-8000-000000000001';
 const imageAttachmentId = '30000000-0000-4000-8000-000000000001';
 const rawTurnId = '40000000-0000-4000-8000-000000000001';
 const metadataTurnId = '50000000-0000-4000-8000-000000000001';
+const webRawTurnId = '60000000-0000-4000-8000-000000000001';
+const webMetadataTurnId = '70000000-0000-4000-8000-000000000001';
 
 test('hashStudentReference returns a deterministic non-PII label', () => {
   // Given
@@ -101,6 +103,48 @@ test('applyRetentionCleanup deletes storage before marking attachment rows', asy
   ]);
 });
 
+test('applyRetentionCleanup includes web raw and metadata candidates in the exact scope', async () => {
+  // Given
+  const store = new FakeRetentionStore();
+  const candidates = candidateSet({
+    imageAttachments: [],
+    rawContentTurnIds: [],
+    metadataTurnIds: [],
+    webRawContentTurnIds: [webRawTurnId],
+    webMetadataTurnIds: [webMetadataTurnId],
+  });
+
+  // When
+  const result = await applyRetentionCleanup({
+    candidates,
+    confirmScope: formatRetentionScopeConfirmation(candidates),
+    deletedAt: now.toISOString(),
+    store,
+  });
+
+  // Then
+  assert.deepEqual(result, { ok: true, appliedCount: 2 });
+  assert.deepEqual(store.operations, [`web-raw:${webRawTurnId}`, `web-metadata:${webMetadataTurnId}`]);
+});
+
+test('applyRetentionCleanup rejects web cleanup without the exact preview scope hash', async () => {
+  // Given
+  const store = new FakeRetentionStore();
+  const candidates = candidateSet({ webRawContentTurnIds: [webRawTurnId] });
+
+  // When
+  const result = await applyRetentionCleanup({
+    candidates,
+    confirmScope: '4:bad',
+    deletedAt: now.toISOString(),
+    store,
+  });
+
+  // Then
+  assert.equal(result.ok, false);
+  assert.deepEqual(store.operations, []);
+});
+
 test('applyRetentionCleanup stops on storage failure before destructive row writes', async () => {
   // Given
   const store = new FakeRetentionStore({ failStorage: true });
@@ -151,6 +195,8 @@ type CandidateInput = {
   readonly imageAttachmentIds?: readonly string[];
   readonly rawContentTurnIds?: readonly string[];
   readonly metadataTurnIds?: readonly string[];
+  readonly webRawContentTurnIds?: readonly string[];
+  readonly webMetadataTurnIds?: readonly string[];
 };
 
 function candidateSet(input: CandidateInput): RetentionCandidateSet {
@@ -162,6 +208,8 @@ function candidateSet(input: CandidateInput): RetentionCandidateSet {
     imageAttachments,
     rawContentTurnIds: input.rawContentTurnIds ?? [rawTurnId],
     metadataTurnIds: input.metadataTurnIds ?? [metadataTurnId],
+    webRawContentTurnIds: input.webRawContentTurnIds ?? [],
+    webMetadataTurnIds: input.webMetadataTurnIds ?? [],
   };
 }
 
@@ -185,8 +233,18 @@ class FakeRetentionStore {
     return { ok: true };
   }
 
+  async markWebRawContentDeleted(input: { readonly turnId: string }): Promise<{ readonly ok: true }> {
+    this.operations.push(`web-raw:${input.turnId}`);
+    return { ok: true };
+  }
+
   async deleteTurnMetadata(input: { readonly turnId: string }): Promise<{ readonly ok: true }> {
     this.operations.push(`metadata:${input.turnId}`);
+    return { ok: true };
+  }
+
+  async deleteWebTurnMetadata(input: { readonly turnId: string }): Promise<{ readonly ok: true }> {
+    this.operations.push(`web-metadata:${input.turnId}`);
     return { ok: true };
   }
 }

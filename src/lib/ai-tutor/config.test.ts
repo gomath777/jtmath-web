@@ -214,6 +214,7 @@ test('AI_TUTOR_ENV_NAMES documents the complete runtime config surface', () => {
     'AI_TUTOR_PAIRING_HMAC_SECRET',
     'AI_TUTOR_GEMINI_TEXT_MODEL',
     'AI_TUTOR_GEMINI_VISION_MODEL',
+    'AI_TUTOR_GEMINI_FALLBACK_MODEL',
     'AI_TUTOR_MODEL_TIMEOUT_MS',
     'AI_TUTOR_RECENT_TURN_COUNT_CAP',
     'AI_TUTOR_RECENT_TURN_CHARACTER_CAP',
@@ -224,4 +225,40 @@ test('AI_TUTOR_ENV_NAMES documents the complete runtime config surface', () => {
     'AI_TUTOR_METADATA_RETENTION_DAYS',
     'AI_TUTOR_ALLOW_UNSTABLE_MODELS_IN_TESTS',
   ]);
+});
+
+test('parseAiTutorConfig maps the retired Gemini 2.5 Flash tutor model to the stable 3.1 Flash Lite model', () => {
+  // Given
+  const env = completeEnv;
+
+  // When
+  const result = parseAiTutorConfig(env);
+
+  // Then
+  assert.equal(result.ok, true);
+  if (result.ok && result.config.status === 'enabled') {
+    assert.equal(result.config.textModel.id, 'gemini-3.1-flash-lite');
+    assert.equal(result.config.visionModel.id, 'gemini-3.1-flash-lite');
+  } else {
+    assert.fail('Expected config to parse');
+  }
+});
+
+test('parseAiTutorConfig accepts a separately configured stable fallback model', () => {
+  // Given
+  const env: AiTutorEnvironment = {
+    ...completeEnv,
+    AI_TUTOR_GEMINI_FALLBACK_MODEL: 'gemini-3.1-flash',
+  };
+
+  // When
+  const result = parseAiTutorConfig(env);
+
+  // Then
+  assert.equal(result.ok, true);
+  if (result.ok && result.config.status === 'enabled') {
+    assert.deepEqual(result.config.fallbackModel, { id: 'gemini-3.1-flash', alias: 'fallback' });
+  } else {
+    assert.fail('Expected config to parse');
+  }
 });

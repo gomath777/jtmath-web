@@ -1,0 +1,742 @@
+{
+  "schemaVersion": 1,
+  "assetRoot": "src/data/ai-tutor-guides/2026-midterm-w1s2/mj1",
+  "entries": [
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:1",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 1
+        },
+        "guidePath": "guides/mj1-limit-stage2/01.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/01/problem-01.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "121db5421d58ccbd7d84aabb0a735ff58c5ee35ad62c0e85ecda590ccbc32481",
+          "dimensions": {
+            "width": 909,
+            "height": 871
+          },
+          "crop": {
+            "page": 1,
+            "left": 0,
+            "top": 548,
+            "right": 909,
+            "bottom": 1419
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/01/solution-01.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "73fa66faae4df6c5c0398da6dc49b26bed453e1b47f2db7f54aaec455d5c4dca",
+          "dimensions": {
+            "width": 909,
+            "height": 1942
+          },
+          "crop": {
+            "page": 6,
+            "left": 0,
+            "top": 548,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/01.json",
+      "guideSha256": "542be9cc9d939eb9933f3d21a448ccc14486f88df51c835070f5a284a3701583"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:2",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 2
+        },
+        "guidePath": "guides/mj1-limit-stage2/02.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/02/problem-02.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "f3ee4042dea329d8eb44fd81c174f88d5d76c0f5dd35ea0b45b9d14e3305c540",
+          "dimensions": {
+            "width": 909,
+            "height": 1051
+          },
+          "crop": {
+            "page": 1,
+            "left": 0,
+            "top": 1439,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/02/solution-02.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "3c4e8d1452154ec29ae2fab9b9f6f892e643844d07c2e6b6d6b18d72a659fd5e",
+          "dimensions": {
+            "width": 910,
+            "height": 722
+          },
+          "crop": {
+            "page": 6,
+            "left": 909,
+            "top": 548,
+            "right": 1819,
+            "bottom": 1270
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/02.json",
+      "guideSha256": "8a648f927ecd992344f24bc344338a1fd831ad9deddc8e314bd4d0aa3d3c7309"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:3",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 3
+        },
+        "guidePath": "guides/mj1-limit-stage2/03.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/03/problem-03.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "8e4d1b0d8cdb1f1c84a9a7b9db6bb50701470a5badfa3a6368e226b2e977f8e5",
+          "dimensions": {
+            "width": 910,
+            "height": 871
+          },
+          "crop": {
+            "page": 1,
+            "left": 909,
+            "top": 548,
+            "right": 1819,
+            "bottom": 1419
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/03/solution-03.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "3dbb2fc4fca8f3a542ab153f38f95c3bc09b63aa68ab056b4057a31b1424a1a5",
+          "dimensions": {
+            "width": 910,
+            "height": 1200
+          },
+          "crop": {
+            "page": 6,
+            "left": 909,
+            "top": 1290,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/03.json",
+      "guideSha256": "8b5cf444986a9fcc8bf3ed15749901d89ff881f48ebb4079335278ceec8c17c0"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:4",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 4
+        },
+        "guidePath": "guides/mj1-limit-stage2/04.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/04/problem-04.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "4f2ead3364b757a395ed347e77a528de4091ae665f448c094a3ef37d0a2b5371",
+          "dimensions": {
+            "width": 910,
+            "height": 1051
+          },
+          "crop": {
+            "page": 1,
+            "left": 909,
+            "top": 1439,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/04/solution-04.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "b787b5d1451dbcd486a13fc3ef8b6830ee8cf12d0df0911b0700826f6cb6e3bf",
+          "dimensions": {
+            "width": 909,
+            "height": 2309
+          },
+          "crop": {
+            "page": 7,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/04.json",
+      "guideSha256": "2b6072f72fb0195173b1f47fef542d9e369933d8c679aa0fe58b37fc0da70077"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:5",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 5
+        },
+        "guidePath": "guides/mj1-limit-stage2/05.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/05/problem-05.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "41c349773159e67f07ca1edfe1c015bd77bf4d62b6bfcaf40ebab4b51347c70d",
+          "dimensions": {
+            "width": 909,
+            "height": 1054
+          },
+          "crop": {
+            "page": 2,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 1235
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/05/solution-05.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "e2e0ea7e16750d8a96535e33928124c642f53a9455646d670ac143b0cc64954a",
+          "dimensions": {
+            "width": 910,
+            "height": 1124
+          },
+          "crop": {
+            "page": 7,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 1305
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/05.json",
+      "guideSha256": "19efde8f306e34593da8d3db20fee6fe7e61067fe0f968da5615576f6e62f5cb"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:6",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 6
+        },
+        "guidePath": "guides/mj1-limit-stage2/06.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/06/problem-06.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "92de052667d83e468bf8a6dfd2b340fb540f6b880d8af8b0953108a1cc1d18f0",
+          "dimensions": {
+            "width": 909,
+            "height": 1235
+          },
+          "crop": {
+            "page": 2,
+            "left": 0,
+            "top": 1255,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/06/solution-06.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "3936c33d1ecd4b466ff2402ca5c1c5063c3bd39ff204951e8095fd4da2e66c94",
+          "dimensions": {
+            "width": 910,
+            "height": 1165
+          },
+          "crop": {
+            "page": 7,
+            "left": 909,
+            "top": 1325,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/06.json",
+      "guideSha256": "2419966c926367f0f14cf2a8bbed29a15d8fc7cb728fa6e59f2d72bc8e6f6dcb"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:7",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 7
+        },
+        "guidePath": "guides/mj1-limit-stage2/07.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/07/problem-07.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "f431e42ccf289fa2e9cb18d6a51720401c0b2f58d517cb01af58e4e362ece6f0",
+          "dimensions": {
+            "width": 910,
+            "height": 1054
+          },
+          "crop": {
+            "page": 2,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 1235
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/07/solution-07.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "405dd2743a18a6a8bf429f6968eb510702657a822d33c55627c67f33bf87bb1e",
+          "dimensions": {
+            "width": 909,
+            "height": 675
+          },
+          "crop": {
+            "page": 8,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 856
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/07.json",
+      "guideSha256": "2efcf724478f56b92a2ddb1be725ea73c2ee6e047b38223658f6dfe858d1888e"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:8",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 8
+        },
+        "guidePath": "guides/mj1-limit-stage2/08.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/08/problem-08.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "3d14c752beee8e752d8b478e3d147338f332989674a060b765cb57ef2b76dbd4",
+          "dimensions": {
+            "width": 910,
+            "height": 1235
+          },
+          "crop": {
+            "page": 2,
+            "left": 909,
+            "top": 1255,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/08/solution-08.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "b1b9ffbed15f085337dfbfa8cc50d793a7fb2d00fa9f126153d5503e8ec5f666",
+          "dimensions": {
+            "width": 909,
+            "height": 708
+          },
+          "crop": {
+            "page": 8,
+            "left": 0,
+            "top": 876,
+            "right": 909,
+            "bottom": 1584
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/08.json",
+      "guideSha256": "2a65b8f918c5f15f1fe32a3bb9d5f71e7975f14aafa831a5879400bc90772300"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:9",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 9
+        },
+        "guidePath": "guides/mj1-limit-stage2/09.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/09/problem-09.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "0cd160dd6d9494488bca244f300d511a108ff7549a5eb6a21c06ac9294fd394e",
+          "dimensions": {
+            "width": 909,
+            "height": 1054
+          },
+          "crop": {
+            "page": 3,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 1235
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/09/solution-09.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "1a5dd97c8b4fa8fa07d5a49dd8ae35a945377c1d7d88080b7f2d0f90d667e8cf",
+          "dimensions": {
+            "width": 909,
+            "height": 886
+          },
+          "crop": {
+            "page": 8,
+            "left": 0,
+            "top": 1604,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/09.json",
+      "guideSha256": "28532cc1d2f5d095c948f60a7465b41c8766cf4d671442ec9af6e8bc4a21214f"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:10",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 10
+        },
+        "guidePath": "guides/mj1-limit-stage2/10.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/10/problem-10.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "01aa3fc38c219ba6e0ee84d9ec82a24656c3997d8cced5b60e9e78390642c56b",
+          "dimensions": {
+            "width": 909,
+            "height": 1235
+          },
+          "crop": {
+            "page": 3,
+            "left": 0,
+            "top": 1255,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/10/solution-10.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "512c8595f7787c885c734776e5056222854af589008c6ebe661feab9678d798c",
+          "dimensions": {
+            "width": 910,
+            "height": 812
+          },
+          "crop": {
+            "page": 8,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 993
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/10.json",
+      "guideSha256": "8cb943939ab09d6521dfc64218b3e02aeceda1e4d043769bd0249615808a459d"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:11",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 11
+        },
+        "guidePath": "guides/mj1-limit-stage2/11.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/11/problem-11.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "beda9fa2447115f0850225a91a0679a4ab32c4e6679e63c30ef1edeb5ee78cbd",
+          "dimensions": {
+            "width": 910,
+            "height": 1053
+          },
+          "crop": {
+            "page": 3,
+            "left": 909,
+            "top": 182,
+            "right": 1819,
+            "bottom": 1235
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/11/solution-11.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "3e0c36f074824ac382a3585a030c78797012835adcc1a7a6729b253c3ec5028a",
+          "dimensions": {
+            "width": 910,
+            "height": 1477
+          },
+          "crop": {
+            "page": 8,
+            "left": 909,
+            "top": 1013,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/11.json",
+      "guideSha256": "04a0a38273e17339907973ba9e17edb170c5093c4fc175554442e365ffba39ae"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:12",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 12
+        },
+        "guidePath": "guides/mj1-limit-stage2/12.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/12/problem-12.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "eab01ef6f6e3bb79d66ab65f176bbc0ea33895fa91016fbead454676e95f05e9",
+          "dimensions": {
+            "width": 910,
+            "height": 1235
+          },
+          "crop": {
+            "page": 3,
+            "left": 909,
+            "top": 1255,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/12/solution-12.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "6ae7e053e03eb99e5017b1322512a69a2260da0e81398f06246c644fee65c396",
+          "dimensions": {
+            "width": 909,
+            "height": 2309
+          },
+          "crop": {
+            "page": 9,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/12.json",
+      "guideSha256": "d169302c9c795fc753bb436ef2bf258082dac3692b6bde556a4feae100a3bc35"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:13",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 13
+        },
+        "guidePath": "guides/mj1-limit-stage2/13.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/13/problem-13.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "51fc8fb693a9269db32975dbda9cf25542ac60101dae12ffe82bbe1fab32a24b",
+          "dimensions": {
+            "width": 909,
+            "height": 1055
+          },
+          "crop": {
+            "page": 4,
+            "left": 0,
+            "top": 181,
+            "right": 909,
+            "bottom": 1236
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/13/solution-13.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "0e42a35d7630189137ad472363c0de85718b555c2701f79925753858aa400595",
+          "dimensions": {
+            "width": 910,
+            "height": 2309
+          },
+          "crop": {
+            "page": 9,
+            "left": 909,
+            "top": 181,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/13.json",
+      "guideSha256": "f767d1f72abad7ec20b48abee0ac67d19164c37c7f7fb5a3e835cce73bb1cc0e"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:14",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 14
+        },
+        "guidePath": "guides/mj1-limit-stage2/14.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/14/problem-14.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "31f3926f8aab90a805855cee0d3785f3a42ddcef692d5d196bf6be789f3d9c9b",
+          "dimensions": {
+            "width": 909,
+            "height": 1234
+          },
+          "crop": {
+            "page": 4,
+            "left": 0,
+            "top": 1256,
+            "right": 909,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/14/solution-14.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "40cc5d078c57e49b721c8e2f8d1354b64ffd1fdc5082c6f9d76d1ee2b28d4578",
+          "dimensions": {
+            "width": 909,
+            "height": 2308
+          },
+          "crop": {
+            "page": 10,
+            "left": 0,
+            "top": 182,
+            "right": 909,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/14.json",
+      "guideSha256": "2aa3b0f1d8df56a2ebd5624223f691e4a13a5ebe156231b25a88e75c43e18965"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:15",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 15
+        },
+        "guidePath": "guides/mj1-limit-stage2/15.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/15/problem-15.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "5d1660f4325992722859d97e9ff40b9459b1f7b6f246c6bd1da7f42d9d5bed27",
+          "dimensions": {
+            "width": 910,
+            "height": 1053
+          },
+          "crop": {
+            "page": 4,
+            "left": 909,
+            "top": 182,
+            "right": 1819,
+            "bottom": 1235
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/15/solution-15.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "02a3afa393307a8cfc04ca3fb21852f67ee54b84e931842e97617a65d7b51fcf",
+          "dimensions": {
+            "width": 910,
+            "height": 2308
+          },
+          "crop": {
+            "page": 10,
+            "left": 909,
+            "top": 182,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/15.json",
+      "guideSha256": "0f3316fe187958e735e8f1cc0ce5113ab252ec0aedf49fbc28be5d83c27080c3"
+    },
+    {
+      "catalogEntry": {
+        "manifestKey": "mj1-limit-stage2:2:16",
+        "target": {
+          "lessonKey": "mj1-limit-stage2",
+          "level": 2,
+          "problemNumber": 16
+        },
+        "guidePath": "guides/mj1-limit-stage2/16.json",
+        "status": "verified",
+        "problemAsset": {
+          "assetKey": "mj1-limit-stage2/problem/16/problem-16.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "57aadf0de35e9787a1962784551fc31b4c61d344d5df7433e338abca068cde29",
+          "dimensions": {
+            "width": 910,
+            "height": 1235
+          },
+          "crop": {
+            "page": 4,
+            "left": 909,
+            "top": 1255,
+            "right": 1819,
+            "bottom": 2490
+          }
+        },
+        "solutionAsset": {
+          "assetKey": "mj1-limit-stage2/solution/16/solution-16.png",
+          "sourceSha256": "d6bc6d1037fb29ad5d335727c2801cccf8e88987de018c0660201cb23ce49c93",
+          "sha256": "92f0fd3cbcbd30880e8ca1e299886d332073fc0395744bdc8169b7aab1e5b887",
+          "dimensions": {
+            "width": 1819,
+            "height": 2309
+          },
+          "crop": {
+            "page": 11,
+            "left": 0,
+            "top": 181,
+            "right": 1819,
+            "bottom": 2490
+          }
+        }
+      },
+      "guideAssetPath": "guides/mj1-limit-stage2/16.json",
+      "guideSha256": "0fd904a3c3b2d4ccefeed5679cc246319cd77509a8405f7fe0b83308894a4b96"
+    }
+  ]
+}

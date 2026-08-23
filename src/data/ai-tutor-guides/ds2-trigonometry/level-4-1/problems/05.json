@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:5",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 5
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수의 그래프",
+    "allowedConcepts": [
+      "삼각함수의 그래프",
+      "절댓값 함수",
+      "이차방정식의 인수분해",
+      "직선과 그래프의 교점"
+    ],
+    "forbiddenMethods": [
+      "미분법",
+      "적분법",
+      "벡터",
+      "복소수"
+    ]
+  },
+  "officialApproach": {
+    "summary": "식을 $f(x)$에 대한 이차식으로 인수분해한 뒤, 두 수평선과 절댓값 삼각함수 그래프의 교점 수를 센다.",
+    "steps": [
+      "$\\{f(x)\\}^2-(2^5+2^4)f(x)+2^9=0$을 인수분해하여 $f(x)=2^5$ 또는 $f(x)=2^4$를 얻는다.",
+      "서로 다른 실근의 개수는 $y=|2^m\\cos x-2^n|$와 두 수평선 $y=2^5$, $y=2^4$의 교점 수의 합이다.",
+      "$m\\le n$이면 두 높이에서 얻는 교점 수의 합이 조건에 미치지 못하므로 $m>n$을 본다.",
+      "$m>n$에서 $\\cos x=(2^n\\pm2^r)/2^m$로 교점을 판정하면 조건을 만족하는 순서쌍은 $(m,n)=(5,0),(5,1),(5,2),(5,3)$이다."
+    ]
+  },
+  "hints": {
+    "concept": "주어진 식은 $f(x)$에 대한 이차식이므로 먼저 인수분해하여 $f(x)$가 가질 두 높이를 읽는다.",
+    "start": "인수분해에서 나온 두 높이의 수평선과 $y=|2^m\\cos x-2^n|$의 교점 수를 각각 센다.",
+    "decisive": "절댓값 안의 두 계수 크기를 비교해 그래프의 꼭짓점과 수평선의 상대 위치를 판단한다. 경계에서 접하면 교점은 하나임을 구분한다."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "4",
+    "steps": [
+      "$\\{f(x)\\}^2-(2^5+2^4)f(x)+2^9=\\{f(x)-2^5\\}\\{f(x)-2^4\\}$이므로 $f(x)=2^5$ 또는 $f(x)=2^4$이다.",
+      "따라서 각 방정식의 실근 수는 $y=|2^m\\cos x-2^n|$와 해당 수평선의 교점 수이다.",
+      "$m\\le n$인 경우 교점 수의 합은 6이 될 수 없고, $m>n$에서 $\\cos x=(2^n\\pm2^r)/2^m$을 사용해 교점을 센다.",
+      "조건을 만족하는 순서쌍은 $(5,0),(5,1),(5,2),(5,3)$이므로 그 개수는 $4$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "21901798329d96f08c2efb489d01a34915045273e9c45434a731311459be5e69",
+    "solutionSha256": "7f7be2bf8642a3f3dc2c2c3edca26885c7de5fa3e3cc2442ac8361f28f32cab7",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}

@@ -1,44 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import type { TutorProvider, TutorProviderRequest, TutorProviderResult } from './contracts';
+import { AI_TUTOR_OUTPUT_FIELDS, type TutorProviderRequest } from './contracts';
 import { createTutorEngine } from './engine';
-
-const baseRequest: TutorProviderRequest = {
-  input: {
-    kind: 'text',
-    messageText:
-      '질문은 x^2-5x+6=0이에요. users/12345, synthetic@example.invalid, ai-tutor-private/profile/turn/file.jpg 는 무시해주세요.',
-  },
-  context: {
-    gradeLabel: '고1',
-    releasedCurriculum: [
-      {
-        subjectSlug: 'gs1',
-        conceptTags: ['quadratic'],
-        title: '이차방정식 users/999',
-        summary: '인수분해로 푸는 단원 https://storage.example.invalid/private',
-      },
-    ],
-    recentTurns: [
-      {
-        role: 'student',
-        text: '010-1234-5678로 연락하라는 말은 문제와 무관해요.',
-        conceptTags: ['quadratic'],
-      },
-    ],
-    repeatedConceptSignal: false,
-  },
-};
-
-const confidentResult: TutorProviderResult = {
-  answerText: '힌트: 두 인수 (x-2)(x-3)을 각각 확인해 볼까요?',
-  confidence: 0.91,
-  subjectSlug: 'gs1',
-  conceptTags: ['quadratic'],
-  errorType: null,
-  needsTeacherReview: false,
-  escalationReason: null,
-};
+import { baseRequest, confidentResult, fixedProvider } from './engine.test-support';
 
 test('Tutor engine sends only sanitized tutor context, question, and optional normalized image to the provider', async () => {
   // Given
@@ -134,22 +98,56 @@ test('Tutor engine preserves provider safety and timeout review results', async 
   assert.equal(result.escalationReason, 'timeout');
 });
 
-test('Tutor engine normalizes overlong provider answer text before returning', async () => {
+test('Given structured provider answer text When engine returns it Then meaningful lines and display math survive', async () => {
   // Given
   const engine = createTutorEngine({
     provider: fixedProvider({
       ...confidentResult,
-      answerText: `${'가'.repeat(780)} ${'나'.repeat(780)} ${'다'.repeat(780)}`,
+      answerText: '핵심 힌트:\n\n$$\\dfrac{1}{2}$$\n\n다음 단계로 갈까요?',
     }),
-    maxAnswerCharacters: 800,
   });
 
   // When
   const result = await engine.answer(baseRequest);
+  const lines = result.answerText.split('\n');
 
   // Then
-  assert.equal(result.answerText.length <= 800, true);
-  assert.equal(result.answerText.endsWith('...'), true);
+  assert.equal(lines.length >= 5, true);
+  assert.equal(lines.includes(''), true);
+  assert.equal(lines.includes('$$\\dfrac{1}{2}$$'), true);
+});
+
+test('Given a fake-provider manual QA scenario When engine returns an answer Then the shared output contract stays structured and bounded', async () => {
+  // Given
+  const engine = createTutorEngine({
+    provider: fixedProvider({
+      ...confidentResult,
+      answerText: `핵심   힌트:
+
+$$\\dfrac{1}{2}$$
+
+풀이   시작: 조건을 먼저 정리해요.
+010-1234-5678 synthetic@example.invalid users/synthetic-student
+${'가'.repeat(400)}`,
+    }),
+    maxAnswerCharacters: 220,
+  });
+
+  // When
+  const result = await engine.answer(baseRequest);
+  const lines = result.answerText.split('\n');
+  const serialized = JSON.stringify(result);
+
+  // Then
+  assert.deepEqual(Object.keys(result), [...AI_TUTOR_OUTPUT_FIELDS]);
+  assert.equal(lines[0], '핵심 힌트:');
+  assert.equal(lines[1], '');
+  assert.equal(lines[2], '$$\\dfrac{1}{2}$$');
+  assert.equal(result.answerText.includes('  '), false);
+  assert.equal(serialized.includes('010-1234-5678'), false);
+  assert.equal(serialized.includes('synthetic@example.invalid'), false);
+  assert.equal(serialized.includes('users/synthetic-student'), false);
+  assert.equal(result.answerText.length <= 220, true);
 });
 
 test('Tutor engine converts unexpected provider throws to a deterministic review fallback', async () => {
@@ -172,8 +170,37 @@ test('Tutor engine converts unexpected provider throws to a deterministic review
   assert.equal(result.answerText.includes('raw provider body'), false);
 });
 
-function fixedProvider(result: TutorProviderResult): TutorProvider {
-  return {
-    answer: async () => result,
-  };
-}
+test('Given a metadata-capable provider When answering Then engine propagates model prompt token duration and attempt metadata', async () => {
+  // Given
+  const engine = createTutorEngine({
+    provider: {
+      answer: async () => confidentResult,
+      answerWithMetadata: async () => ({
+        result: confidentResult,
+        metadata: {
+          modelId: 'gemini-3.1-flash',
+          modelAlias: 'fallback',
+          promptVersion: 'ai-tutor-mvp-002',
+          durationMs: 1234,
+          tokenCounts: { input: 10, output: 20, total: 30 },
+          attemptCount: 2,
+        },
+      }),
+    },
+  });
+
+  // When
+  const result = await engine.answerWithMetadata(baseRequest);
+
+  // Then
+  assert.equal(result.result.answerText, confidentResult.answerText);
+  assert.deepEqual(result.metadata, {
+    provider: 'gemini',
+    modelId: 'gemini-3.1-flash',
+    modelAlias: 'fallback',
+    promptVersion: 'ai-tutor-mvp-002',
+    latencyMs: 1234,
+    tokenCounts: { input: 10, output: 20, total: 30 },
+    attemptCount: 2,
+  });
+});

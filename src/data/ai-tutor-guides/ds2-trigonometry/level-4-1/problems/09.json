@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:9",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 9
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수의 그래프와 삼각부등식",
+    "allowedConcepts": [
+      "삼각함수의 그래프",
+      "삼각방정식",
+      "삼각부등식의 해"
+    ],
+    "forbiddenMethods": [
+      "음함수 미분",
+      "미분법",
+      "적분법",
+      "벡터"
+    ]
+  },
+  "officialApproach": {
+    "summary": "상수항을 사인값으로 바꾸어 사인 그래프와 수평선의 위치 관계로 부등식의 해 구간을 찾고, 매개변수의 상한을 판정한다.",
+    "steps": [
+      "부등식을 $\\sin x<-\\cos\\frac{\\pi}{8}$로 바꾸고 우변을 같은 사인값으로 표현한다.",
+      "사인 그래프에서 등식이 되는 점을 표시하여 $-\\pi\\le x\\le2\\pi$에서 부등식이 성립하는 구간을 찾는다.",
+      "구간 $[-\\pi,k]$와의 공통부분이 주어진 열린 구간과 정확히 같도록 하면서, 다음 해 구간이 시작되기 전까지의 최대 $k$를 정한다."
+    ]
+  },
+  "hints": {
+    "concept": "상수 $-\\cos\\frac{\\pi}{8}$를 사인값으로 고쳐서 $y=\\sin x$ 그래프와 수평선의 위아래를 비교하세요.",
+    "start": "$-\\cos\\frac{\\pi}{8}=\\sin\\left(-\\frac{3\\pi}{8}\\right)$를 이용해 먼저 등식 $\\sin x=\\sin\\left(-\\frac{3\\pi}{8}\\right)$의 해를 표시하세요.",
+    "decisive": "처음으로 얻는 음의 해 구간이 주어진 대칭형 열린 구간과 일치하는지 확인하고, 다음 음의 해 구간의 왼쪽 끝점은 부등식이 엄격하다는 점을 이용해 처리하세요."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "$\\frac{11\\pi}{8}$",
+    "steps": [
+      "$\\sin x+\\cos\\frac{\\pi}{8}<0$은 $\\sin x<\\sin\\left(-\\frac{3\\pi}{8}\\right)$와 같다.",
+      "$-\\pi\\le x\\le2\\pi$에서 등식의 경계점은 $-\\frac{5\\pi}{8}$, $-\\frac{3\\pi}{8}$, $\\frac{11\\pi}{8}$, $\\frac{13\\pi}{8}$이다. 따라서 부등식의 해는 $\\left(-\\frac{5\\pi}{8},-\\frac{3\\pi}{8}\\right)$ 및 $\\left(\\frac{11\\pi}{8},\\frac{13\\pi}{8}\\right)$이다.",
+      "첫 구간은 $-\\pi-\\alpha<x<\\alpha$ 꼴이며 $\\alpha=-\\frac{3\\pi}{8}$이다. 다음 구간의 왼쪽 경계는 포함해도 부등식을 만족하지 않으므로 최대값은 $k=\\frac{11\\pi}{8}$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "7e9d73a1912deca632c8523da2ddde7efba71996cc2b783ba951c6c9a022b358",
+    "solutionSha256": "8d6882e8ea0fbb64ad4095a4beba88ae6a3b76c439a481ce5286f34362fee48e",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}
