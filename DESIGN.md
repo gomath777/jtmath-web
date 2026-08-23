@@ -110,6 +110,15 @@ All spacing derives from a 4px base.
 - **Accessibility**: iframe `title` describes the lecture.
 - **Motion**: none.
 
+### PDF Resource Actions
+
+- **Anatomy**: a noninteractive PDF or hintbook card keeps its icon, filename, and metadata in the card body, followed by one reusable two-link action group.
+- **States**: a valid approved Bunny PDF renders `열기` and `다운로드`; blank, unsupported, or invalid sources render no action link. Links use the card's default, hover, and focus-visible states.
+- **Labels**: visible Korean labels are `열기` and `다운로드`. Accessible names are `{파일명} 브라우저에서 열기` and `{파일명} 다운로드` so repeated actions remain distinguishable to assistive technology.
+- **Security**: `열기` keeps the approved source URL and opens in a new tab with `rel="noopener noreferrer"`. `다운로드` uses the same-origin validated download route and does not open a new tab.
+- **Responsive layout**: action controls wrap below the metadata on narrow screens so a long Korean filename can wrap naturally and remain readable at 390px; controls sit inline when space allows.
+- **Accessibility**: each action has a visible `focus-visible` terracotta ring with an ivory offset. Cards themselves are not links, preventing nested interactive elements.
+
 ## 6. Motion & Interaction
 
 | Type | Duration | Easing | Usage |
