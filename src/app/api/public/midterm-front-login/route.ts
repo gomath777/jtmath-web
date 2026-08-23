@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { setSimpleAdminCookie, verifySimpleAdminPasscode } from '@/utils/admin-auth';
 import { setStudentCookie, signToken } from '@/utils/student-auth';
+import { isMidtermFrontAdminEntry } from './policy';
 
 const BIRTH_PIN_PATTERN = /^\d{6}$/;
 
@@ -38,6 +40,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
   if (!BIRTH_PIN_PATTERN.test(birthPin)) {
     return redirectTo(req, 'format');
+  }
+
+  if (isMidtermFrontAdminEntry({ birthPin, verifyAdminPasscode: verifySimpleAdminPasscode })) {
+    await setSimpleAdminCookie(birthPin);
+    return NextResponse.redirect(new URL('/admin/calendars-new', req.url), { status: 303 });
   }
 
   const sc = createServiceClient(
