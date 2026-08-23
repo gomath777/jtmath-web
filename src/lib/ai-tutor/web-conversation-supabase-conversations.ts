@@ -31,13 +31,26 @@ type UpsertConversationInput = Parameters<WebConversationRepository['upsertConve
 type ClaimRequestInput = Parameters<WebConversationRepository['claimRequest']>[0];
 type RecentTurnsInput = Parameters<WebConversationRepository['readRecentTurns']>[0];
 
-export function upsertConversation(
+export async function upsertConversation(
   client: WebSupabaseDataClient,
   input: UpsertConversationInput,
 ): Promise<WebConversationRepositoryResult<WebConversation>> {
   const parsed = UpsertWebConversationInputSchema.safeParse(input);
   if (!parsed.success) return Promise.resolve(invalid('upsert_web_conversation'));
   const row = parsed.data;
+  const existing = await readMaybe(
+    'read_web_conversation_before_upsert',
+    WebConversationRowSchema,
+    client
+      .from('ai_tutor_web_conversations')
+      .select(webConversationColumns)
+      .eq('profile_id', row.profileId)
+      .eq('assignment_id', row.assignmentId)
+      .maybeSingle(),
+    toWebConversation,
+  );
+  if (!existing.ok) return { ok: false, error: existing.error };
+  const active = existing.value;
   return readOne(
     'upsert_web_conversation',
     WebConversationRowSchema,
@@ -48,9 +61,9 @@ export function upsertConversation(
           profile_id: row.profileId,
           assignment_id: row.assignmentId,
           context_key: row.contextKey,
-          active_material_key: row.activeMaterialKey,
-          active_problem_key: row.activeProblemKey,
-          active_stage: row.activeStage,
+          active_material_key: row.activeMaterialKey ?? active?.activeMaterialKey ?? null,
+          active_problem_key: row.activeProblemKey ?? active?.activeProblemKey ?? null,
+          active_stage: row.activeStage ?? active?.activeStage ?? null,
           last_seen_at: row.seenAt,
         },
         { onConflict: 'profile_id,assignment_id' },

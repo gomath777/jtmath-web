@@ -258,3 +258,26 @@ test('Given web conversation persistence When a duplicate free-form request is p
   assert.equal(fake.operations.some((operation) => JSON.stringify(operation.payload ?? {}).includes('"input_tokens":7')), true);
   assert.equal(fake.operations.some((operation) => JSON.stringify(operation.payload ?? {}).includes('"total_tokens":18')), true);
 });
+
+test('Given a persisted selected problem When the next turn asks for the next step Then the server retains that target for Gemini', async () => {
+  const fake = createFakeWebConversationSupabase();
+  let nextRequestId = 0;
+  const fixtures = createFixtures({
+    identity: persistedIdentity,
+    tokenRow: persistedToken,
+    lesson: persistedLesson,
+    assignments: [persistedAssignment],
+    guideStore: verifiedGuideStore([]),
+    conversationRepository: createSupabaseWebConversationRepository(fake.client),
+    requestIdFactory: () => `followup-${++nextRequestId}`,
+  });
+
+  const first = await fixtures.post({ lessonSlug: GUIDE_LESSON_SLUG, selectedMaterialKey: guideMaterialKey, message: '3번 힌트 줘' });
+  const followup = await fixtures.post({ lessonSlug: GUIDE_LESSON_SLUG, message: '다음 단계 알려줘' });
+  const secondProviderRequest = fixtures.providerRequests[1];
+
+  assert.equal(first.status, 200);
+  assert.equal(followup.status, 200);
+  assert.equal(fixtures.providerRequests.length, 2);
+  assert.match(secondProviderRequest?.input.messageText ?? '', /대상 문제: 3번/u);
+});
