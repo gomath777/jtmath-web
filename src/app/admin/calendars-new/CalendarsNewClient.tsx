@@ -138,6 +138,7 @@ export default function CalendarsNewClient({ students }: { students: Student[] }
                             phase={s.phase}
                             slug={s.slug}
                             basePath="/s"
+                            previewBase={mode === 'master' ? '/api/admin/preview' : undefined}
                           />
                         </div>
                       </div>
