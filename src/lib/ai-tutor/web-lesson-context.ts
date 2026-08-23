@@ -116,7 +116,9 @@ export async function resolveWebLessonContext(
   ) {
     return { ok: false, reason: 'unassigned' };
   }
-  if (!isReleased(selectedAssignment, input.now)) return { ok: false, reason: 'unreleased' };
+  if (!isReleased(selectedAssignment, input.now) && input.identity.isMaster !== true) {
+    return { ok: false, reason: 'unreleased' };
+  }
 
   const variant = selectedAssignment.variant?.trim() || 'default';
   const variantBlocks = await loadOrSourceError(() =>
