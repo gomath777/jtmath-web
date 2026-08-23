@@ -7,9 +7,9 @@ import ContentGroupBlock from './ContentGroupBlock';
 
 const bunnyPdfUrl = 'https://mathgo-pdfs.b-cdn.net/qa/content-group.pdf';
 
-function renderContent(content: Record<string, unknown>): string {
+function renderContent(content: Record<string, unknown>, progress = {}): string {
   return renderToStaticMarkup(
-    <ContentGroupBlock content={content} progress={{}} subjectSlug="test" />,
+    <ContentGroupBlock content={content} progress={progress} subjectSlug="test" />,
   );
 }
 
@@ -175,6 +175,61 @@ test('Given each existing lesson content-group layout, When it is statically ren
   assert.match(gichulMarkup, /기출 문제를 풀어 보세요\./);
   assert.match(gichulMarkup, /기출 문제지\.pdf/);
   assert.match(gichulMarkup, /심화 문제/);
+});
+
+test('Given ordered videos and saved progress, When concept and gichul layouts render, Then their visible study-state contract remains characterized', () => {
+  const conceptMarkup = renderContent(
+    {
+      label: '개념 학습',
+      page_range: '12~15쪽',
+      videos: [
+        { bunny_video_id: 'later', title: '두 번째 강의', problem_number: 2, order_index: 2 },
+        { bunny_video_id: 'first', title: '첫 번째 강의', problem_number: 1, order_index: 1, duration_seconds: 65 },
+      ],
+    },
+    {
+      later: { completed: false, watch_percent: 42 },
+      first: { completed: true, watch_percent: 100 },
+    },
+  );
+  const gichulMarkup = renderContent({
+    label: '레벨4 기출',
+    videos: [
+      { bunny_video_id: 'one', title: '해설 강의', problem_number: 1, order_index: 1 },
+      { bunny_video_id: 'two', title: '해설 강의', problem_number: 2, order_index: 2 },
+    ],
+  });
+  const completedConceptMarkup = renderContent(
+    {
+      label: '개념 학습',
+      page_range: '12~15쪽',
+      videos: [{ bunny_video_id: 'complete', title: '완료 강의', problem_number: 1 }],
+    },
+    { complete: { completed: true, watch_percent: 100 } },
+  );
+
+  assert.ok(conceptMarkup.indexOf('1번') < conceptMarkup.indexOf('2번'));
+  assert.match(conceptMarkup, /1:05/);
+  assert.match(conceptMarkup, /42%/);
+  assert.match(conceptMarkup, /line-through/);
+  assert.match(conceptMarkup, /강의를 모두 시청한 후 진행하세요 \(1\/2\)/);
+  assert.match(completedConceptMarkup, /강의를 모두 시청했습니다 ✓/);
+  assert.match(gichulMarkup, /해설강의/);
+  assert.match(gichulMarkup, /2개/);
+});
+
+test('Given invalid bonus content without its required PDF, When it renders, Then the existing invalid-data failure remains visible', () => {
+  assert.throws(
+    () => renderContent({ label: '보충 학습', is_bonus: true }),
+    /Cannot read properties of undefined/,
+  );
+});
+
+test('Given falsy malformed PDF and video fields, When a concept block renders, Then existing fallback behavior remains', () => {
+  const pdfMarkup = renderContent({ label: '개념 학습', page_range: '1쪽', pdfs: false, pdf: { url: resourceOne, original_name: '대체 학습지.pdf' } });
+  const videoMarkup = renderContent({ label: '개념 학습', page_range: '1쪽', videos: false });
+  assert.match(pdfMarkup, /대체 학습지\.pdf/);
+  assert.match(videoMarkup, /개념서 1쪽/);
 });
 
 for (const actionCase of contentGroupActionCases) {
