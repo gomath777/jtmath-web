@@ -98,6 +98,31 @@ test('Given a registered guide that cannot be verified When posting Then the han
   assert.equal(fixtures.providerRequests.length, 0);
 });
 
+test('Given a persisted tutor turn and an unavailable registered guide When posting Then the claimed turn is marked failed instead of remaining processing', async () => {
+  // Given
+  const fake = createFakeWebConversationSupabase();
+  const fixtures = createFixtures({
+    identity: persistedIdentity,
+    tokenRow: persistedToken,
+    lesson: persistedLesson,
+    assignments: [persistedAssignment],
+    guideStore: unavailableRegisteredGuideStore('not_found'),
+    conversationRepository: createSupabaseWebConversationRepository(fake.client),
+  });
+
+  // When
+  const response = await fixtures.post({ lessonSlug: GUIDE_LESSON_SLUG, selectedMaterialKey: guideMaterialKey, message: '3번 힌트 줘' });
+
+  // Then
+  assert.equal(response.status, 503);
+  assert.equal(
+    fake.operations.some((operation) => operation.table === 'ai_tutor_web_turns'
+      && operation.action === 'update'
+      && JSON.stringify(operation.payload).includes('"status":"failed"')),
+    true,
+  );
+});
+
 test('Given malformed or forged web material selection When posting Then the handler rejects it before provider work', async () => {
   const fixtures = createFixtures();
   const response = await fixtures.post({ lessonSlug: 'ds2-trig', selectedMaterialKey: 'forged_material', message: '2번 힌트 줘' });

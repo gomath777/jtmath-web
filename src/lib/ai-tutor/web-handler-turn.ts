@@ -109,10 +109,21 @@ export async function answerWebTutorTurn(input: Readonly<{
     problemImageStore: input.dependencies.problemImageStore,
     guideStore: input.dependencies.guideStore,
   });
-  if (!material.ok && material.reason === 'registered_guide_unavailable') {
-    return json({ status: 'material_unavailable', message: '학습 자료를 확인할 수 없습니다. 선생님 확인이 필요합니다.' }, 503);
+  if (!material.ok) {
+    const message = material.reason === 'registered_guide_unavailable'
+      ? '학습 자료를 확인할 수 없습니다. 선생님 확인이 필요합니다.'
+      : '학습 자료를 확인할 수 없습니다.';
+    await markPersistentFailure({
+      repository: input.dependencies.conversationRepository,
+      persistence,
+      profileId: input.identity.profileId,
+      assignmentId: assignment.id,
+      answerText: message,
+      errorCategory: 'material_unavailable',
+      now: input.now,
+    });
+    return json({ status: 'material_unavailable', message }, 503);
   }
-  if (!material.ok) return json({ status: 'material_unavailable', message: '학습 자료를 확인할 수 없습니다.' }, 503);
 
   const engineAnswer = await runWebTutorEngine({
     engine: input.dependencies.engine,
