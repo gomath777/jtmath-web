@@ -88,7 +88,26 @@ test('Given strict master preview for an eligible student assignment When resolv
   ]);
 });
 
-function createCountingEligiblePort(): WebLessonContextQueryPort & { readonly calls: readonly string[] } {
+test('Given strict master preview for an assigned pending lesson When resolving page launcher Then tutor is visible', async () => {
+  const strictMasterToken = await signStrictWebStudentToken({
+    payload: { profileId: 'synthetic-profile', slug: 'synthetic-slug', isMaster: true },
+    secret: enabledEnv.STUDENT_TOKEN_SECRET ?? '',
+    nowSeconds: 1_800_000_000,
+  });
+  const port = createCountingEligiblePort({ assignmentStatus: 'pending' });
+
+  const visible = await shouldShowWebTutorFromPort({
+    cookieHeader: `student_session=${strictMasterToken}`,
+    lessonSlug: 'trig-lesson',
+    env: enabledEnv,
+    port,
+    now: new Date('2026-08-21T00:00:00.000Z'),
+  });
+
+  assert.equal(visible, true);
+});
+
+function createCountingEligiblePort(input: { readonly assignmentStatus?: 'pending' | 'released' } = {}): WebLessonContextQueryPort & { readonly calls: readonly string[] } {
   const calls: string[] = [];
   return {
     calls,
@@ -119,9 +138,9 @@ function createCountingEligiblePort(): WebLessonContextQueryPort & { readonly ca
           id: 'synthetic-assignment',
           curriculumItemId: 'synthetic-item',
           profileId: 'synthetic-profile',
-          status: 'released',
+          status: input.assignmentStatus ?? 'released',
           scheduledDate: '2026-08-21',
-          releasedAt: '2026-08-20T00:00:00.000Z',
+          releasedAt: input.assignmentStatus === 'pending' ? null : '2026-08-20T00:00:00.000Z',
           variant: 'default',
         },
       ];

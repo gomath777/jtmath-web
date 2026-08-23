@@ -174,3 +174,22 @@ test('resolveWebLessonContext keeps master previews bound to the represented stu
   if (!result.ok) assert.fail('Expected the signed master preview to retain assignment-scoped access');
   assert.equal(getWebLessonAssignment(result).id, releasedAssignment.id);
 });
+
+test('resolveWebLessonContext allows a master preview to inspect an assigned pending lesson without exposing it to students', async () => {
+  const pendingAssignment = {
+    ...releasedAssignment,
+    status: 'pending' as const,
+    releasedAt: null,
+  };
+
+  const result = await resolveWebLessonContext({
+    port: fakePort({ lesson, token: activeToken, assignments: [pendingAssignment], blocksByVariant: { honors: blocks } }),
+    identity: { ...baseIdentity, isMaster: true },
+    lessonSlug: lesson.publicSlug,
+    now,
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) assert.fail('Expected the master preview to resolve its assigned pending lesson');
+  assert.equal(getWebLessonAssignment(result).id, pendingAssignment.id);
+});

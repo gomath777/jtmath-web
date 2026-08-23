@@ -173,7 +173,11 @@ async function loadWebTutorContext(input: {
   if (!runtime.ok) return null;
   const result = await resolveWebLessonContext({
     port: runtime.dependencies.lessonPort,
-    identity: { profileId: identity.profileId, slug: identity.slug },
+    identity: {
+      profileId: identity.profileId,
+      slug: identity.slug,
+      ...(identity.isMaster === true ? { isMaster: true } : {}),
+    },
     lessonSlug: input.lessonSlug,
     now: new Date(),
   });

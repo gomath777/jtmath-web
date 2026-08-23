@@ -25,6 +25,7 @@ export async function shouldShowWebTutorFromPort(input: WebTutorPageEligibilityI
     identity: {
       profileId: identity.profileId,
       slug: identity.slug,
+      ...(identity.isMaster === true ? { isMaster: true } : {}),
     },
     lessonSlug: input.lessonSlug,
     now: input.now,
