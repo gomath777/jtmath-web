@@ -71,7 +71,7 @@ export function buildGeminiParameters(request: TutorProviderRequest, model: Gemi
       topP: 0.8,
       topK: 40,
       candidateCount: 1,
-      maxOutputTokens: 8192,
+      maxOutputTokens: 2048,
       responseMimeType: 'application/json',
       responseJsonSchema: tutorResponseJsonSchema,
       ...thinkingConfigForModel(model.id),

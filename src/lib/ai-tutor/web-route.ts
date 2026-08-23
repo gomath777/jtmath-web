@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import type { AiTutorConfig } from './config';
 import { createGeminiTutorProvider } from './gemini-provider';
@@ -14,6 +15,7 @@ import { createSupabaseWebConversationRepository } from './web-conversation-supa
 import type { WebConversationRepository } from './web-conversation-repository';
 import {
   createDefaultWebAiTutorRuntimeDependencies,
+  type WebAiTutorRuntimeDependencies,
   type WebAiTutorRuntimeDependenciesResult,
 } from './web-runtime-readiness';
 import { toWebSupabaseDataClient } from './web-runtime-supabase-adapter';
@@ -37,6 +39,7 @@ export type WebAiTutorRouteOptions = {
 
 export function createWebAiTutorRoutePost(options: WebAiTutorRouteOptions): (request: Request) => Promise<Response> {
   let cachedAdmission: Readonly<{ secret: string; admission: PreviewWebAdmission }> | undefined;
+  let cachedRuntimeDependencies: Readonly<{ key: string; dependencies: WebAiTutorRuntimeDependencies }> | undefined;
   return async (request) => {
     const env = options.env;
     const config = parseWebAiTutorConfig(env);
@@ -59,7 +62,15 @@ export function createWebAiTutorRoutePost(options: WebAiTutorRouteOptions): (req
     }
 
     const constructors = options.constructors ?? defaultConstructors(env);
-    const runtimeDependencies = await getRuntimeDependencies(constructors, config.config);
+    const runtimeDependencies = await getCachedRuntimeDependencies({
+      constructors,
+      config: config.config,
+      env,
+      cached: cachedRuntimeDependencies,
+      update: (next) => {
+        cachedRuntimeDependencies = next;
+      },
+    });
     if (!runtimeDependencies.ok) {
       return Response.json({ status: 'disabled', message: 'AI 튜터를 사용할 수 없습니다.' }, { status: 404 });
     }
@@ -81,6 +92,35 @@ export function createWebAiTutorRoutePost(options: WebAiTutorRouteOptions): (req
     });
     return handler(replayJsonRequest(request, body));
   };
+}
+
+async function getCachedRuntimeDependencies(input: Readonly<{
+  readonly constructors: WebAiTutorRouteConstructors;
+  readonly config: EnabledWebAiTutorConfig;
+  readonly env: WebAiTutorRouteEnvironment;
+  readonly cached: Readonly<{ key: string; dependencies: WebAiTutorRuntimeDependencies }> | undefined;
+  readonly update: (next: Readonly<{ key: string; dependencies: WebAiTutorRuntimeDependencies }>) => void;
+}>): Promise<WebAiTutorRuntimeDependenciesResult> {
+  const key = runtimeDependenciesCacheKey(input.env, input.config);
+  if (input.cached?.key === key) return { ok: true, dependencies: input.cached.dependencies };
+  const result = await getRuntimeDependencies(input.constructors, input.config);
+  if (result.ok) input.update({ key, dependencies: result.dependencies });
+  return result;
+}
+
+function runtimeDependenciesCacheKey(
+  env: WebAiTutorRouteEnvironment,
+  config: EnabledWebAiTutorConfig,
+): string {
+  return JSON.stringify({
+    runtime: config.runtime,
+    supabaseUrlFingerprint: fingerprint(env.NEXT_PUBLIC_SUPABASE_URL),
+    supabaseServiceKeyFingerprint: fingerprint(env.SUPABASE_SERVICE_KEY),
+  });
+}
+
+function fingerprint(value: string | undefined): string {
+  return createHash('sha256').update(value ?? '').digest('base64url');
 }
 
 async function getRuntimeDependencies(

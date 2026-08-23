@@ -44,7 +44,7 @@ test('Gemini provider uses the exact configured text model with structured JSON 
   assert.equal(calls[0]?.model, 'gemini-2.5-flash');
   assert.equal(calls[0]?.config?.responseMimeType, 'application/json');
   assert.equal(calls[0]?.config?.candidateCount, 1);
-  assert.equal(calls[0]?.config?.maxOutputTokens, 8192);
+  assert.equal(calls[0]?.config?.maxOutputTokens, 2048);
   assert.deepEqual(calls[0]?.config?.responseJsonSchema.required, [
     'answerText',
     'confidence',

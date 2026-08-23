@@ -72,6 +72,52 @@ test('Given ready preview fake When route receives a request Then handler answer
   assert.deepEqual(counters, { runtime: 1, provider: 1 });
 });
 
+test('Given ready runtime dependencies When the same route handles later requests Then the successful readiness result is reused', async () => {
+  const counters = { runtime: 0, provider: 0 };
+  const post = createWebAiTutorRoutePost({
+    env: readyEnv,
+    now: () => now,
+    constructors: constructors({ counters, runtime: readyRuntime() }),
+    fetchPort: pdfFetchPort(),
+  });
+
+  const first = await post(request(await token()));
+  const second = await post(request(await token()));
+
+  assert.equal(first.status, 200);
+  assert.equal(second.status, 200);
+  assert.deepEqual(counters, { runtime: 1, provider: 2 });
+});
+
+test('Given failed readiness When the same route retries later Then the failure is not cached', async () => {
+  const counters = { runtime: 0, provider: 0 };
+  const runtimes: WebAiTutorRuntimeDependenciesResult[] = [
+    { ok: false, reason: 'private_assets_unavailable' },
+    readyRuntime(),
+  ];
+  const post = createWebAiTutorRoutePost({
+    env: readyEnv,
+    now: () => now,
+    constructors: {
+      ...constructors({ counters, runtime: readyRuntime() }),
+      createRuntimeDependencies: async () => {
+        counters.runtime += 1;
+        const next = runtimes.shift();
+        if (next === undefined) assert.fail('Expected a configured runtime readiness result');
+        return next;
+      },
+    },
+    fetchPort: pdfFetchPort(),
+  });
+
+  const first = await post(request(await token()));
+  const second = await post(request(await token()));
+
+  assert.equal(first.status, 404);
+  assert.equal(second.status, 200);
+  assert.deepEqual(counters, { runtime: 2, provider: 1 });
+});
+
 test('Given invalid cookie When route receives a request Then runtime readiness is not touched', async () => {
   const counters = { runtime: 0, provider: 0 };
   const post = createWebAiTutorRoutePost({

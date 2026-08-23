@@ -21,6 +21,6 @@ test('Given a web route timeout above the function budget When Gemini is called 
     now: () => 0,
   });
 
-  assert.equal(deadlineMs, 55_000);
+  assert.equal(deadlineMs, 40_000);
   assert.equal(answer.result.errorType, null);
 });
