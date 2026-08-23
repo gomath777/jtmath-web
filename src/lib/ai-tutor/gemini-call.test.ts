@@ -157,3 +157,24 @@ test('Given a total deadline expires before retry When call metadata is returned
   assert.equal(result.attemptCount, 1);
   assert.equal(calls, 1);
 });
+
+test('Given an in-flight Gemini SDK request When the overall deadline expires Then the request signal aborts and the call returns timeout', async () => {
+  let signal: AbortSignal | undefined;
+  const client: GeminiGenerateContentClient = {
+    generateContent: async (params) => new Promise((_, reject) => {
+      signal = params.config.abortSignal;
+      signal?.addEventListener('abort', () => reject(new Error('synthetic aborted request')), { once: true });
+    }),
+  };
+
+  const response = await callGeminiWithRetry({
+    client,
+    params: await paramsFixture,
+    deadlineMs: 90_000,
+    deadline: async () => 'timeout',
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(response, 'timeout');
+  assert.equal(signal?.aborted, true);
+});

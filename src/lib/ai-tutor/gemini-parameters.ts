@@ -18,6 +18,8 @@ export type GeminiGenerateContentConfig = {
   readonly maxOutputTokens: number;
   readonly responseMimeType: 'application/json';
   readonly responseJsonSchema: GeminiResponseJsonSchema;
+  readonly abortSignal?: AbortSignal;
+  readonly httpOptions?: { readonly timeout?: number };
   readonly thinkingConfig?: {
     readonly includeThoughts: false;
     readonly thinkingBudget?: 0;

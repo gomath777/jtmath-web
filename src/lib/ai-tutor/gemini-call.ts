@@ -31,7 +31,9 @@ export async function callGeminiWithRetry(options: GeminiCallOptions): Promise<G
 }
 
 export async function callGeminiWithRetryWithMetadata(options: GeminiCallOptions): Promise<GeminiCallResult> {
-  const timer = createDeadline(options.deadline, options.deadlineMs);
+  const abortController = new AbortController();
+  const timer = createDeadline(options.deadline, options.deadlineMs, abortController);
+  const params = attachRequestDeadline(options.params, options.deadlineMs, abortController.signal);
   let expired = false;
   let attemptCount = 0;
   const expiration = timer.promise.then((result) => {
@@ -39,7 +41,10 @@ export async function callGeminiWithRetryWithMetadata(options: GeminiCallOptions
     return result;
   });
   try {
-    const result = await Promise.race([generateWithRetry(options, () => expired, () => { attemptCount += 1; }), expiration]);
+    const result = await Promise.race([
+      generateWithRetry({ ...options, params }, () => expired, () => { attemptCount += 1; }),
+      expiration,
+    ]);
     return result === 'timeout'
       ? { response: result, attemptCount: attemptCount === 2 ? 2 : 1 }
       : { response: result.response, attemptCount: attemptCount === 2 ? 2 : 1, ...(result.failedStatus === undefined ? {} : { failedStatus: result.failedStatus }) };
@@ -98,10 +103,12 @@ async function generateWithRetry(
 }
 
 async function callGeminiOnce(options: GeminiCallOptions): Promise<GeminiCallResult> {
-  const timer = createDeadline(options.deadline, options.deadlineMs);
+  const abortController = new AbortController();
+  const timer = createDeadline(options.deadline, options.deadlineMs, abortController);
+  const params = attachRequestDeadline(options.params, options.deadlineMs, abortController.signal);
   try {
     const response = await Promise.race([
-      options.client.generateContent(options.params).then(
+      options.client.generateContent(params).then(
         (value) => ({ kind: 'response' as const, value }),
         (error: unknown) => ({ kind: 'error' as const, error }),
       ),
@@ -143,12 +150,42 @@ function readGeminiErrorStatus(error: unknown): number | undefined {
   return undefined;
 }
 
-function createDeadline(deadline: GeminiCallOptions['deadline'], milliseconds: number): Deadline {
-  if (deadline !== undefined) return { promise: deadline(milliseconds), cancel: noop };
+function attachRequestDeadline(
+  params: GeminiGenerateContentParameters,
+  milliseconds: number,
+  abortSignal: AbortSignal,
+): GeminiGenerateContentParameters {
+  return {
+    ...params,
+    config: {
+      ...params.config,
+      abortSignal,
+      httpOptions: { ...params.config.httpOptions, timeout: milliseconds },
+    },
+  };
+}
+
+function createDeadline(
+  deadline: GeminiCallOptions['deadline'],
+  milliseconds: number,
+  abortController: AbortController,
+): Deadline {
+  if (deadline !== undefined) {
+    return {
+      promise: deadline(milliseconds).then((result) => {
+        abortController.abort();
+        return result;
+      }),
+      cancel: noop,
+    };
+  }
   let timeout: NodeJS.Timeout | undefined;
   return {
     promise: new Promise<'timeout'>((resolve) => {
-      timeout = setTimeout(() => resolve('timeout'), milliseconds);
+      timeout = setTimeout(() => {
+        abortController.abort();
+        resolve('timeout');
+      }, milliseconds);
     }),
     cancel: () => {
       if (timeout !== undefined) clearTimeout(timeout);

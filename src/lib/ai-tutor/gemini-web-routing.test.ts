@@ -24,3 +24,31 @@ test('Given a web route timeout above the function budget When Gemini is called 
   assert.equal(deadlineMs, 40_000);
   assert.equal(answer.result.errorType, null);
 });
+
+test('Given a stalled Gemini web request When the deadline expires Then its SDK fetch is aborted and the tutor returns a timeout answer', async () => {
+  let signal: AbortSignal | undefined;
+  let timeoutMs: number | undefined;
+
+  const answer = await answerGeminiWebRoute({
+    route: {
+      request,
+      primaryModel: { id: 'gemini-3.1-pro', alias: 'reasoning' },
+      fallbackModel: { id: 'gemini-3.1-flash', alias: 'fallback' },
+    },
+    client: {
+      generateContent: async (params) => new Promise((_, reject) => {
+        signal = params.config.abortSignal;
+        timeoutMs = params.config.httpOptions?.timeout;
+        signal?.addEventListener('abort', () => reject(new Error('synthetic aborted request')), { once: true });
+      }),
+    },
+    modelTimeoutMs: 60_000,
+    deadline: async () => 'timeout',
+    now: () => 0,
+  });
+
+  assert.equal(signal?.aborted, true);
+  assert.equal(timeoutMs, 40_000);
+  assert.equal(answer.result.errorType, 'timeout');
+  assert.match(answer.result.answerText, /답변 시간이 길어졌어요/u);
+});
