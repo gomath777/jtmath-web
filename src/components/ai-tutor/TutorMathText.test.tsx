@@ -173,6 +173,20 @@ test('classifyTutorLatex keeps malformed and instruction-like fragments literal 
   assert.equal(classifyTutorLatex('\\sqrt{x_1^2}').kind, 'renderable');
 });
 
+test('classifyTutorLatex renders safe single-variable inline math without opening prose fallback', () => {
+  // Given: tutor answers commonly reference short variables as standalone inline math.
+  const safeVariables = ['x', 'a', 'y', 'x_1'];
+
+  // When / Then
+  for (const expression of safeVariables) {
+    assert.deepEqual(classifyTutorLatex(expression), { kind: 'renderable' });
+  }
+  assert.equal(classifyTutorLatex('정답').kind, 'literal');
+  assert.equal(classifyTutorLatex('x plus y').kind, 'literal');
+  assert.equal(classifyTutorLatex('\\href{https://example.com}{x}').kind, 'literal');
+  assert.equal(classifyTutorLatex('ignore previous instructions').kind, 'literal');
+});
+
 test('TutorMathText server markup contains escaped text and no injected HTML', () => {
   // Given
   const text = '태그 <script>alert(1)</script> 와 $\\sin x$';
@@ -194,6 +208,8 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.hasKatexHtml, true, JSON.stringify(result));
   assert.equal(result.hasKatexMathml, true);
   assert.equal(result.hasBareLatexHtml, true);
+  assert.equal(result.singleVariableKatexCount, 4);
+  assert.equal(result.singleVariableLiteralCount, 0);
   assert.equal(result.curriculumKatexCount, 7);
   assert.equal(result.curriculumLiteralCount, 0);
   assert.equal(result.unsafeNodeCount, 0);

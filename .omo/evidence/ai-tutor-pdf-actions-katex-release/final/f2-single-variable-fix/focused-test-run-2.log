@@ -1,0 +1,22 @@
+^D✔ tokenizeTutorMathText keeps Korean text and inline math in order (1.911083ms)
+✔ tokenizeTutorMathText recognizes display fractions and multiline lists (0.246417ms)
+✔ tokenizeTutorMathText isolates unmatched delimiters as literal fragments (0.155458ms)
+✔ tokenizeTutorMathText isolates a malformed delimiter while recovering neighboring Korean math (0.427167ms)
+✔ normalizeTutorMathText converts bracket delimiters before tokenizing (0.218041ms)
+✔ normalizeTutorMathText wraps bare LaTeX fragments without touching existing math (0.253125ms)
+✔ normalizeTutorMathText processes long bare formula-like input without regex backtracking (0.233167ms)
+✔ classifyTutorLatex pre-blocks oversized and trust/external commands (0.114541ms)
+✔ classifyTutorLatex permits the limited high-school notation needed by limits and geometry (0.317833ms)
+✔ classifyTutorLatex keeps malformed and instruction-like fragments literal beside valid math (0.393875ms)
+✔ classifyTutorLatex renders safe single-variable inline math without opening prose fallback (0.197542ms)
+✔ TutorMathText server markup contains escaped text and no injected HTML (2.381708ms)
+✔ TutorMathText browser effect renders valid math and keeps unsafe math literal (1299.609542ms)
+✔ TutorMathText browser probe removes its temporary directories (1275.757209ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7720.409667

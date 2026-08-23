@@ -1,0 +1,4 @@
+^D250 src/components/ai-tutor/TutorMathText.logic.ts
+187 src/components/ai-tutor/TutorMathText.test.tsx
+230 src/components/ai-tutor/TutorMathText.browser-test-support.ts
+58 src/components/ai-tutor/TutorMathText.browser-probe-result.ts
