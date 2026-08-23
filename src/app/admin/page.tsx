@@ -10,8 +10,9 @@ const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',')
 export default async function AdminDashboardPage({
   searchParams,
 }: {
-  searchParams: { tab?: string };
+  searchParams: Promise<{ tab?: string }>;
 }) {
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
@@ -20,7 +21,7 @@ export default async function AdminDashboardPage({
     redirect('/dashboard');
   }
 
-  const activeTab = searchParams.tab || 'users';
+  const activeTab = resolvedSearchParams.tab || 'users';
 
   // 수강생 목록 (프로필 + 수강 정보)
   const { data: profiles } = await supabase

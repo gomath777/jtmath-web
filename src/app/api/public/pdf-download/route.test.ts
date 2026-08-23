@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createPdfDownloadGet, type PdfFetchResponse } from './route';
+import { createPdfDownloadGet, type PdfFetchResponse } from '@/lib/pdf-download-route';
 
 const sourceUrl = 'https://mathgo-pdfs.b-cdn.net/worksheets/lesson.PDF?v=20260824';
 

@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { createPdfDownloadGet } from '../../../src/app/api/public/pdf-download/route';
+import { createPdfDownloadGet } from '../../../src/lib/pdf-download-route';
 
 const downloadGet = createPdfDownloadGet({
   fetch: async () => ({

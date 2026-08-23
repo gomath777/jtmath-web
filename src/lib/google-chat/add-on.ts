@@ -2,14 +2,46 @@ import { z } from 'zod';
 
 const ChatUserSchema = z
   .object({
+    name: z.string().min(1).optional(),
     displayName: z.string().min(1).optional(),
+  })
+  .loose();
+
+const ChatSpaceSchema = z
+  .object({
+    name: z.string().min(1),
+    type: z.string().optional(),
+  })
+  .loose();
+
+const ChatThreadSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+  })
+  .loose();
+
+const ChatAttachmentSchema = z
+  .object({
+    name: z.string().optional(),
+    contentName: z.string().optional(),
+    contentType: z.string().optional(),
+    attachmentDataRef: z
+      .object({
+        resourceName: z.string(),
+      })
+      .loose(),
   })
   .loose();
 
 const ChatMessageSchema = z
   .object({
+    name: z.string().min(1).optional(),
     text: z.string().optional(),
-    attachment: z.array(z.unknown()).optional(),
+    annotations: z.array(z.unknown()).optional(),
+    attachment: z.array(ChatAttachmentSchema).optional(),
+    attachments: z.array(ChatAttachmentSchema).optional(),
+    space: ChatSpaceSchema.optional(),
+    thread: ChatThreadSchema.optional(),
   })
   .loose();
 
@@ -60,7 +92,17 @@ const RemovedFromSpaceEventSchema = z
 export type GoogleChatEvent =
   | {
       readonly kind: 'message';
+      readonly userName: string;
+      readonly messageName: string;
+      readonly space: {
+        readonly name: string;
+        readonly type: string;
+        readonly channel: 'direct_message' | 'named_space';
+      };
+      readonly threadName?: string | null;
       readonly text: string;
+      readonly annotations: readonly unknown[];
+      readonly attachments: readonly GoogleChatAttachment[];
       readonly hasAttachment: boolean;
     }
   | {
@@ -69,7 +111,18 @@ export type GoogleChatEvent =
     }
   | {
       readonly kind: 'removed_from_space';
+      readonly space?: {
+        readonly name: string;
+        readonly channel: 'direct_message' | 'named_space';
+      };
     };
+
+export type GoogleChatAttachment = Readonly<{
+  readonly name?: string;
+  readonly contentName?: string;
+  readonly contentType?: string;
+  readonly attachmentDataRef: Readonly<{ readonly resourceName: string }>;
+}>;
 
 type CreateMessageResponse = {
   readonly hostAppDataAction: {
@@ -97,10 +150,22 @@ export function parseGoogleChatEvent(input: unknown): GoogleChatEvent {
   const messageEvent = MessageEventSchema.safeParse(input);
   if (messageEvent.success) {
     const message = messageEvent.data.chat.messagePayload.message;
+    const attachments = message.attachments ?? message.attachment ?? [];
+    const space = message.space ?? { name: 'spaces/unknown', type: 'DM' };
     return {
       kind: 'message',
+      userName: messageEvent.data.chat.user?.name ?? 'users/unknown',
+      messageName: message.name ?? 'spaces/unknown/messages/unknown',
+      space: {
+        name: space.name,
+        type: space.type ?? 'DM',
+        channel: space.type === 'ROOM' || space.type === 'SPACE' ? 'named_space' : 'direct_message',
+      },
+      threadName: message.thread?.name ?? null,
       text: message.text?.trim() ?? '',
-      hasAttachment: (message.attachment?.length ?? 0) > 0,
+      annotations: message.annotations ?? [],
+      attachments,
+      hasAttachment: attachments.length > 0,
     };
   }
 
@@ -113,7 +178,15 @@ export function parseGoogleChatEvent(input: unknown): GoogleChatEvent {
   }
 
   const removedFromSpaceEvent = RemovedFromSpaceEventSchema.safeParse(input);
-  if (removedFromSpaceEvent.success) return { kind: 'removed_from_space' };
+  if (removedFromSpaceEvent.success) {
+    return {
+      kind: 'removed_from_space',
+      space: {
+        name: removedFromSpaceEvent.data.chat.removedFromSpacePayload.space.name,
+        channel: 'named_space',
+      },
+    };
+  }
 
   throw new InvalidGoogleChatEventError(
     messageEvent.error.issues.length +

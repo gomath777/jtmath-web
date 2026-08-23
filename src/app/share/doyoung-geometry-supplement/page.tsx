@@ -99,18 +99,19 @@ const LESSONS: readonly ConceptLesson[] = [
 ];
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
-export default function DoyoungGeometrySupplementPage({ searchParams }: PageProps) {
+export default async function DoyoungGeometrySupplementPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="기하"
       heading="도영 기하보충"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <ConceptSharePage subjectLabel="기하" heading="도영 기하보충" lessons={LESSONS} />
     </ConceptAccessPage>

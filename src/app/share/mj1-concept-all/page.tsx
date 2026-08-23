@@ -21,18 +21,19 @@ const GATE_CONFIG: ConceptGateConfig = {
 const MJ1_CONCEPT_ALL_LESSONS = [...MJ1_CONCEPT_PART1, ...MJ1_CONCEPT_PART2] as const;
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
-export default function Mj1ConceptAllPage({ searchParams }: PageProps) {
+export default async function Mj1ConceptAllPage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="미적분1"
       heading="전체 개념보강"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <ConceptSharePage
         subjectLabel="미적분1"

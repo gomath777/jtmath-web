@@ -9,9 +9,11 @@ export default async function CourseViewerPage({
   params,
   searchParams,
 }: {
-  params: { id: string };
-  searchParams: { lesson?: string };
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ lesson?: string }>;
 }) {
+  const { id } = await params;
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   // 1. Auth check
@@ -22,7 +24,7 @@ export default async function CourseViewerPage({
   const { data: course } = await supabase
     .from('courses')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .single();
 
   const courseTitle = course?.title || '대수 Δ0 실전 개념 완성';
@@ -31,7 +33,7 @@ export default async function CourseViewerPage({
   const { data: lessonsData } = await supabase
     .from('lessons')
     .select('*')
-    .eq('course_id', params.id)
+    .eq('course_id', id)
     .order('week_number', { ascending: true })
     .order('lesson_number', { ascending: true });
 
@@ -56,7 +58,7 @@ export default async function CourseViewerPage({
   });
   const weeks = Array.from(weeksMap.entries()).sort((a, b) => a[0] - b[0]);
 
-  const currentLessonId = searchParams.lesson || (lessons.length > 0 ? lessons[0].id : null);
+  const currentLessonId = resolvedSearchParams.lesson || (lessons.length > 0 ? lessons[0].id : null);
   const currentLesson = lessons.find(l => l.id === currentLessonId) || (lessons.length > 0 ? lessons[0] : null);
 
   // Hardcoded textbook pages mapping for the Delta 0 courses based on user's curriculum
@@ -171,7 +173,7 @@ export default async function CourseViewerPage({
                   return (
                     <Link
                       key={lesson.id}
-                      href={`/dashboard/courses/${params.id}?lesson=${lesson.id}`}
+                      href={`/dashboard/courses/${id}?lesson=${lesson.id}`}
                       className={`w-full text-left flex items-start gap-2.5 px-3 py-2.5 text-xs rounded-lg transition-all ${
                         isActive
                           ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20'

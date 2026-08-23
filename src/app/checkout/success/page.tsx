@@ -6,9 +6,9 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 export default async function CheckoutSuccessPage({
   searchParams,
 }: {
-  searchParams: { paymentKey: string; orderId: string; amount: string };
+  searchParams: Promise<{ paymentKey?: string; orderId?: string; amount?: string }>;
 }) {
-  const { paymentKey, orderId, amount } = searchParams;
+  const { paymentKey, orderId, amount } = await searchParams;
   
   if (!paymentKey || !orderId || !amount) {
     redirect('/dashboard');

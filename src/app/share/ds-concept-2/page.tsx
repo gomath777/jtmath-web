@@ -19,18 +19,19 @@ const GATE_CONFIG: ConceptGateConfig = {
 };
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
-export default function DsConceptPart2Page({ searchParams }: PageProps) {
+export default async function DsConceptPart2Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="대수"
       heading="8~14차시 · 후반기"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <ConceptSharePage
         subjectLabel="대수"

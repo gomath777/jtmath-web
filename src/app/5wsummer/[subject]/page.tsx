@@ -9,9 +9,9 @@ import { requireSummerSession } from '@/lib/summer-5week/server';
 import { isSummerSubject, SUMMER_SUBJECT_INFO, type SummerSubject } from '@/lib/summer-5week/subjects';
 
 type SummerSubjectPageProps = {
-  readonly params: {
+  readonly params: Promise<{
     readonly subject: string;
-  };
+  }>;
 };
 
 export const dynamic = 'force-dynamic';
@@ -25,8 +25,9 @@ function assertNever(value: never): never {
 }
 
 export async function generateMetadata({ params }: SummerSubjectPageProps): Promise<Metadata> {
-  if (!isSummerSubject(params.subject)) return {};
-  const info = SUMMER_SUBJECT_INFO[params.subject];
+  const { subject } = await params;
+  if (!isSummerSubject(subject)) return {};
+  const info = SUMMER_SUBJECT_INFO[subject];
   return {
     title: `${info.shortLabel} 5주 특강 | 고T수학`,
   };
@@ -77,9 +78,9 @@ function buildDashboardDays(subject: SummerSubject, session: SummerSession): rea
 }
 
 export default async function SummerSubjectPage({ params }: SummerSubjectPageProps) {
-  if (!isSummerSubject(params.subject)) notFound();
+  const { subject } = await params;
+  if (!isSummerSubject(subject)) notFound();
 
-  const subject = params.subject;
   const session = await requireSummerSession();
   if (!session.subjects.includes(subject)) redirect('/5wsummer');
 

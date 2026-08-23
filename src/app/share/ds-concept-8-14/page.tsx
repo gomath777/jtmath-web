@@ -55,9 +55,9 @@ type ChapterWithVideos = ChapterSet & {
 };
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
 function requiredEnv(name: string): string {
@@ -130,13 +130,14 @@ async function loadChapters() {
   }));
 }
 
-export default function DsConcept8to14SharePage({ searchParams }: PageProps) {
+export default async function DsConcept8to14SharePage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="대수"
       heading="8차시 ~ 14차시"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <DsConcept8to14Content />
     </ConceptAccessPage>

@@ -31,15 +31,17 @@ export default async function PracticePage({
   params,
   searchParams,
 }: {
-  params: { subject: string };
-  searchParams: { video?: string };
+  params: Promise<{ subject: string }>;
+  searchParams: Promise<{ video?: string }>;
 }) {
+  const { subject } = await params;
+  const resolvedSearchParams = await searchParams;
   const supabase = await createClient();
 
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const subjectSlug = params.subject;
+  const subjectSlug = subject;
   const subjectName = SUBJECT_NAMES[subjectSlug] ?? subjectSlug;
 
   const { data: videosData } = await supabase
@@ -61,7 +63,7 @@ export default async function PracticePage({
   }
   const chapters = Array.from(chaptersMap.entries());
 
-  const currentVideoId = searchParams.video ?? (videos.length > 0 ? videos[0].bunny_video_id : null);
+  const currentVideoId = resolvedSearchParams.video ?? (videos.length > 0 ? videos[0].bunny_video_id : null);
   const currentVideo = videos.find(v => v.bunny_video_id === currentVideoId) ?? videos[0] ?? null;
 
   return (

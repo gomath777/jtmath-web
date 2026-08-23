@@ -80,7 +80,7 @@ function parseQuery(input: string): Token[] {
   const parts = trimmed.split(/[\s,，]+/).filter(Boolean);
 
   for (const raw of parts) {
-    let part = raw.trim();
+    const part = raw.trim();
     if (!part) continue;
 
     // First, try compact code per part

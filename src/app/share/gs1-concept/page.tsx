@@ -110,18 +110,19 @@ const SECTIONS: Section[] = [
 ];
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
-export default function Gs1ConceptPart1Page({ searchParams }: PageProps) {
+export default async function Gs1ConceptPart1Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="공통수학1"
       heading="1~9강 · 전반부"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <div className="min-h-screen bg-parchment text-ink">
       <main className="max-w-2xl mx-auto px-5 py-10 md:py-14">

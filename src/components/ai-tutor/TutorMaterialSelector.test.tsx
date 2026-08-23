@@ -5,8 +5,8 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { TutorMaterialSelector, type TutorMaterialChoice } from './TutorMaterialSelector';
 
 const materials = [
-  { materialKey: 'm-1-content-pdfs-0', level: 1, label: '대표문항', fileName: '대표문항.pdf', order: 1 },
-  { materialKey: 'm-1-content-pdfs-1', level: 2, label: '레벨 2', fileName: '레벨2.pdf', order: 2, sideLabel: 'A' },
+  { materialKey: 'm-1-content-pdfs-0', label: '대표문항', order: 1 },
+  { materialKey: 'm-1-content-pdfs-1', label: '레벨 2', order: 2, sideLabel: 'A' },
 ] as const satisfies readonly TutorMaterialChoice[];
 
 test('TutorMaterialSelector renders client-safe labels in source order and names the target worksheet', () => {

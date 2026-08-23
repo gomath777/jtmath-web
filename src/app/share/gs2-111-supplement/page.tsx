@@ -30,9 +30,9 @@ type Video = {
 };
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
 const VIDEOS: readonly Video[] = [
@@ -48,13 +48,14 @@ function embedUrl(id: string): string {
   return `https://iframe.mediadelivery.net/embed/${CONCEPT_LIBRARY_ID}/${id}?autoplay=false&preload=true&responsive=true`;
 }
 
-export default function Gs2Supplement111Page({ searchParams }: PageProps) {
+export default async function Gs2Supplement111Page({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="공통수학2"
       heading="1.1.1 보강자료"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <div className="min-h-screen bg-parchment text-ink">
         <main className="mx-auto max-w-5xl px-5 py-8 md:px-8 md:py-12">

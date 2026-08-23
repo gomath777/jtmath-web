@@ -86,7 +86,7 @@ export default async function AdminCalendarsNewPage() {
     .order('scheduled_date');
 
   const slaByProfile = new Map<string, CalendarSlaEntry[]>();
-  for (const row of (slaRows || []) as Array<{
+  for (const row of (slaRows || []) as unknown as Array<{
     id: string;
     profile_id: string;
     scheduled_date: string | null;

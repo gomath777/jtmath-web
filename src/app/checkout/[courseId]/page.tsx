@@ -4,13 +4,14 @@ import MainHeader from '@/components/MainHeader';
 import CheckoutClient from './CheckoutClient';
 import { ShieldCheck, Clock, Download } from 'lucide-react';
 
-export default async function CheckoutPage({ params }: { params: { courseId: string } }) {
+export default async function CheckoutPage({ params }: { params: Promise<{ courseId: string }> }) {
+  const { courseId } = await params;
   const supabase = await createClient();
 
   // 1. 로그인 확인
   const { data: { user }, error: authError } = await supabase.auth.getUser();
   if (authError || !user) {
-    redirect(`/login?redirect=/checkout/${params.courseId}`);
+    redirect(`/login?redirect=/checkout/${courseId}`);
   }
 
   // 2. 유저 프로필 조회 (결제 정보에 필요)
@@ -24,7 +25,7 @@ export default async function CheckoutPage({ params }: { params: { courseId: str
   const { data: course, error: courseError } = await supabase
     .from('courses')
     .select('*')
-    .eq('id', params.courseId)
+    .eq('id', courseId)
     .single();
 
   let fallbackCourse: any = null;
@@ -32,7 +33,7 @@ export default async function CheckoutPage({ params }: { params: { courseId: str
     // 상품이 없으면 404로 보내거나 목록으로 리다이렉트
     // 테스트 환경용 가짜 데이터
     fallbackCourse = {
-      id: params.courseId,
+      id: courseId,
       title: "기하학 마스터 클래스",
       subtitle: "중등 기하 완벽 대비반",
       price: 50000,

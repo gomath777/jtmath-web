@@ -83,18 +83,19 @@ const SECTIONS = [
 ];
 
 type PageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly gate?: string | readonly string[];
-  };
+  }>;
 };
 
-export default function DsConceptSuyeolSharePage({ searchParams }: PageProps) {
+export default async function DsConceptSuyeolSharePage({ searchParams }: PageProps) {
+  const resolvedSearchParams = await searchParams;
   return (
     <ConceptAccessPage
       config={GATE_CONFIG}
       subjectLabel="대수"
       heading="16~20강 · 수열"
-      gate={searchParams?.gate}
+      gate={resolvedSearchParams?.gate}
     >
       <div className="min-h-screen bg-parchment text-ink">
       <main className="max-w-2xl mx-auto px-5 py-10 md:py-14">

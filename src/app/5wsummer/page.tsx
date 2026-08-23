@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 type SummerEntryPageProps = {
-  readonly searchParams?: {
+  readonly searchParams?: Promise<{
     readonly error?: string;
     readonly gate?: string;
-  };
+  }>;
 };
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -26,6 +26,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 export default async function SummerEntryPage({ searchParams }: SummerEntryPageProps) {
+  const resolvedSearchParams = await searchParams;
   const session = await readSummerSession();
 
   if (session) {
@@ -42,7 +43,7 @@ export default async function SummerEntryPage({ searchParams }: SummerEntryPageP
     );
   }
 
-  const gate = searchParams?.error ?? searchParams?.gate;
+  const gate = resolvedSearchParams?.error ?? resolvedSearchParams?.gate;
   const error = gate ? ERROR_MESSAGES[gate] : undefined;
 
   return (
