@@ -64,8 +64,7 @@ test('Given fallback cookie When route receives request Then dependencies are no
   assert.equal(constructions, 0);
 });
 
-test('Given master token When route receives request Then dependencies are not constructed', async () => {
-  const counters = constructionCounters();
+test('Given master preview token for an assigned student When route receives request Then it uses the same assignment-scoped tutor route', async () => {
   const token = await signStrictWebStudentToken({
     payload: { ...baseIdentity, isMaster: true },
     secret: explicitSecret,
@@ -74,11 +73,17 @@ test('Given master token When route receives request Then dependencies are not c
   const response = await createWebAiTutorRoutePost({
     env,
     now: () => now,
-    constructors: throwingConstructors(counters),
+    constructors: createRouteConstructors(),
+    fetchPort: {
+      fetch: async () => new Response(new Blob([new TextEncoder().encode('%PDF- synthetic')]), {
+        headers: { 'content-type': 'application/pdf' },
+      }),
+    },
   })(request(validBody(), token));
 
-  assert.equal(response.status, 403);
-  assert.equal(counters.count, 0);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.match(body.resolvedTarget.contextKey, /^ctx_/);
 });
 
 test('Given forbidden body field When route receives request Then dependencies are not constructed', async () => {

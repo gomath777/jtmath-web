@@ -53,9 +53,6 @@ export function createWebAiTutorRoutePost(options: WebAiTutorRouteOptions): (req
       nowSeconds: Math.floor(now.getTime() / 1000),
     });
     if (identity === null) return Response.json({ status: 'unauthorized', message: '다시 로그인해 주세요.' }, { status: 401 });
-    if (identity.isMaster === true) {
-      return Response.json({ status: 'forbidden', message: '학생 계정으로만 사용할 수 있습니다.' }, { status: 403 });
-    }
     const body = await readJson(request);
     if (body === invalidJson || !WebTutorRequestSchema.safeParse(body).success) {
       return Response.json({ status: 'invalid_request', message: '요청 형식이 올바르지 않습니다.' }, { status: 422 });
