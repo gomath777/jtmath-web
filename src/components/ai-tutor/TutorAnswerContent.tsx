@@ -97,6 +97,7 @@ function normalizeTutorAnswerText(text: string): string {
   return text
     .replace(/\r\n?/g, '\n')
     .replace(/^\s*\[\[method:[^\]\n]*\]\]\s*/gim, '')
+    .replace(/^\s*(?:hint|start|decisive_hint|solution)\s*:?\s*(?:\n|$)/i, '')
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/__(.*?)__/g, '$1')
     .replace(/`([^`]+)`/g, '$1');

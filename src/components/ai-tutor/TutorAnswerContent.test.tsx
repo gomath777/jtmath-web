@@ -126,6 +126,19 @@ test('parseTutorAnswerBlocks strips method markers and inline markdown markers b
   assert.equal(markup.includes('__'), false);
 });
 
+test('parseTutorAnswerBlocks removes a standalone internal English stage token', () => {
+  // Given: the provider accidentally emits its internal stage identifier before a Korean answer.
+  const answer = ['hint', '', '함수의 각 범위를 먼저 확인해 보세요.'].join('\n');
+
+  // When: the answer is prepared for the student-facing card.
+  const blocks = parseTutorAnswerBlocks(answer);
+
+  // Then: the internal token is never shown while the mathematical hint remains intact.
+  assert.deepEqual(blocks, [
+    { kind: 'paragraph', text: '함수의 각 범위를 먼저 확인해 보세요.' },
+  ] satisfies readonly TutorAnswerBlock[]);
+});
+
 test('TutorTurnList keeps student bubbles compact while tutor turns opt into workbook card classes', () => {
   const markup = renderToStaticMarkup(
     <TutorTurnList
