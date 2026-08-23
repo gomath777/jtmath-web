@@ -48,7 +48,7 @@ type WebAiTutorTurnDependencies = {
 export async function answerWebTutorTurn(input: Readonly<{
   readonly request: Request;
   readonly tutorRequest: WebTutorRequest;
-  readonly identity: { readonly profileId: string; readonly slug: string };
+  readonly identity: { readonly profileId: string; readonly slug: string; readonly isMaster?: boolean };
   readonly dependencies: WebAiTutorTurnDependencies;
   readonly models: {
     readonly fast: WebTutorModelConfig;

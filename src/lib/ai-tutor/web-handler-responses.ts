@@ -102,7 +102,7 @@ export function duplicateCompletedWebTutorResponse(input: Readonly<{
 
 export async function appendRenewedWebTutorCookie(input: Readonly<{
   readonly response: Response;
-  readonly identity: { readonly profileId: string; readonly slug: string };
+  readonly identity: { readonly profileId: string; readonly slug: string; readonly isMaster?: boolean };
   readonly studentTokenSecret: string;
   readonly secureCookie: boolean;
   readonly now: Date;
@@ -111,6 +111,7 @@ export async function appendRenewedWebTutorCookie(input: Readonly<{
     payload: {
       profileId: input.identity.profileId,
       slug: input.identity.slug,
+      ...(input.identity.isMaster === true ? { isMaster: true } : {}),
     },
     secret: input.studentTokenSecret,
     nowSeconds: Math.floor(input.now.getTime() / 1000),

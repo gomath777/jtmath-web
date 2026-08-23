@@ -4,6 +4,7 @@ import { createFixtures, validBody } from './web-handler.test-support';
 import { GUIDE_LESSON_SLUG, guideLesson, unavailableRegisteredGuideStore, verifiedGuideStore } from './web-handler-guide.test-support';
 import { createSupabaseWebConversationRepository } from './web-conversation-supabase';
 import { createFakeWebConversationSupabase, webAssignmentId, webProfileId } from './web-conversation-test-support';
+import { readWebStudentCookie } from './web-auth';
 import './web-handler-graph.cases';
 
 const guideMaterialKey = 'm-1-content-pdfs-3';
@@ -19,6 +20,8 @@ const persistedAssignment = {
   releasedAt: '2026-08-20T09:00:00.000Z',
   variant: 'honors',
 } as const;
+const masterPreviewIdentity = { ...persistedIdentity, isMaster: true } as const;
+const pendingPreviewAssignment = { ...persistedAssignment, status: 'pending', releasedAt: null } as const;
 
 test('Given disabled web tutor config When posting Then the handler returns 404 before provider work', async () => {
   const fixtures = createFixtures({ env: { AI_TUTOR_WEB_ENABLED: 'false' } });
@@ -50,6 +53,28 @@ test('Given a verified standard guide stage When posting Then the handler answer
     materialKey: guideMaterialKey,
     problemNumber: 3,
   });
+});
+
+test('Given a master preview of a pending lesson When the tutor session renews Then the next tutor turn keeps master access', async () => {
+  const fixtures = createFixtures({
+    identity: masterPreviewIdentity,
+    tokenRow: persistedToken,
+    lesson: persistedLesson,
+    assignments: [pendingPreviewAssignment],
+    guideStore: verifiedGuideStore([]),
+  });
+  const request = { lessonSlug: GUIDE_LESSON_SLUG, selectedMaterialKey: guideMaterialKey, message: '3번 결정적 힌트 줘' };
+
+  const first = await fixtures.post(request);
+  const renewedToken = readWebStudentCookie(first.headers.get('set-cookie'));
+
+  assert.equal(first.status, 200);
+  assert.notEqual(renewedToken, null);
+  if (renewedToken === null) assert.fail('The tutor response must renew the signed session cookie.');
+
+  const second = await fixtures.post(request, renewedToken);
+
+  assert.equal(second.status, 200);
 });
 
 test('Given a verified free-form clarification and provider failure When posting Then the handler returns the nearest guide stage with failure metadata', async () => {
