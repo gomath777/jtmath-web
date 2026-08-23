@@ -55,10 +55,7 @@
     "src/components/ai-tutor/AiTutorWidget.test.tsx",
     "src/components/ai-tutor/TutorMathText.browser-test-support.ts",
     "scripts/qa/ai-tutor/web-preflight.ts",
-    "scripts/qa/ai-tutor/web-preflight.test.ts",
-    "scripts/qa/ai-tutor/lesson-page-nonregression-qa.ts",
-    "scripts/qa/ai-tutor/widget-browser-qa.ts",
-    "scripts/qa/summer-5week-demo-cdp.ts"
+    "scripts/qa/ai-tutor/web-preflight.test.ts"
   ],
   "exclude": ["node_modules"]
 }
