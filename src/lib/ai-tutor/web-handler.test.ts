@@ -172,6 +172,36 @@ test('Given a server-owned active material When a client sends a follow-up Then 
   assert.equal(fixtures.providerRequests.length, 1);
 });
 
+test('Given server continuity has more than six persisted turns When posting Then the handler reaches the provider and returns JSON instead of Zod 500', async () => {
+  const fixtures = createFixtures({
+    lesson: guideLesson,
+    guideStore: verifiedGuideStore([]),
+    serverContinuity: ({ contextKey }) => ({
+      activeTarget: { contextKey, materialKey: guideMaterialKey, problemNumber: 3 },
+      recentTurns: Array.from({ length: 8 }, (_, index) => ({
+        role: index % 2 === 0 ? 'student' as const : 'tutor' as const,
+        text: `persisted-${index + 1}`,
+      })),
+    }),
+  });
+
+  const response = await fixtures.post({ lessonSlug: GUIDE_LESSON_SLUG, message: '다음 단계' });
+  const body = await response.json();
+  const providerRequest = fixtures.providerRequests[0];
+
+  assert.equal(response.status, 200);
+  assert.equal(body.status, 'answered');
+  assert.equal(fixtures.providerRequests.length, 1);
+  assert.deepEqual(providerRequest?.context.recentTurns.map((turn) => turn.text), [
+    'persisted-3',
+    'persisted-4',
+    'persisted-5',
+    'persisted-6',
+    'persisted-7',
+    'persisted-8',
+  ]);
+});
+
 test('Given web conversation persistence When a duplicate free-form request is posted Then the provider is called once and token metadata is stored', async () => {
   // Given
   const fake = createFakeWebConversationSupabase();

@@ -4,6 +4,8 @@ import type {
   WebRecentTurn,
 } from './web-conversation-repository';
 
+const maxRecentTurns = 6;
+
 export type WebTutorServerTarget = {
   readonly contextKey: string;
   readonly materialKey: string;
@@ -44,7 +46,7 @@ export async function loadWebTutorServerContinuity(
     profileId: input.profileId,
     assignmentId: input.assignmentId,
     conversationId: input.conversation.id,
-    limit: 6,
+      limit: maxRecentTurns,
   });
   if (!recent.ok) return { kind: 'unavailable' };
   return {
@@ -82,5 +84,5 @@ function toActiveTarget(
 function toPromptTurns(
   turns: readonly WebRecentTurn[],
 ): readonly { readonly role: 'student' | 'tutor'; readonly text: string }[] {
-  return turns.map(({ role, text }) => ({ role, text }));
+  return turns.slice(-maxRecentTurns).map(({ role, text }) => ({ role, text }));
 }

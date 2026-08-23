@@ -12,6 +12,7 @@ import type { WebLessonContextResult } from './web-lesson-context';
 import type { WebTutorProviderRouteMetadata, WebTutorRoutedProvider } from './web-provider-routing';
 
 const zeroTokenCounts: AiTutorTokenCounts = { input: 0, output: 0, total: 0 };
+const maxRecentTurns = 6;
 
 export type WebTutorEngineMetadata =
   | ({ readonly kind: 'provider' } & WebTutorProviderRouteMetadata)
@@ -111,7 +112,7 @@ function createProviderRequest(input: RunWebTutorEngineInput): TutorProviderRequ
         title: input.result.context.lessonTitle,
         summary: '현재 선택한 문제의 확인된 안내만 사용합니다.',
       }],
-      recentTurns: input.recentTurns.map(toTutorRecentTurn),
+      recentTurns: input.recentTurns.slice(-maxRecentTurns).map(toTutorRecentTurn),
       repeatedConceptSignal: false,
       ...(input.guideContext === undefined ? {} : { guideContext: input.guideContext }),
     },

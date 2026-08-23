@@ -69,3 +69,29 @@ test('loadWebTutorServerContinuity fails closed for an invalid stored target and
     conversation: { ...scope.conversation, activeProblemKey: 'problem:1000' },
   }), { kind: 'invalid_active_target' });
 });
+
+test('Given a repository returns more persisted turns than requested When continuity is loaded Then it preserves the newest six in chronological order', async () => {
+  const repository: WebTutorContinuityRepository = {
+    readRecentTurns: async () => ({
+      ok: true,
+      value: Array.from({ length: 8 }, (_, index) => ({
+        role: index % 2 === 0 ? 'student' as const : 'tutor' as const,
+        text: `turn-${index + 1}`,
+        targetMaterialKey: 'm-lv42',
+      })),
+    }),
+  };
+
+  const result = await loadWebTutorServerContinuity({ repository, ...scope });
+
+  assert.equal(result.kind, 'ok');
+  if (result.kind !== 'ok') assert.fail('Expected persisted continuity to remain usable');
+  assert.deepEqual(result.continuity.recentTurns.map((turn) => turn.text), [
+    'turn-3',
+    'turn-4',
+    'turn-5',
+    'turn-6',
+    'turn-7',
+    'turn-8',
+  ]);
+});
