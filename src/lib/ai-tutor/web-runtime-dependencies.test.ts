@@ -52,6 +52,14 @@ test('web runtime dependency factory constructs only after enabled web config', 
     parseWebAiTutorConfig({ ...completeWebEnv, VERCEL_ENV: 'production' }),
     constructors,
   );
+  const productionOptIn = createWebAiTutorDependenciesWhenEnabled(
+    parseWebAiTutorConfig({
+      ...completeWebEnv,
+      VERCEL_ENV: 'production',
+      AI_TUTOR_WEB_PRODUCTION_ENABLED: 'true',
+    }),
+    constructors,
+  );
   const fallback = createWebAiTutorDependenciesWhenEnabled(
     parseWebAiTutorConfig({ ...completeWebEnv, STUDENT_TOKEN_SECRET: 'dev-fallback-secret-change-me' }),
     constructors,
@@ -60,7 +68,8 @@ test('web runtime dependency factory constructs only after enabled web config', 
 
   // Then
   assert.equal(production, undefined);
+  assert.deepEqual(productionOptIn, { status: 'constructed' });
   assert.equal(fallback, undefined);
   assert.deepEqual(enabled, { status: 'constructed' });
-  assert.deepEqual(counters, { supabase: 1, pdf: 1, gemini: 1, admission: 1, chat: 0 });
+  assert.deepEqual(counters, { supabase: 2, pdf: 2, gemini: 2, admission: 2, chat: 0 });
 });

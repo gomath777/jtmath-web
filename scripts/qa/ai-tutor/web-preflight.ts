@@ -32,13 +32,7 @@ export function runWebAiTutorPreflight(
 ): WebAiTutorPreflightResult {
   const parsed = parseWebAiTutorConfig(input.env, { nodeEnv: input.nodeEnv });
   const checks = [
-    ...AI_TUTOR_WEB_ENV_NAMES.map((name) => ({
-      name,
-      ok: name === 'VERCEL_ENV' ? input.env[name] !== 'production' : present(input.env[name]),
-      detail: name === 'VERCEL_ENV'
-        ? 'preview-or-local'
-        : present(input.env[name]) ? 'present' : 'missing',
-    })),
+    ...AI_TUTOR_WEB_ENV_NAMES.map((name) => environmentCheck(input.env, name)),
     runtimeCheck(parsed),
     featureFlagCheck(parsed),
   ];
@@ -47,6 +41,29 @@ export function runWebAiTutorPreflight(
     ...checks.map((check) => formatCheck(check, input.namesOnly)),
   ];
   return { exitCode: checks.every((check) => check.ok) ? 0 : 1, lines };
+}
+
+function environmentCheck(
+  env: WebAiTutorEnvironment,
+  name: (typeof AI_TUTOR_WEB_ENV_NAMES)[number],
+): Check {
+  const production = env.VERCEL_ENV === 'production';
+  const productionOptIn = env.AI_TUTOR_WEB_PRODUCTION_ENABLED?.trim().toLowerCase() === 'true';
+  if (name === 'AI_TUTOR_WEB_PRODUCTION_ENABLED') {
+    return {
+      name,
+      ok: !production || productionOptIn,
+      detail: production ? (productionOptIn ? 'present' : 'missing') : 'not-required',
+    };
+  }
+  if (name === 'VERCEL_ENV') {
+    return {
+      name,
+      ok: !production || productionOptIn,
+      detail: production ? 'production-opt-in' : 'preview-or-local',
+    };
+  }
+  return { name, ok: present(env[name]), detail: present(env[name]) ? 'present' : 'missing' };
 }
 
 function runtimeCheck(parsed: ReturnType<typeof parseWebAiTutorConfig>): Check {

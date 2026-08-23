@@ -183,6 +183,7 @@ async function loadWebTutorContext(input: {
 function readWebAiTutorEnvironment(env: NodeJS.ProcessEnv): WebAiTutorEnvironment {
   return {
     AI_TUTOR_WEB_ENABLED: env.AI_TUTOR_WEB_ENABLED,
+    AI_TUTOR_WEB_PRODUCTION_ENABLED: env.AI_TUTOR_WEB_PRODUCTION_ENABLED,
     AI_TUTOR_PAID_BILLING_CONFIRMED: env.AI_TUTOR_PAID_BILLING_CONFIRMED,
     GEMINI_API_KEY: env.GEMINI_API_KEY,
     AI_TUTOR_GEMINI_FAST_MODEL: env.AI_TUTOR_GEMINI_FAST_MODEL,

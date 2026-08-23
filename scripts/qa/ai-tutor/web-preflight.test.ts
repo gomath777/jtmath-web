@@ -54,3 +54,19 @@ test('web preflight fails closed in production and fallback-secret cases', () =>
   assert.equal(production.lines.includes('FAIL AI_TUTOR_WEB_FEATURE_FLAG'), true);
   assert.equal(fallback.lines.includes('FAIL AI_TUTOR_WEB_RUNTIME_CONFIG'), true);
 });
+
+test('web preflight accepts production only with the explicit production opt-in', () => {
+  const result = runWebAiTutorPreflight({
+    env: {
+      ...completeEnv,
+      VERCEL_ENV: 'production',
+      AI_TUTOR_WEB_PRODUCTION_ENABLED: 'true',
+    },
+    nodeEnv: 'production',
+    namesOnly: true,
+  });
+
+  assert.equal(result.exitCode, 0);
+  assert.equal(result.lines.includes('PASS AI_TUTOR_WEB_PRODUCTION_ENABLED'), true);
+  assert.equal(result.lines.includes('PASS AI_TUTOR_WEB_FEATURE_FLAG'), true);
+});

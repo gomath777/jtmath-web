@@ -38,7 +38,7 @@ test('web config enables only in preview or local runtimes when complete setting
   });
 });
 
-test('web config hard-disables production even when all settings are complete', () => {
+test('web config hard-disables production without the explicit production opt-in', () => {
   // Given
   let constructionCount = 0;
 
@@ -56,6 +56,33 @@ test('web config hard-disables production even when all settings are complete', 
   assert.equal(result.config.status, 'disabled');
   assert.equal(result.config.enabled, false);
   assert.equal(constructionCount, 0);
+});
+
+test('web config enables production only with the explicit production opt-in and complete settings', () => {
+  const result = parseWebAiTutorConfig({
+    ...completeWebEnv,
+    VERCEL_ENV: 'production',
+    AI_TUTOR_WEB_PRODUCTION_ENABLED: 'true',
+  });
+
+  assert.equal(result.ok, true);
+  if (!result.ok) assert.fail('Expected explicit production opt-in to parse');
+  assert.equal(result.config.status, 'enabled');
+  assert.equal(result.config.runtime, 'production');
+});
+
+test('web config rejects an invalid production opt-in value', () => {
+  const result = parseWebAiTutorConfig({
+    ...completeWebEnv,
+    VERCEL_ENV: 'production',
+    AI_TUTOR_WEB_PRODUCTION_ENABLED: 'yes',
+  });
+
+  assert.equal(result.ok, false);
+  if (result.ok) assert.fail('Expected invalid production opt-in to fail closed');
+  assert.deepEqual(result.issues, [
+    { envName: 'AI_TUTOR_WEB_PRODUCTION_ENABLED', code: 'invalid_boolean' },
+  ]);
 });
 
 test('web config fails closed for each missing or blank required variable', () => {
@@ -234,6 +261,7 @@ test('AI_TUTOR_WEB_ENV_NAMES documents the isolated web config surface', () => {
   // Given / When / Then
   assert.deepEqual(AI_TUTOR_WEB_ENV_NAMES, [
     'AI_TUTOR_WEB_ENABLED',
+    'AI_TUTOR_WEB_PRODUCTION_ENABLED',
     'AI_TUTOR_PAID_BILLING_CONFIRMED',
     'GEMINI_API_KEY',
     'AI_TUTOR_GEMINI_FAST_MODEL',

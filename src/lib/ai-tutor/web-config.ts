@@ -9,6 +9,7 @@ import {
 
 export const AI_TUTOR_WEB_ENV_NAMES = [
   'AI_TUTOR_WEB_ENABLED',
+  'AI_TUTOR_WEB_PRODUCTION_ENABLED',
   'AI_TUTOR_PAID_BILLING_CONFIRMED',
   'GEMINI_API_KEY',
   'AI_TUTOR_GEMINI_FAST_MODEL',
@@ -76,7 +77,7 @@ export type WebAiTutorConfig =
         readonly reasoning: WebTutorModelConfig;
         readonly fallback: WebTutorModelConfig;
       };
-      readonly runtime: Exclude<WebAiTutorRuntime, 'production'>;
+      readonly runtime: WebAiTutorRuntime;
     })
   | (WebAiTutorSharedConfig & {
       readonly status: 'disabled';
@@ -103,7 +104,8 @@ export function parseWebAiTutorConfig(
   const issues: WebAiTutorConfigIssue[] = [];
   const shared = parseWebAiTutorSharedConfig(env, issues);
 
-  if (runtime === 'production') {
+  if (runtime === 'production' && !productionOptInEnabled(env, issues)) {
+    if (issues.length > 0) return { ok: false, issues };
     return {
       ok: true,
       config: {
@@ -184,6 +186,17 @@ export function parseWebAiTutorConfig(
       ...shared,
     },
   };
+}
+
+function productionOptInEnabled(
+  env: WebAiTutorEnvironment,
+  issues: WebAiTutorConfigIssue[],
+): boolean {
+  const value = env.AI_TUTOR_WEB_PRODUCTION_ENABLED?.trim().toLowerCase();
+  if (value === 'true') return true;
+  if (value === undefined || value === '' || value === 'false') return false;
+  issues.push({ envName: 'AI_TUTOR_WEB_PRODUCTION_ENABLED', code: 'invalid_boolean' });
+  return false;
 }
 
 function parseWebAiTutorModels(

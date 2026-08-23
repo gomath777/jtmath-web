@@ -43,7 +43,7 @@ export async function createDefaultWebAiTutorRuntimeDependencies(
   if (config.runtime === 'development' || config.runtime === 'test') {
     return createLocalWebAiTutorRuntimeDependencies({ config, lessonClient });
   }
-  if (config.runtime === 'preview') {
+  if (config.runtime === 'preview' || config.runtime === 'production') {
     return createPreviewWebAiTutorRuntimeDependencies({
       config,
       lessonClient,
