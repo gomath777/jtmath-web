@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
+import { requireAdmin } from '@/utils/admin-auth';
 import { signToken, setStudentCookie } from '@/utils/student-auth';
-
-const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || 'admin@jtmath.com').split(',').map(e => e.trim());
 
 // GET /api/admin/preview?slug=xxx&to=/s/xxx/session/yyy
 // 어드민 인증 확인 후 해당 학생의 student_session 쿠키(isMaster)를 발급하고 리디렉트.
 export async function GET(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || !ADMIN_EMAILS.includes(user.email || '')) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
+  const guard = await requireAdmin();
+  if (guard) return guard;
 
   const slug = req.nextUrl.searchParams.get('slug');
   const to = req.nextUrl.searchParams.get('to');
