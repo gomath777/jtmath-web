@@ -2,6 +2,10 @@ import { notFound, redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { createClient as createServiceClient } from '@supabase/supabase-js';
 import { verifyToken } from '@/utils/student-auth';
+import { parseWebAiTutorConfig, type WebAiTutorEnvironment } from '@/lib/ai-tutor/web-config';
+import { readWebStudentCookie, verifyStrictWebStudentToken } from '@/lib/ai-tutor/web-auth';
+import { resolveWebLessonContext, type WebLessonContext } from '@/lib/ai-tutor/web-lesson-context';
+import { createDefaultWebAiTutorRuntimeDependencies } from '@/lib/ai-tutor/web-runtime-readiness';
 import LessonContent from './LessonContent';
 import type { SessionBlock, ProgressMap } from '@/components/blocks/types';
 
@@ -19,7 +23,7 @@ const SUBJECT_LABEL: Record<string, string> = {
   gs1: '공통수학1', gs2: '공통수학2',
   ds: '대수', ds2: '대수',
   mj1: '미적분1', ms1: '미적분1', mj2: '미적분2',
-  ht: '확률과통계', gi: '기하', s2: '수학2',
+  ht: '확률과통계', gh: '기하', gi: '기하', s2: '수학2',
 };
 
 interface LessonItem {
@@ -65,6 +69,10 @@ export default async function LessonPage({
   const cookieStore = await cookies();
   const studentToken = cookieStore.get('student_session')?.value;
   const student = studentToken ? await verifyToken(studentToken) : null;
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
 
   let assignedVariant = 'default';
   let assignedDate: string | null = null;
@@ -103,7 +111,7 @@ export default async function LessonPage({
     blocks = (defaultBlocks as SessionBlock[]) || [];
   }
 
-  let progressMap: ProgressMap = {};
+  const progressMap: ProgressMap = {};
   let progressEndpoint: string | undefined = undefined;
   if (student) {
     const { data: progress } = await sc
@@ -125,9 +133,15 @@ export default async function LessonPage({
     (lessonItem.week_number && lessonItem.session_number
       ? `${lessonItem.week_number}주차 ${lessonItem.session_number}차시`
       : '학습 페이지');
+  const webTutorContext = await loadWebTutorContext({
+    cookieHeader,
+    lessonSlug: slug,
+    env: readWebAiTutorEnvironment(process.env),
+  });
 
   return (
     <LessonContent
+      lessonSlug={slug}
       heading={heading}
       subjectLabel={subjectLabel}
       subjectSlug={subjectSlug}
@@ -136,6 +150,56 @@ export default async function LessonPage({
       progressEndpoint={progressEndpoint}
       assignedDate={assignedDate}
       isAuthenticated={!!student}
+      tutorContext={webTutorContext}
     />
   );
+}
+
+async function loadWebTutorContext(input: {
+  readonly cookieHeader: string;
+  readonly lessonSlug: string;
+  readonly env: WebAiTutorEnvironment;
+}): Promise<WebLessonContext | null> {
+  const token = readWebStudentCookie(input.cookieHeader);
+  if (token === null) return null;
+  const identity = await verifyStrictWebStudentToken({
+    token,
+    secret: process.env.STUDENT_TOKEN_SECRET ?? '',
+  });
+  if (identity === null) return null;
+  const config = parseWebAiTutorConfig(input.env);
+  if (!config.ok || config.config.status !== 'enabled') return null;
+  const runtime = await createDefaultWebAiTutorRuntimeDependencies(input.env, config.config);
+  if (!runtime.ok) return null;
+  const result = await resolveWebLessonContext({
+    port: runtime.dependencies.lessonPort,
+    identity: {
+      profileId: identity.profileId,
+      slug: identity.slug,
+      ...(identity.isMaster === true ? { isMaster: true } : {}),
+    },
+    lessonSlug: input.lessonSlug,
+    now: new Date(),
+  });
+  return result.ok ? result.context : null;
+}
+
+function readWebAiTutorEnvironment(env: NodeJS.ProcessEnv): WebAiTutorEnvironment {
+  return {
+    AI_TUTOR_WEB_ENABLED: env.AI_TUTOR_WEB_ENABLED,
+    AI_TUTOR_WEB_PRODUCTION_ENABLED: env.AI_TUTOR_WEB_PRODUCTION_ENABLED,
+    AI_TUTOR_PAID_BILLING_CONFIRMED: env.AI_TUTOR_PAID_BILLING_CONFIRMED,
+    GEMINI_API_KEY: env.GEMINI_API_KEY,
+    AI_TUTOR_GEMINI_FAST_MODEL: env.AI_TUTOR_GEMINI_FAST_MODEL,
+    AI_TUTOR_GEMINI_REASONING_MODEL: env.AI_TUTOR_GEMINI_REASONING_MODEL,
+    AI_TUTOR_GEMINI_FALLBACK_MODEL: env.AI_TUTOR_GEMINI_FALLBACK_MODEL,
+    AI_TUTOR_MODEL_TIMEOUT_MS: env.AI_TUTOR_MODEL_TIMEOUT_MS,
+    AI_TUTOR_RECENT_TURN_COUNT_CAP: env.AI_TUTOR_RECENT_TURN_COUNT_CAP,
+    AI_TUTOR_RECENT_TURN_CHARACTER_CAP: env.AI_TUTOR_RECENT_TURN_CHARACTER_CAP,
+    AI_TUTOR_RECENT_TOTAL_CHARACTER_CAP: env.AI_TUTOR_RECENT_TOTAL_CHARACTER_CAP,
+    STUDENT_TOKEN_SECRET: env.STUDENT_TOKEN_SECRET,
+    NEXT_PUBLIC_SUPABASE_URL: env.NEXT_PUBLIC_SUPABASE_URL,
+    SUPABASE_SERVICE_KEY: env.SUPABASE_SERVICE_KEY,
+    VERCEL_ENV: env.VERCEL_ENV,
+  };
 }

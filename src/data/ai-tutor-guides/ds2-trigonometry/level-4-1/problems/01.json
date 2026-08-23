@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:1",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 1
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수",
+    "allowedConcepts": [
+      "삼각함수의 그래프",
+      "최댓값과 최솟값",
+      "주기와 평행이동"
+    ],
+    "forbiddenMethods": [
+      "미분법",
+      "적분법",
+      "음함수 미분"
+    ]
+  },
+  "officialApproach": {
+    "summary": "코사인 그래프의 진폭, 주기, 평행이동을 이용하여 주어진 구간의 최댓값과 최솟값 조건을 비교한다.",
+    "steps": [
+      "$f(x)=a\\cos\\left(bx-\\frac{\\pi}{4}\\right)$를 기본 코사인 그래프의 평행이동으로 해석한다.",
+      "최댓값에서 진폭을 정하고, 구간 안에서 최솟값이 나타나는 위치로 $b$의 범위를 제한한다.",
+      "끝점에서 주어진 최솟값 조건을 대입하여 남은 값을 결정한다."
+    ]
+  },
+  "hints": {
+    "concept": "양수인 계수 $a$는 그래프의 진폭이므로 최댓값과 바로 연결된다.",
+    "start": "$y=a\\cos bx$를 먼저 떠올리고, 괄호 안을 정리하여 어느 만큼 평행이동했는지 확인해 보자.",
+    "decisive": "구간에서 최솟값이 한 번만 나타나는 위치를 먼저 따져 $b$의 범위를 정한 뒤, 그 위치의 함수값을 사용하자."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "5",
+    "steps": [
+      "최댓값이 $4$이므로 진폭에서 $a=4$를 얻는다.",
+      "구간에서의 최솟값 위치 조건으로 $\\frac{3}{4}<b<\\frac{5}{4}$를 얻는다.",
+      "끝점의 최솟값을 대입하면 $b=1$이므로 $a+b=5$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "72692360afffb283637e2bbf126280033b7ed7bb506bbb2de5d0eb93f5546f78",
+    "solutionSha256": "c88186d8aecdbf88874f24a38ccd535e54afaca68b6595968de4b5254ab062bb",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}

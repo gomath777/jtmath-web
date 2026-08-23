@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:4",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 4
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수의 그래프",
+    "allowedConcepts": [
+      "삼각함수의 그래프",
+      "삼각함수의 부등식",
+      "곱의 부호"
+    ],
+    "forbiddenMethods": [
+      "미분법",
+      "적분법",
+      "벡터",
+      "복소수"
+    ]
+  },
+  "officialApproach": {
+    "summary": "곱이 음수가 되는 두 부호 조합을 나누어, 사인과 코사인 그래프에서 각각의 공통구간을 찾는다.",
+    "steps": [
+      "$(\\sin\\frac{\\pi x}{12}-\\frac12)>0$ 및 $(\\cos\\frac{\\pi x}{12}-\\frac12)<0$의 공통구간을 구한다.",
+      "전자는 $2<x<10$, 후자는 $4<x<20$이므로 첫 경우에 해당하는 정수는 5개이다.",
+      "$(\\sin\\frac{\\pi x}{12}-\\frac12)<0$ 및 $(\\cos\\frac{\\pi x}{12}-\\frac12)>0$의 공통구간을 구한다.",
+      "이 경우의 공통 정수도 5개이므로 두 경우를 합하여 $5+5=10$개이다."
+    ]
+  },
+  "hints": {
+    "concept": "곱이 음수이면 두 인수의 부호가 서로 반대이다. 두 삼각함수 그래프에서 각각 $\\frac12$와 비교되는 구간을 찾는다.",
+    "start": "두 인수의 부호 조합을 두 경우로 나누고, 각 부등식의 경계가 되는 $x$ 값을 표시한다.",
+    "decisive": "경계에서는 곱이 $0$이므로 등호를 포함하지 않는다. 두 경우의 공통인 정수만 중복 없이 센다."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "10",
+    "steps": [
+      "곱이 음수이려면 두 인수의 부호가 반대여야 한다.",
+      "첫 부호 조합에서는 $2<x<10$ 및 $4<x<20$의 공통 정수 5개를 얻는다.",
+      "둘째 부호 조합에서는 $0\\le x<2$ 또는 $20<x<24$의 정수 5개를 얻는다.",
+      "따라서 전체 개수는 $5+5=10$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "5404f3f8efbd3d79cf85fb8aab1c1bbfd3469601ca84b8759a7f23bde987b2e3",
+    "solutionSha256": "1f2d0f32be06254b9f61803ef092581e94a931fc7e7aa25531e499ce52e2957f",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}

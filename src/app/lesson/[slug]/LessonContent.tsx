@@ -1,9 +1,12 @@
 'use client';
 
 import BlockRenderer from '@/components/blocks/BlockRenderer';
+import { AiTutorWidget } from '@/components/ai-tutor/AiTutorWidget';
+import type { WebLessonContext } from '@/lib/ai-tutor/web-lesson-context';
 import type { SessionBlock, ProgressMap } from '@/components/blocks/types';
 
 interface LessonContentProps {
+  lessonSlug: string;
   heading: string;
   subjectLabel: string;
   subjectSlug: string;
@@ -12,6 +15,7 @@ interface LessonContentProps {
   progressEndpoint?: string;
   assignedDate: string | null;
   isAuthenticated: boolean;
+  tutorContext: WebLessonContext | null;
 }
 
 function formatDate(date: string): string {
@@ -20,6 +24,7 @@ function formatDate(date: string): string {
 }
 
 export default function LessonContent({
+  lessonSlug,
   heading,
   subjectLabel,
   subjectSlug,
@@ -28,6 +33,7 @@ export default function LessonContent({
   progressEndpoint,
   assignedDate,
   isAuthenticated,
+  tutorContext,
 }: LessonContentProps) {
   return (
     <article>
@@ -66,6 +72,8 @@ export default function LessonContent({
           ))}
         </div>
       )}
+
+      <AiTutorWidget lessonSlug={lessonSlug} tutorContext={tutorContext} />
     </article>
   );
 }

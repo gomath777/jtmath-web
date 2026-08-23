@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "manifestKey": "ds2-trigonometry:41:6",
+  "target": {
+    "lessonKey": "ds2-trigonometry",
+    "level": 41,
+    "problemNumber": 6
+  },
+  "curriculum": {
+    "grade": "고등학교 2학년",
+    "subject": "수학Ⅰ",
+    "unit": "삼각함수의 정의",
+    "allowedConcepts": [
+      "단위원에서의 삼각함수",
+      "직선 $y=x$에 대한 대칭",
+      "좌표와 삼각함수"
+    ],
+    "forbiddenMethods": [
+      "미분법",
+      "적분법",
+      "벡터",
+      "복소수"
+    ]
+  },
+  "officialApproach": {
+    "summary": "대칭이동으로 점 B의 좌표를 구하고, 두 점이 단위원 위에 있음을 이용하여 좌표를 삼각함수 값으로 읽는다.",
+    "steps": [
+      "직선 $y=x$에 대한 대칭으로 $B=(k/\\sqrt{k^2+1},-1/\\sqrt{k^2+1})$를 구한다.",
+      "$OA=OB=1$이므로 $\\cos\\alpha=-1/\\sqrt{k^2+1}$, $\\sin\\beta=-1/\\sqrt{k^2+1}$이다.",
+      "주어진 곱을 대입하면 $1/(k^2+1)=1/3$이므로 $k^2=2$이다."
+    ]
+  },
+  "hints": {
+    "concept": "점이 단위원 위에 있으므로 좌표는 각각 해당 동경의 코사인과 사인으로 읽을 수 있다. 대칭이 바꾸는 좌표를 먼저 확인한다.",
+    "start": "직선 $y=x$에 대한 대칭으로 점 B의 좌표를 구한 뒤, $OA=OB=1$을 이용해 $\\cos\\alpha$와 $\\sin\\beta$를 좌표에서 읽는다.",
+    "decisive": "두 삼각함수 값의 부호를 좌표의 사분면에 맞춰 정하고, 곱을 정리할 때 분모가 $k$의 제곱에 1을 더한 식만 남게 한다."
+  },
+  "alternatives": [],
+  "solution": {
+    "answer": "2",
+    "steps": [
+      "대칭이동한 점은 $B=(k/\\sqrt{k^2+1},-1/\\sqrt{k^2+1})$이다.",
+      "$OA=OB=1$이므로 $\\cos\\alpha=-1/\\sqrt{k^2+1}$, $\\sin\\beta=-1/\\sqrt{k^2+1}$이다.",
+      "따라서 $\\cos\\alpha\\sin\\beta=1/(k^2+1)=1/3$이다.",
+      "그러므로 $k^2+1=3$이고 $k^2=2$이다."
+    ]
+  },
+  "provenance": {
+    "problemSha256": "b03a80bcc8b678dbb155f824ac588cc0eeea6bc226f558cd636d28d782b895af",
+    "solutionSha256": "aa482e1454dbeb0a45ba15ecaa2bd128de8521f27ad7f5c62c3d17e708c43198",
+    "authoringModel": "gpt-5.6-terra",
+    "verifierModel": "gpt-5.6-terra"
+  },
+  "qa": {
+    "status": "verified",
+    "checks": [
+      "schema_valid",
+      "official_solution_checked",
+      "curriculum_checked",
+      "latex_checked"
+    ]
+  }
+}
