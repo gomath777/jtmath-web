@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import BlockRenderer from '@/components/blocks/BlockRenderer';
 import { AiTutorWidget } from '@/components/ai-tutor/AiTutorWidget';
 import type { WebLessonContext } from '@/lib/ai-tutor/web-lesson-context';
@@ -55,6 +56,8 @@ export default function LessonContent({
         )}
       </header>
 
+      <AiTutorWidget lessonSlug={lessonSlug} tutorContext={tutorContext} />
+
       {blocks.length === 0 ? (
         <p className="text-center text-stone py-12 text-[14px]">
           아직 콘텐츠가 없습니다.
@@ -73,7 +76,6 @@ export default function LessonContent({
         </div>
       )}
 
-      <AiTutorWidget lessonSlug={lessonSlug} tutorContext={tutorContext} />
     </article>
   );
 }

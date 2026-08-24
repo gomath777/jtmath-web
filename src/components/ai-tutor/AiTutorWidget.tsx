@@ -124,7 +124,7 @@ export function AiTutorWidget({ lessonSlug, tutorContext }: AiTutorWidgetProps) 
 
   const contextLabel = `${SUBJECT_LABELS[tutorContext.subjectSlug]} · ${tutorContext.unit}`;
   return (
-    <section className="mt-8 border-t border-border-cream pt-6" aria-label="AI 튜터">
+    <section className="mb-8" aria-label="AI 튜터">
       {!expanded ? (
         <button
           ref={launcherRef}

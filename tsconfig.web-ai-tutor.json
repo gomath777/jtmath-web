@@ -48,6 +48,7 @@
     "src/app/layout.tsx",
     "src/app/lesson/[slug]/page.tsx",
     "src/app/lesson/[slug]/LessonContent.tsx",
+    "src/app/lesson/[slug]/LessonContent.test.tsx",
     "src/components/blocks/BlockRenderer.tsx",
     "src/components/blocks/types.ts",
     "src/components/blocks/ContentGroupBlock.tsx",
