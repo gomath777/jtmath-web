@@ -37,6 +37,15 @@ Scope: this file applies to the whole repository.
 - Before any GS2 upload or link change, compare file size, page count or duration, modified time, and hash against the currently linked asset. If the active and old sources conflict, stop and ask instead of guessing.
 - When replacing a GS2 PDF at Bunny, archive the old object under an old/archive path first, then link the renewed object with a fresh filename or cache-busting URL and verify the public CDN response.
 
+## Student Learning Page AI Tutor
+
+- Every new or rebuilt student-facing `/lesson/[slug]` page that contains worksheet PDFs must include the page-local Web AI Tutor unless the operator explicitly opts that page out.
+- A page is not Tutor-ready merely because `AiTutorWidget` is mounted globally. Before release, register the exact subject, lesson slug, assigned variant, PDF material keys/hashes, problem ranges, verified guide catalog, and private problem/solution/guide assets. Missing or mismatched material must fail closed.
+- Build Tutor context from the student's actual released assignment and `session_blocks`; never replace individual DS2 schedules or create duplicate pages/assignments just to enable Tutor.
+- Keep the Tutor above the worksheet blocks. Preserve both PDF `열기` and `다운로드`, keep graph generation off, render math with the shared KaTeX path, and do not reuse Google Chat routing or UX.
+- Before release, run the Web Tutor scoped typecheck/tests, synthetic browser QA at mobile/tablet/desktop and 200% zoom, names-only config preflight, material/catalog/hash checks, and a preview smoke. Record the previous Vercel deployment as rollback.
+- Detailed creation and handoff steps live in `docs/codex-operations.md` under “Future Learning Page AI Tutor Workflow”.
+
 ## Handoff
 
 - Keep repo-level guidance short. Put detailed operating steps in `docs/codex-operations.md`.

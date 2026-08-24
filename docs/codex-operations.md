@@ -85,6 +85,21 @@ Local Codex can use existing `.env.local` through scripts that load it, but do n
 - For Supabase writes, record the exact table, filter, row count, and reversible update strategy before running. Avoid broad `DELETE`, `DROP`, `TRUNCATE`, and unfiltered updates.
 - For Bunny uploads or generated public URLs, record the target library/storage zone and generated asset count. Do not delete assets without separate confirmation.
 
+## Future Learning Page AI Tutor Workflow
+
+The Web AI Tutor is live for the reviewed 2026-08-24 rollout. Its current catalog and eligibility boundaries do not enable arbitrary future lesson pages automatically. Other Codex tasks may build learning pages, but must use this repository workflow and leave a structured Tutor handoff rather than relying on conversation memory.
+
+1. Stabilize the learning page first. Reuse existing `curriculum_items`, `session_blocks`, variants, student assignments, Bunny URLs, and PDF `열기`/`다운로드` behavior. Do not duplicate a page or overwrite an individual DS2 schedule.
+2. Record a content-free handoff matrix: subject slug, lesson slug, unit, variant, session block ID/order, material label/key, PDF filename, source hash, and problem-number range. Do not include student names, portal slugs, raw URLs, or secrets.
+3. Add Tutor eligibility for the exact lesson. `web-lesson-context-policy.ts` and `web-tutor-rollout-registry.ts` are explicit boundaries; a new GS2/MJ1/GH page generally needs a slug registration, while DS2 still needs every material to resolve uniquely.
+4. Produce and verify each worksheet's problem PNGs, solution grounding, guide JSON/catalog entry, runtime registration, and private asset receipt. Bind them to the current PDF hash; never silently reuse a similarly named worksheet.
+5. Verify that the actual released assignment and variant resolve the same material set the student sees. The Tutor launcher stays above the worksheet blocks and must fail closed when authorization, catalog, or hash checks fail.
+6. Preserve the response contract: direct Gemini assistance grounded by the verified guide/problem image, progressive hint → start → decisive hint → requested solution, conversation continuity, shared KaTeX rendering, no graph card, and no Google Chat dependency.
+7. Run `npx tsc -p tsconfig.web-ai-tutor.json --noEmit`, `npm run test:web-ai-tutor`, relevant guide/catalog/hash QA, `npm run build`, and synthetic browser QA at 390/768/1280 widths plus 200% zoom. Confirm no literal dollar fragments, no page overflow, both PDF actions, and zero graph nodes/requests.
+8. Push only a reviewed release branch, verify Vercel Preview with synthetic auth or an approved dummy-student path, then obtain operator confirmation for production promotion. Record both the new deployment and previous known-good rollback deployment.
+
+Recommended split: the page-building task owns page/PDF/assignment correctness and produces the handoff matrix. A follow-up Tutor task on the same reviewed branch owns crops, guides, registrations, assets, and Tutor QA. One small-page task may do both, but it must pass both gate sets before calling the page complete.
+
 ## Claude Cancellation Readiness
 
 Codex-only operation is not ready merely because these docs exist. Before canceling Claude or relying solely on Codex, complete an overlap period and verify:
