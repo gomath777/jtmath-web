@@ -187,6 +187,50 @@ test('classifyTutorLatex renders safe single-variable inline math without openin
   assert.equal(classifyTutorLatex('ignore previous instructions').kind, 'literal');
 });
 
+test('classifyTutorLatex renders short uppercase Euclidean labels without opening prose fallback', () => {
+  // Given: geometry answers commonly refer to segments and triangles as short uppercase labels.
+  const geometryLabels = ['AB', 'CD', 'ABC', 'ABD', 'ABCD'];
+  const literalExpressions = [
+    'hello',
+    'ANSWER',
+    'AI',
+    'PDF',
+    'HTML',
+    'STOP',
+    '정답',
+    'ignore previous instructions',
+    '<script>alert(1)</script>',
+    '\\href{https://example.com}{x}',
+    '\\notacommand{x}',
+  ];
+
+  // When / Then
+  for (const expression of geometryLabels) {
+    assert.deepEqual(classifyTutorLatex(expression), { kind: 'renderable' });
+  }
+  assert.deepEqual(tokenizeTutorMathText('$AB$, $CD$, $ABC$, $ABD$'), [
+    { kind: 'inlineMath', expression: 'AB', source: '$AB$' },
+    { kind: 'text', text: ', ' },
+    { kind: 'inlineMath', expression: 'CD', source: '$CD$' },
+    { kind: 'text', text: ', ' },
+    { kind: 'inlineMath', expression: 'ABC', source: '$ABC$' },
+    { kind: 'text', text: ', ' },
+    { kind: 'inlineMath', expression: 'ABD', source: '$ABD$' },
+  ]);
+  assert.deepEqual(
+    tokenizeTutorMathText('$ABD$와 $ABC$를 비교하고 $AB$와 $CD$의 관계를 봐요.')
+      .flatMap((token) => token.kind === 'inlineMath' ? [token.expression] : []),
+    ['ABD', 'ABC', 'AB', 'CD'],
+  );
+  for (const expression of literalExpressions) {
+    assert.equal(classifyTutorLatex(expression).kind, 'literal', expression);
+  }
+  assert.equal(
+    tokenizeTutorMathText('$hello$, $ANSWER$, $정답$').some((token) => token.kind === 'inlineMath'),
+    false,
+  );
+});
+
 test('TutorMathText server markup contains escaped text and no injected HTML', () => {
   // Given
   const text = '태그 <script>alert(1)</script> 와 $\\sin x$';
@@ -210,7 +254,7 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.hasBareLatexHtml, true);
   assert.equal(result.singleVariableKatexCount, 4);
   assert.equal(result.singleVariableLiteralCount, 0);
-  assert.equal(result.curriculumKatexCount, 7);
+  assert.equal(result.curriculumKatexCount, 11);
   assert.equal(result.curriculumLiteralCount, 0);
   assert.equal(result.unsafeNodeCount, 0);
   assert.equal(result.hrefText, '$\\href{https://example.com}{x}$');

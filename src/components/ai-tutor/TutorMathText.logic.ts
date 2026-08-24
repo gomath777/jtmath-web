@@ -279,7 +279,7 @@ function hasBalancedLatexGroups(expression: string): boolean {
 
 function isPlainProse(expression: string): boolean {
   const mathText = expression.replace(/\\(?:text|mathrm)\{[^}]*\}/g, '');
-  return /[가-힣]/u.test(mathText) || (!/^[A-Za-z]$/u.test(mathText.trim()) && !/[\\0-9=+\-*/^_{}()[\]<>|]/u.test(mathText));
+  return /[가-힣]/u.test(mathText) || (!/^(?:[A-Za-z]|[A-D]{2,4})$/u.test(mathText.trim()) && !/[\\0-9=+\-*/^_{}()[\]<>|]/u.test(mathText));
 }
 
 function isLikelyUnmatchedOpening(expression: string): boolean {
