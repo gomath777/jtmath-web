@@ -60,8 +60,11 @@ export function ConceptContentGroupLayout({ data, progress, progressEndpoint }: 
             {pdfs.map((pdf, index) => {
               const name = getPdfDisplayName(pdf, 'document.pdf');
               return (
-                <div key={index} className="space-y-2">
-                  <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+                <div
+                  key={index}
+                  className="flex flex-col gap-3 rounded-xl border border-border-cream bg-sand px-4 py-3.5 sm:flex-row sm:items-center"
+                >
+                  <div className="flex min-w-0 flex-1 items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-crimson/10 flex items-center justify-center shrink-0">
                       <FileText className="w-4.5 h-4.5 text-crimson" />
                     </div>

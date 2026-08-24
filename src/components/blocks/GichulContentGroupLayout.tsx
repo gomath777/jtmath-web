@@ -55,8 +55,11 @@ export function GichulContentGroupLayout({ data, progress, progressEndpoint }: G
           {pdfs.map((pdf, index) => {
             const name = getPdfDisplayName(pdf, 'document.pdf');
             return (
-              <div key={index} className="space-y-2">
-                <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+              <div
+                key={index}
+                className="flex flex-col gap-3 rounded-xl border border-border-cream bg-sand px-4 py-3.5 sm:flex-row sm:items-center"
+              >
+                <div className="flex min-w-0 flex-1 items-center gap-3">
                   <FileText className="w-5 h-5 text-charcoal shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-[14px] font-medium text-ink truncate tracking-tight">{name}</p>
@@ -72,8 +75,8 @@ export function GichulContentGroupLayout({ data, progress, progressEndpoint }: G
 
       {data.hintbook && (
         <div className="px-4 pt-3 pb-1">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+          <div className="flex flex-col gap-3 rounded-xl border border-terracotta/20 bg-terracotta/[0.06] px-4 py-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>

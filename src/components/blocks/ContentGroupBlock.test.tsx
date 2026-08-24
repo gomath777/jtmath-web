@@ -40,6 +40,26 @@ function attributeValue(attributes: string, name: string): string | null {
   return new RegExp(`${name}="([^"]*)"`).exec(attributes)?.[1] ?? null;
 }
 
+function pdfActionAncestorClasses(markup: string): readonly (readonly string[])[] {
+  const divClassStack: string[] = [];
+  const actionAncestors: string[][] = [];
+
+  for (const match of markup.matchAll(/<div\b([^>]*)>|<\/div>|<a\b([^>]*)>/g)) {
+    if (match[0].startsWith('<div')) {
+      divClassStack.push(attributeValue(match[1] ?? '', 'class') ?? '');
+    } else if (match[0] === '</div>') {
+      divClassStack.pop();
+    } else {
+      const label = attributeValue(match[2] ?? '', 'aria-label');
+      if (label?.endsWith('브라우저에서 열기') || label?.endsWith('다운로드')) {
+        actionAncestors.push([...divClassStack]);
+      }
+    }
+  }
+
+  return actionAncestors;
+}
+
 const resourceOne = 'https://mathgo-pdfs.b-cdn.net/qa/content-group-one.pdf';
 const resourceTwo = 'https://mathgo-pdfs.b-cdn.net/qa/content-group-two.pdf';
 const resourceThree = 'https://mathgo-pdfs.b-cdn.net/qa/content-group-three.pdf';
@@ -166,7 +186,7 @@ test('Given each existing lesson content-group layout, When it is statically ren
   assert.match(conceptMarkup, /학습지 받기/);
   assert.match(conceptMarkup, /개념 학습지\.pdf/);
   assert.match(conceptMarkup, /1 MB/);
-  assert.match(conceptMarkup, /rounded-xl bg-sand/);
+  assert.match(conceptMarkup, /rounded-xl[^"']*bg-sand/);
   assert.ok(sideMarkup.indexOf('>A<') < sideMarkup.indexOf('>B<'));
   assert.ok(sideMarkup.indexOf('A 학습지.pdf') < sideMarkup.indexOf('B 학습지.pdf'));
   assert.match(sideMarkup, /grid grid-cols-2/);
@@ -258,5 +278,10 @@ for (const actionCase of contentGroupActionCases) {
     );
     assert.ok(anchors.every((anchor) => !anchor.contents.includes('<a')));
     assert.ok(downloadAnchors.every((anchor) => !attributeValue(anchor.attributes, 'href')?.startsWith('https://mathgo-pdfs.b-cdn.net')));
+    assert.ok(
+      pdfActionAncestorClasses(markup).every((classes) =>
+        classes.some((className) => className.includes('bg-sand') || className.includes('bg-terracotta/')),
+      ),
+    );
   });
 }

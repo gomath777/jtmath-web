@@ -16,8 +16,8 @@ function SidePanel({ side }: SidePanelProps) {
   return (
     <div className="p-4 space-y-2">
       <p className="text-[10px] font-semibold tracking-[0.1em] uppercase text-stone mb-2.5">{side.label}</p>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2.5 px-3 py-3 rounded-xl bg-sand border border-border-cream">
+      <div className="flex flex-col gap-2 rounded-xl border border-border-cream bg-sand px-3 py-3">
+        <div className="flex min-w-0 items-center gap-2.5">
           <FileText className="w-4 h-4 text-charcoal shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-[12px] font-medium text-ink truncate">{pdfName}</p>
@@ -27,8 +27,8 @@ function SidePanel({ side }: SidePanelProps) {
         <PdfResourceActions name={pdfName} sourceUrl={getPdfSourceUrl(side.pdf)} />
       </div>
       {side.hintbook && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+        <div className="flex flex-col gap-2 rounded-xl border border-terracotta/20 bg-terracotta/[0.06] px-3 py-2.5">
+          <div className="flex min-w-0 items-center gap-2.5">
             <Lightbulb className="w-3.5 h-3.5 text-terracotta shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[10px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
@@ -98,8 +98,8 @@ export function BonusContentGroupLayout({ data }: BonusLayoutProps) {
         <h3 className="font-serif font-medium text-[17px] text-ink tracking-tight">{data.label}</h3>
       </div>
       <div className="px-4 py-4 space-y-2">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-sand border border-border-cream">
+        <div className="flex flex-col gap-3 rounded-xl border border-border-cream bg-sand px-4 py-3.5 sm:flex-row sm:items-center">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
             <FileText className="w-5 h-5 text-charcoal shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-medium text-ink truncate tracking-tight">{pdfName}</p>
@@ -109,8 +109,8 @@ export function BonusContentGroupLayout({ data }: BonusLayoutProps) {
           <PdfResourceActions name={pdfName} sourceUrl={getPdfSourceUrl(pdf)} />
         </div>
         {hintbook && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-terracotta/[0.06] border border-terracotta/20">
+          <div className="flex flex-col gap-3 rounded-xl border border-terracotta/20 bg-terracotta/[0.06] px-4 py-3 sm:flex-row sm:items-center">
+            <div className="flex min-w-0 flex-1 items-center gap-3">
               <Lightbulb className="w-4 h-4 text-terracotta shrink-0" />
               <div className="flex-1 min-w-0">
                 <p className="text-[11px] tracking-wider uppercase font-medium text-terracotta">힌트북</p>
