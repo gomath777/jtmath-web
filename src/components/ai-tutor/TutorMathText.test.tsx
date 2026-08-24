@@ -231,6 +231,15 @@ test('classifyTutorLatex renders short uppercase Euclidean labels without openin
   );
 });
 
+test('classifyTutorLatex renders roman geometry labels used by Gemini', () => {
+  const text = '선분 $\\mathrm{AB}$, $\\mathrm{BC}$, $\\mathrm{CA}$의 길이를 비교해요.';
+
+  assert.deepEqual(
+    tokenizeTutorMathText(text).flatMap((token) => token.kind === 'inlineMath' ? [token.expression] : []),
+    ['\\mathrm{AB}', '\\mathrm{BC}', '\\mathrm{CA}'],
+  );
+});
+
 test('TutorMathText server markup contains escaped text and no injected HTML', () => {
   // Given
   const text = '태그 <script>alert(1)</script> 와 $\\sin x$';
@@ -254,7 +263,7 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.hasBareLatexHtml, true);
   assert.equal(result.singleVariableKatexCount, 4);
   assert.equal(result.singleVariableLiteralCount, 0);
-  assert.equal(result.curriculumKatexCount, 11);
+  assert.equal(result.curriculumKatexCount, 14);
   assert.equal(result.curriculumLiteralCount, 0);
   assert.equal(result.unsafeNodeCount, 0);
   assert.equal(result.hrefText, '$\\href{https://example.com}{x}$');
