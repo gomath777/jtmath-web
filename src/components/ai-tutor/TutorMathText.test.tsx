@@ -240,6 +240,16 @@ test('classifyTutorLatex renders roman geometry labels used by Gemini', () => {
   );
 });
 
+test('classifyTutorLatex renders comma-separated scalar variables used by Gemini', () => {
+  const text = '앞서 구한 $a, c$ 값을 이용하고 $x_1, x_2$도 비교해요.';
+
+  assert.deepEqual(
+    tokenizeTutorMathText(text).flatMap((token) => token.kind === 'inlineMath' ? [token.expression] : []),
+    ['a, c', 'x_1, x_2'],
+  );
+  assert.equal(classifyTutorLatex('hello, world').kind, 'literal');
+});
+
 test('TutorMathText server markup contains escaped text and no injected HTML', () => {
   // Given
   const text = '태그 <script>alert(1)</script> 와 $\\sin x$';
@@ -263,7 +273,7 @@ test('TutorMathText browser effect renders valid math and keeps unsafe math lite
   assert.equal(result.hasBareLatexHtml, true);
   assert.equal(result.singleVariableKatexCount, 4);
   assert.equal(result.singleVariableLiteralCount, 0);
-  assert.equal(result.curriculumKatexCount, 14);
+  assert.equal(result.curriculumKatexCount, 15);
   assert.equal(result.curriculumLiteralCount, 0);
   assert.equal(result.unsafeNodeCount, 0);
   assert.equal(result.hrefText, '$\\href{https://example.com}{x}$');

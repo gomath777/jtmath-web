@@ -19,7 +19,7 @@ const BROWSER_SAMPLES = [
   ['includegraphics', '$\\includegraphics{secret.png}$'], ['malformed', '$\\notacommand{x}$'],
   ['bareLatex', '시작은 f(x)=a\\sin x+b 로 잡아요.'],
   ['singleVariable', '$x$, $a$, $y$, $x_1$'],
-  ['curriculumNotation', '$\\lim_{x \\to 0}\\frac{\\sin x}{x}=1$, $\\angle A=90^\\circ$, $AB\\parallel CD$, $AB\\perp CD$, $\\triangle ABC$, $\\overrightarrow{AB}$, $x\\ne 0$, $AB$, $CD$, $ABC$, $ABD$, $\\mathrm{AB}$, $\\mathrm{BC}$, $\\mathrm{CA}$'],
+  ['curriculumNotation', '$\\lim_{x \\to 0}\\frac{\\sin x}{x}=1$, $\\angle A=90^\\circ$, $AB\\parallel CD$, $AB\\perp CD$, $\\triangle ABC$, $\\overrightarrow{AB}$, $x\\ne 0$, $AB$, $CD$, $ABC$, $ABD$, $\\mathrm{AB}$, $\\mathrm{BC}$, $\\mathrm{CA}$, $a, c$'],
   ['fragmentRecovery', '앞의 $닫히지 않은 조각 뒤에도 $\\dfrac{1}{2}$와 $\\sqrt{x_1^2}$를 읽어요.'],
   ['listRecovery', '목록도 $닫히지 않은 조각 뒤에 $\\dfrac{1}{2}$를 읽어요.'],
   ['scriptMath', 'before $<script>alert(1)</script>$ after $\\dfrac{1}{2}$'],
