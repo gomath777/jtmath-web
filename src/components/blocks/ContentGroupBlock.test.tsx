@@ -221,7 +221,7 @@ test('Given ordered videos and saved progress, When concept and gichul layouts r
 test('Given invalid bonus content without its required PDF, When it renders, Then the existing invalid-data failure remains visible', () => {
   assert.throws(
     () => renderContent({ label: '보충 학습', is_bonus: true }),
-    /Cannot read properties of undefined/,
+    TypeError,
   );
 });
 

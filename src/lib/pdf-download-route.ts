@@ -15,6 +15,11 @@ type PdfDownloadDependencies = Readonly<{
   readonly scheduleTimeout?: (callback: () => void, milliseconds: number) => TimeoutHandle;
 }>;
 
+type PdfFetchFailure = Readonly<{
+  readonly error: 'pdf_timeout' | 'pdf_unavailable';
+  readonly status: 502 | 504;
+}>;
+
 export function createPdfDownloadGet(dependencies: PdfDownloadDependencies): (request: Request) => Promise<Response> {
   const scheduleTimeout = dependencies.scheduleTimeout ?? defaultScheduleTimeout;
 
@@ -36,10 +41,10 @@ export function createPdfDownloadGet(dependencies: PdfDownloadDependencies): (re
         redirect: 'manual',
         signal: controller.signal,
       });
-    } catch {
+    } catch (error) {
       timeout.cancel();
-      if (timedOut) return errorResponse('pdf_timeout', 504);
-      return errorResponse('pdf_unavailable', 502);
+      const failure = pdfFetchFailure(error, timedOut);
+      return errorResponse(failure.error, failure.status);
     }
     timeout.cancel();
 
@@ -64,6 +69,14 @@ export function createPdfDownloadGet(dependencies: PdfDownloadDependencies): (re
 function defaultScheduleTimeout(callback: () => void, milliseconds: number): TimeoutHandle {
   const timeout = setTimeout(callback, milliseconds);
   return { cancel: () => clearTimeout(timeout) };
+}
+
+function pdfFetchFailure(error: unknown, timedOut: boolean): PdfFetchFailure {
+  // Fetch rejection details can include request URLs or network internals; fail closed without surfacing them.
+  void error;
+  return timedOut
+    ? { error: 'pdf_timeout', status: 504 }
+    : { error: 'pdf_unavailable', status: 502 };
 }
 
 function errorResponse(error: 'invalid_pdf_url' | 'pdf_timeout' | 'pdf_unavailable', status: 400 | 502 | 504): Response {

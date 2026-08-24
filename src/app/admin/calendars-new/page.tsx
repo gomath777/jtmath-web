@@ -46,6 +46,58 @@ interface StudentCard {
 // 기말 마무리 단계 배너 라벨 (st-dashboard 응답과 동일하게 유지)
 const REVIEW_PHASE_LABEL = '전체 오답 반복 · 취약유형 보충 · 모의내신';
 
+type ProfileRow = Readonly<{
+  readonly id: string;
+  readonly name: string;
+  readonly school: string | null;
+  readonly grade: number | null;
+  readonly review_phase_start: string | null;
+  readonly exam_date_final: string | null;
+}>;
+
+type TokenQueryRow = Readonly<{
+  readonly slug: string;
+  readonly profile_id: string;
+  readonly profiles: ProfileRow | readonly ProfileRow[] | null;
+}>;
+
+type TokenRow = Readonly<{
+  readonly slug: string;
+  readonly profile_id: string;
+  readonly profiles: ProfileRow;
+}>;
+
+type CurriculumQueryRow = Readonly<{
+  readonly subject_slug: string;
+}>;
+
+type CurriculumItemQueryRow = Readonly<{
+  readonly public_slug: string;
+  readonly title: string;
+  readonly category: string;
+  readonly session_number: number | null;
+  readonly variant_label: string | null;
+  readonly curriculum: CurriculumQueryRow | readonly CurriculumQueryRow[] | null;
+}>;
+
+type SlaQueryRow = Readonly<{
+  readonly id: string;
+  readonly profile_id: string;
+  readonly scheduled_date: string | null;
+  readonly status: string;
+  readonly curriculum_item: CurriculumItemQueryRow | readonly CurriculumItemQueryRow[] | null;
+}>;
+
+type SlaRow = Readonly<{
+  readonly id: string;
+  readonly profile_id: string;
+  readonly scheduled_date: string | null;
+  readonly status: string;
+  readonly curriculum_item: Omit<CurriculumItemQueryRow, 'curriculum'> & Readonly<{
+    readonly curriculum: CurriculumQueryRow;
+  }>;
+}>;
+
 export default async function AdminCalendarsNewPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -58,20 +110,13 @@ export default async function AdminCalendarsNewPage() {
   );
 
   // 1. 활성 학생 토큰
-  type TokenRow = {
-    slug: string;
-    profile_id: string;
-    profiles: {
-      id: string; name: string; school: string | null; grade: number | null;
-      review_phase_start: string | null; exam_date_final: string | null;
-    };
-  };
   const tokensRes = await sc
     .from('student_tokens')
     .select('slug, profile_id, profiles!inner(id, name, school, grade, review_phase_start, exam_date_final)')
     .eq('is_active', true)
-    .eq('show_in_calendar', true); // 퇴원 학생은 캘린더에서 숨김 (포탈은 portal_expires_at 까지 유지)
-  const tokens = (tokensRes.data || []) as unknown as TokenRow[];
+    .eq('show_in_calendar', true)
+    .returns<TokenQueryRow[]>(); // 퇴원 학생은 캘린더에서 숨김 (포탈은 portal_expires_at 까지 유지)
+  const tokens = (tokensRes.data ?? []).flatMap(toTokenRow);
 
   // 2. 전 학생 SLA + curriculum_item + curricula 한 번에
   const { data: slaRows } = await sc
@@ -83,23 +128,11 @@ export default async function AdminCalendarsNewPage() {
         curriculum:curricula!inner(subject_slug)
       )
     `)
-    .order('scheduled_date');
+    .order('scheduled_date')
+    .returns<SlaQueryRow[]>();
 
   const slaByProfile = new Map<string, CalendarSlaEntry[]>();
-  for (const row of (slaRows || []) as unknown as Array<{
-    id: string;
-    profile_id: string;
-    scheduled_date: string | null;
-    status: string;
-    curriculum_item: {
-      public_slug: string;
-      title: string;
-      category: string;
-      session_number: number | null;
-      variant_label: string | null;
-      curriculum: { subject_slug: string };
-    };
-  }>) {
+  for (const row of (slaRows ?? []).flatMap(toSlaRow)) {
     if (!row.scheduled_date) continue;
     const ci = row.curriculum_item;
     const subject = ci.curriculum.subject_slug;
@@ -154,4 +187,31 @@ export default async function AdminCalendarsNewPage() {
     });
 
   return <CalendarsNewClient students={students} />;
+}
+
+function toTokenRow(row: TokenQueryRow): readonly TokenRow[] {
+  const profile = Array.isArray(row.profiles) ? row.profiles[0] ?? null : row.profiles;
+  if (profile === null) return [];
+  return [{ slug: row.slug, profile_id: row.profile_id, profiles: profile }];
+}
+
+function toSlaRow(row: SlaQueryRow): readonly SlaRow[] {
+  const curriculumItem = Array.isArray(row.curriculum_item) ? row.curriculum_item[0] ?? null : row.curriculum_item;
+  if (curriculumItem === null) return [];
+  const curriculum = Array.isArray(curriculumItem.curriculum) ? curriculumItem.curriculum[0] ?? null : curriculumItem.curriculum;
+  if (curriculum === null) return [];
+  return [{
+    id: row.id,
+    profile_id: row.profile_id,
+    scheduled_date: row.scheduled_date,
+    status: row.status,
+    curriculum_item: {
+      public_slug: curriculumItem.public_slug,
+      title: curriculumItem.title,
+      category: curriculumItem.category,
+      session_number: curriculumItem.session_number,
+      variant_label: curriculumItem.variant_label,
+      curriculum,
+    },
+  }];
 }
