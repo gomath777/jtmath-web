@@ -215,6 +215,7 @@ function successResponse(kind: string, defaultMaterialKey: string): RuntimeObjec
     message: [
       '핵심 힌트: 두 점의 좌표를 먼저 분리해서 읽어요.',
       '기울기 $m=\\dfrac{1}{2}$ 를 먼저 확인해요.',
+      '삼각형 $PRQ$에서 선분 $PQ$와 $PR$의 관계도 확인해요.',
       '',
       '1. 공통 인자를 먼저 묶어요.',
       '2. 긴 식은 아래처럼 한 번에 보지 말고 분자와 분모를 따로 확인해요.',

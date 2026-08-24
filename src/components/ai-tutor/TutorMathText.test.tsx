@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import test from 'node:test';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -189,7 +189,7 @@ test('classifyTutorLatex renders safe single-variable inline math without openin
 
 test('classifyTutorLatex renders short uppercase Euclidean labels without opening prose fallback', () => {
   // Given: geometry answers commonly refer to segments and triangles as short uppercase labels.
-  const geometryLabels = ['AB', 'CD', 'ABC', 'ABD', 'ABCD'];
+  const geometryLabels = ['AB', 'CD', 'ABC', 'ABD', 'ABCD', 'PR', 'PQ', 'PRQ'];
   const literalExpressions = [
     'hello',
     'ANSWER',
@@ -231,12 +231,37 @@ test('classifyTutorLatex renders short uppercase Euclidean labels without openin
   );
 });
 
-test('classifyTutorLatex renders roman geometry labels used by Gemini', () => {
-  const text = '선분 $\\mathrm{AB}$, $\\mathrm{BC}$, $\\mathrm{CA}$의 길이를 비교해요.';
+test('tokenizeTutorMathText renders the P-Q-R geometry labels emitted in tutor hints', () => {
+  const text = '삼각형 $PRQ$는 직각삼각형이므로 선분 $PQ$와 $PR$의 길이를 구해요.';
 
   assert.deepEqual(
     tokenizeTutorMathText(text).flatMap((token) => token.kind === 'inlineMath' ? [token.expression] : []),
-    ['\\mathrm{AB}', '\\mathrm{BC}', '\\mathrm{CA}'],
+    ['PRQ', 'PQ', 'PR'],
+  );
+});
+
+test('AI Tutor inline math does not create a scrollbar under short expressions', () => {
+  const globalsCss = readFileSync('src/app/globals.css', 'utf8');
+  const inlineRule = /\.tutor-answer-content \[data-tutor-math="inline"\]\s*\{([^}]*)\}/u.exec(globalsCss)?.[1] ?? '';
+
+  assert.notEqual(inlineRule, '');
+  assert.doesNotMatch(inlineRule, /overflow-x:\s*auto/u);
+  assert.match(inlineRule, /overflow:\s*visible/u);
+});
+
+test('AI Tutor hides display-math scrollbar chrome while retaining horizontal overflow', () => {
+  const globalsCss = readFileSync('src/app/globals.css', 'utf8');
+
+  assert.match(globalsCss, /\.tutor-math-text \[data-tutor-math="display"\][^{]*\{[^}]*scrollbar-width:\s*none/u);
+  assert.match(globalsCss, /\.tutor-math-text \[data-tutor-math="display"\]::-webkit-scrollbar\s*\{[^}]*display:\s*none/u);
+});
+
+test('classifyTutorLatex renders roman geometry labels used by Gemini', () => {
+  const text = '선분 $\\mathrm{AB}$, $\\mathrm{BC}$, $\\mathrm{CA}$와 삼각형 $\\mathrm{PRQ}$의 길이를 비교해요.';
+
+  assert.deepEqual(
+    tokenizeTutorMathText(text).flatMap((token) => token.kind === 'inlineMath' ? [token.expression] : []),
+    ['\\mathrm{AB}', '\\mathrm{BC}', '\\mathrm{CA}', '\\mathrm{PRQ}'],
   );
 });
 

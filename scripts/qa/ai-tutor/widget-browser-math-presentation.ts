@@ -24,6 +24,7 @@ export async function assertWorkbookTypography(cdp: CdpClient, viewport: Viewpor
       const articleStyle = article instanceof HTMLElement ? getComputedStyle(article) : null;
       const answerCardStyle = answerCard instanceof HTMLElement ? getComputedStyle(answerCard) : null;
       const displayRect = firstDisplay instanceof HTMLElement ? firstDisplay.getBoundingClientRect() : null;
+      const displayStyle = firstDisplay instanceof HTMLElement ? getComputedStyle(firstDisplay) : null;
       const inlineRect = inlineMath instanceof HTMLElement ? inlineMath.getBoundingClientRect() : null;
       const displayKatex = firstDisplay?.querySelector('.katex-display');
       const fieldset = document.querySelector('fieldset');
@@ -35,6 +36,7 @@ export async function assertWorkbookTypography(cdp: CdpClient, viewport: Viewpor
       const fieldsetStyle = fieldset instanceof HTMLElement ? getComputedStyle(fieldset) : null;
       const studentStyle = studentBubble instanceof HTMLElement ? getComputedStyle(studentBubble) : null;
       const literalNodes = Array.from(article?.querySelectorAll('[data-tutor-math="literal"]') ?? []);
+      const inlineMathNodes = Array.from(article?.querySelectorAll('[data-tutor-math="inline"]') ?? []);
       return {
         tutorFontSizePx: Number.parseFloat(paragraphStyle?.fontSize ?? '0'), tutorLineHeightPx: Number.parseFloat(paragraphStyle?.lineHeight ?? '0'),
         tutorLineHeightRatio: paragraphStyle?.fontSize ? Number.parseFloat(paragraphStyle.lineHeight) / Number.parseFloat(paragraphStyle.fontSize) : 0,
@@ -48,6 +50,9 @@ export async function assertWorkbookTypography(cdp: CdpClient, viewport: Viewpor
         denominatorBelowLine: Number.isFinite(denominatorTop) && fractionLineRect !== null && denominatorTop >= fractionLineRect.bottom,
         hasMathMl: article?.querySelector('.katex-mathml math') !== null, faithfulMathMlCss: mathMlStyle?.position === 'absolute' && mathMlStyle?.width === '1px' && mathMlStyle?.height === '1px',
         visibleLiteralMathCount: literalNodes.filter((node) => node instanceof HTMLElement && getComputedStyle(node).display !== 'none').length,
+        geometryLabelKatexCount: inlineMathNodes.filter((node) => ['PRQ', 'PQ', 'PR'].includes(node.getAttribute('aria-label') ?? '') && node.querySelector('.katex') !== null).length,
+        scrollableInlineMathCount: inlineMathNodes.filter((node) => node instanceof HTMLElement && ['auto', 'scroll'].includes(getComputedStyle(node).overflowX)).length,
+        displayScrollbarWidth: displayStyle?.scrollbarWidth ?? '',
         duplicateVisibleMathMl: Array.from(article?.querySelectorAll('.katex-mathml') ?? []).some((node) => node instanceof HTMLElement && (getComputedStyle(node).position !== 'absolute' || getComputedStyle(node).width !== '1px' || getComputedStyle(node).height !== '1px')),
       };
     })()`,
@@ -64,5 +69,8 @@ export async function assertWorkbookTypography(cdp: CdpClient, viewport: Viewpor
   assertOk(number('fractionCount') > 0 && number('fractionLineCount') > 0 && facts['numeratorAboveLine'] === true && facts['denominatorBelowLine'] === true, `${viewport.name}: fraction DOM or stacked geometry missing`);
   assertOk(facts['hasMathMl'] === true && facts['faithfulMathMlCss'] === true && facts['duplicateVisibleMathMl'] === false, `${viewport.name}: MathML is not hidden visually and present accessibly`);
   assertOk(number('visibleLiteralMathCount') === 0, `${viewport.name}: literal math fallback leaked into workbook answer`);
+  assertOk(number('geometryLabelKatexCount') === 3, `${viewport.name}: P-Q-R geometry labels did not render as KaTeX`);
+  assertOk(number('scrollableInlineMathCount') === 0, `${viewport.name}: inline math exposed horizontal scrollbar chrome`);
+  assertOk(facts['displayScrollbarWidth'] === 'none', `${viewport.name}: display math exposed horizontal scrollbar chrome`);
   lines.push(`${viewport.name}: workbook typography facts ${JSON.stringify(facts)}`);
 }

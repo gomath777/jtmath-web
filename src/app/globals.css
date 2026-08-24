@@ -171,6 +171,14 @@
   margin: 0.35rem 0;
 }
 
+.tutor-math-text [data-tutor-math="display"] {
+  scrollbar-width: none;
+}
+
+.tutor-math-text [data-tutor-math="display"]::-webkit-scrollbar {
+  display: none;
+}
+
 .tutor-math-text [data-tutor-math="inline"] {
   white-space: nowrap;
 }
@@ -250,10 +258,9 @@
 }
 
 .tutor-answer-content [data-tutor-math="inline"] {
-  display: inline-flex;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  display: inline-block;
+  max-width: none;
+  overflow: visible;
   vertical-align: -0.08em;
 }
 
